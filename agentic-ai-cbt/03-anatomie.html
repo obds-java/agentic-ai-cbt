@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3 · Anatomie: LLM · Agent · Harness — Agentic AI CBT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-mod="anatomie">
+
+<main class="wrap">
+
+  <div class="page-head">
+    <span class="eyebrow"><span class="num">3</span> Modell</span>
+    <h1 class="page-title">Anatomie eines Full-Featured-Agenten</h1>
+    <p class="lede">Drei Schichten, die man sauber auseinanderhalten sollte: das <strong>Modell</strong>, der <strong>Agent</strong> und das <strong>Harness</strong>. Wer sie verwechselt, redet aneinander vorbei.</p>
+  </div>
+
+  <div class="goals">
+    <h4>Nach diesem Modul kannst du …</h4>
+    <ul>
+      <li>die drei Schichten LLM, Agent (Loop) und Harness benennen und abgrenzen</li>
+      <li>erklären, was Leute <i>wirklich</i> meinen, wenn sie sagen „ich habe einen Agenten gebaut"</li>
+      <li>einordnen, warum dieselbe Aufgabe mit demselben Modell drastisch unterschiedlich gut laufen kann</li>
+    </ul>
+  </div>
+
+  <h2><span class="sec">3.1</span> Die drei Schichten</h2>
+  <p>Ein produktiver Agent besteht aus drei klar trennbaren Teilen. Das LLM ist nur der innerste Kern – das mit Abstand meiste Engineering steckt drumherum.</p>
+
+  <figure class="diagram reveal">
+    <svg viewBox="0 0 720 440" role="img" aria-label="Drei Schichten: Harness umschließt Agent umschließt LLM">
+      <!-- Harness outer -->
+      <rect x="20" y="20" width="680" height="400" rx="24" fill="none" stroke="#ff7900" stroke-width="2.5"/>
+      <rect x="20" y="20" width="680" height="46" rx="24" fill="#ff7900"/>
+      <text x="44" y="50" fill="#fff" font-size="17" font-weight="800" font-family="Inter">HARNESS</text>
+      <text x="690" y="50" text-anchor="end" fill="#fff" font-size="12.5" font-family="Inter">die ganze Software drumherum</text>
+
+      <!-- harness chips -->
+      <g font-family="Inter" font-size="11.5">
+        <g fill="#54545c">
+          <rect x="44"  y="86" width="92" height="26" rx="13" fill="#fff3e6" stroke="#ffd8ad"/><text x="90"  y="103" text-anchor="middle">Memory</text>
+          <rect x="148" y="86" width="78" height="26" rx="13" fill="#fff3e6" stroke="#ffd8ad"/><text x="187" y="103" text-anchor="middle">Tools</text>
+          <rect x="238" y="86" width="78" height="26" rx="13" fill="#fff3e6" stroke="#ffd8ad"/><text x="277" y="103" text-anchor="middle">Skills</text>
+          <rect x="328" y="86" width="70" height="26" rx="13" fill="#fff3e6" stroke="#ffd8ad"/><text x="363" y="103" text-anchor="middle">MCP</text>
+          <rect x="410" y="86" width="120" height="26" rx="13" fill="#fff3e6" stroke="#ffd8ad"/><text x="470" y="103" text-anchor="middle">Observability</text>
+          <rect x="542" y="86" width="100" height="26" rx="13" fill="#fff3e6" stroke="#ffd8ad"/><text x="592" y="103" text-anchor="middle">Guardrails</text>
+        </g>
+      </g>
+
+      <!-- Agent middle -->
+      <rect x="120" y="140" width="480" height="250" rx="20" fill="none" stroke="#5b5bd6" stroke-width="2.5"/>
+      <rect x="120" y="140" width="480" height="40" rx="20" fill="#5b5bd6"/>
+      <text x="142" y="167" fill="#fff" font-size="15" font-weight="800" font-family="Inter">AGENT</text>
+      <text x="592" y="167" text-anchor="end" fill="#fff" font-size="12" font-family="Inter">Orchestrierung &amp; Loop</text>
+      <text x="360" y="208" text-anchor="middle" fill="#5b5bd6" font-size="12.5" font-family="Inter">Reason → Act → Observe · Kontext-Management · Stop-Logik</text>
+
+      <!-- LLM core -->
+      <rect x="240" y="240" width="240" height="120" rx="16" fill="#161619"/>
+      <text x="360" y="288" text-anchor="middle" fill="#fff" font-size="20" font-weight="800" font-family="Inter">LLM</text>
+      <text x="360" y="312" text-anchor="middle" fill="#9a9aa6" font-size="12.5" font-family="Inter">das Gehirn:</text>
+      <text x="360" y="330" text-anchor="middle" fill="#9a9aa6" font-size="12.5" font-family="Inter">Sprache, Reasoning, Planung</text>
+    </svg>
+    <figcaption>Das LLM ist der Kern. Der Agent legt die Schleife drumherum. Das Harness liefert alles, was den Agenten produktionstauglich macht.</figcaption>
+  </figure>
+
+  <h3>Schicht 1 · Das LLM — das Gehirn</h3>
+  <p>Das Sprachmodell (Claude, GPT, Gemini, Llama …) liefert die rohe Fähigkeit: Sprache verstehen, schlussfolgern, planen, Tool-Aufrufe formulieren. Es ist <strong>zustandslos</strong> – es weiß nichts über vorherige Aufrufe und kann von sich aus nichts in der Welt bewirken. Allein ist es ein extrem belesener Gesprächspartner ohne Hände und ohne Gedächtnis.</p>
+
+  <h3>Schicht 2 · Der Agent — die Schleife</h3>
+  <p>Der Agent ist die Orchestrierungslogik: die <span class="term">Reason-Act-Observe-Schleife</span>, das Zusammenstellen des Kontexts für jeden LLM-Aufruf, das Parsen der Tool-Aufrufe, die Stop-Logik. Das ist die Schicht, die aus „einem Modell" ein „handelndes System" macht.</p>
+
+  <h3>Schicht 3 · Das Harness — die ganze Infrastruktur</h3>
+  <p>Das <span class="term">Harness</span> ist die komplette Software-Infrastruktur, die das LLM umschließt: Memory, Tools, Skills, MCP-Anbindung, Kontext-Management, State-Persistenz, Fehlerbehandlung, Observability und Guardrails. Hier steckt in der Praxis 2026 das meiste Engineering – und das gesamte Modul 4 widmet sich ihm.</p>
+
+  <div class="box note reveal">
+    <div class="t">Was Leute wirklich meinen</div>
+    <p>Anthropic formuliert es treffend: Das Agent-SDK <i>ist</i> das Harness, das Claude Code antreibt. Wenn jemand sagt „ich habe einen Agenten gebaut", dann hat er fast immer <b>ein Harness gebaut und es auf ein Modell gerichtet</b>. Das Modell selbst hat er nicht gebaut – das kam von Anthropic, OpenAI oder Google.</p>
+  </div>
+
+  <div class="merke reveal">
+    <div class="lbl">Merksatz</div>
+    <div class="q">Das LLM ist das Gehirn. Der Agent ist die Schleife. Das Harness ist der Körper – Hände, Gedächtnis, Sinne und Sicherheitsgurt. Dasselbe Gehirn in einem besseren Körper liefert dramatisch bessere Ergebnisse.</div>
+  </div>
+
+  <h2><span class="sec">3.2</span> Warum diese Trennung praktisch wichtig ist</h2>
+  <p>Dieselbe Aufgabe, dasselbe Modell – und trotzdem himmelweite Unterschiede im Ergebnis. Der Grund liegt fast nie im Modell, sondern im Harness: Wie gut sind die Tools beschrieben? Wie sauber wird Kontext kuratiert? Wie wird Fehlerinformation zurückgespielt? Genau deshalb ist „Harness Engineering" 2026 zur eigenen Disziplin geworden.</p>
+
+  <div class="box tip reveal">
+    <div class="t">Konsequenz fürs Team</div>
+    <p>Wenn dein Agent schlecht performt, ist die erste Frage selten „brauchen wir ein größeres Modell?", sondern „ist unser Harness gut?" – also: bessere Tool-Beschreibungen, schlankerer Kontext, klarere Rückmeldungen bei Fehlern. Das ist Engineering-Arbeit, die <b>du</b> beeinflussen kannst, ohne auf das nächste Modell-Release zu warten.</p>
+  </div>
+
+  <!-- QUIZ -->
+  <section class="quiz reveal" data-quiz="anatomie">
+    <div class="quiz-head"><span class="qbadge">Quiz</span><h3>Check: Die drei Schichten</h3><span class="score"></span></div>
+    <div class="quiz-body">
+
+      <div class="q" data-correct="2">
+        <div class="stem"><span class="qn">1.</span> Jemand sagt: „Ich habe letzte Woche einen Agenten gebaut." Was hat er fast immer tatsächlich gebaut?</div>
+        <label class="opt"><span class="mk"></span><span>Ein eigenes Sprachmodell von Grund auf</span></label>
+        <label class="opt"><span class="mk"></span><span>Eine neue Trainingsmethode für LLMs</span></label>
+        <label class="opt"><span class="mk"></span><span>Ein Harness, das er auf ein bestehendes Modell gerichtet hat</span></label>
+        <label class="opt"><span class="mk"></span><span>Einen neuen Chip für KI-Inferenz</span></label>
+        <div class="explain"><b>Richtig: C.</b> Das Modell kommt vom Anbieter. Was man baut, ist das Harness (plus Agent-Loop) drumherum.</div>
+      </div>
+
+      <div class="q" data-correct="0">
+        <div class="stem"><span class="qn">2.</span> Welche Eigenschaft beschreibt das LLM <em>für sich allein</em> am besten?</div>
+        <label class="opt"><span class="mk"></span><span>Zustandslos und ohne eigene Fähigkeit, in der Welt zu handeln</span></label>
+        <label class="opt"><span class="mk"></span><span>Hat persistentes Gedächtnis über alle Aufrufe hinweg</span></label>
+        <label class="opt"><span class="mk"></span><span>Kann selbstständig APIs aufrufen, ohne Harness</span></label>
+        <label class="opt"><span class="mk"></span><span>Enthält bereits Guardrails und Observability</span></label>
+        <div class="explain"><b>Richtig: A.</b> Gedächtnis, Tool-Ausführung, Guardrails und Observability sind alle Teil des <em>Harness</em>, nicht des Modells.</div>
+      </div>
+
+      <div class="q" data-correct="1,2">
+        <div class="stem"><span class="qn">3.</span> Welche Komponenten gehören zum <em>Harness</em> (nicht zum Modell)? <i>(zwei richtige)</i></div>
+        <label class="opt"><span class="mk"></span><span>Die Anzahl der Modell-Parameter</span></label>
+        <label class="opt"><span class="mk"></span><span>Memory / persistenter Zustand</span></label>
+        <label class="opt"><span class="mk"></span><span>Observability und Guardrails</span></label>
+        <label class="opt"><span class="mk"></span><span>Das Tokenizer-Vokabular des Modells</span></label>
+        <div class="explain"><b>Richtig: B &amp; C.</b> Parameteranzahl und Tokenizer sind Modell-intern. Memory, Observability und Guardrails liefert das Harness.</div>
+      </div>
+
+      <div class="q" data-correct="3">
+        <div class="stem"><span class="qn">4.</span> Dein Agent performt schlecht. Was ist 2026 die <em>erste</em> Frage, die du stellen solltest?</div>
+        <label class="opt"><span class="mk"></span><span>Brauchen wir mehr GPUs?</span></label>
+        <label class="opt"><span class="mk"></span><span>Sollten wir das Modell selbst fine-tunen?</span></label>
+        <label class="opt"><span class="mk"></span><span>Warten wir auf das nächste Modell-Release?</span></label>
+        <label class="opt"><span class="mk"></span><span>Ist unser Harness gut – Tool-Beschreibungen, Kontext-Kuratierung, Fehler-Feedback?</span></label>
+        <div class="explain"><b>Richtig: D.</b> Die meisten Performance-Probleme liegen im Harness, nicht im Modell – und genau das kannst du selbst verbessern.</div>
+      </div>
+
+      <div class="quiz-actions">
+        <button class="btn check">Auswerten</button>
+        <button class="btn ghost reset" style="display:none">Nochmal</button>
+        <span class="quiz-result"></span>
+      </div>
+    </div>
+  </section>
+
+  <div id="pager" class="pager"></div>
+
+</main>
+
+<footer class="foot">Agentic AI · CBT · Modul 3 von 10 · Orange Business</footer>
+<script src="assets/cbt.js"></script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5 · Observability — Agentic AI CBT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-mod="observability">
+
+<main class="wrap">
+
+  <div class="page-head">
+    <span class="eyebrow"><span class="num">5</span> Produktion</span>
+    <h1 class="page-title">Observability — warum Agenten sonst blind fliegen</h1>
+    <p class="lede">Ein Agent, den du in Produktion nicht beobachten kannst, ist ein Agent, dem du nicht trauen kannst. Hier lernst du, <em>warum</em> – und womit man es löst.</p>
+  </div>
+
+  <div class="goals">
+    <h4>Nach diesem Modul kannst du …</h4>
+    <ul>
+      <li>erklären, warum klassisches APM-Monitoring für Agenten nicht ausreicht</li>
+      <li>die typischen Fehlermodi nennen, die ohne Tracing unsichtbar bleiben</li>
+      <li>Traces, Evals und LLM-as-a-Judge einordnen</li>
+      <li>die gängigen Tools und den Standard OpenTelemetry zuordnen</li>
+    </ul>
+  </div>
+
+  <h2><span class="sec">5.1</span> Das Grundproblem</h2>
+  <p>Agenten versagen auf <em>subtile</em> Weise: Sie wählen das falsche Tool, laufen in Reasoning-Schleifen oder halluzinieren in einem Zwischenschritt – und produzieren ein plausibel aussehendes, aber falsches Endergebnis. Dasselbe Prompt kann von Lauf zu Lauf unterschiedliche Ausgaben erzeugen. Tools können still kaputtgehen. Nichts davon zeigt ein roter HTTP-500-Fehler an.</p>
+
+  <div class="box warn reveal">
+    <div class="t">Der entscheidende Unterschied zu klassischem Monitoring</div>
+    <p>Klassisches APM misst <b>Latenz und Fehlerraten</b>. Agent-Observability misst zusätzlich <b>Ergebnisqualität, Faithfulness, Sicherheit und Verhaltens-Drift</b>. Ein Agent kann mit 200 OK und 800 ms antworten – und trotzdem kompletten Unsinn liefern. Genau diese Klasse von Fehlern sieht klassisches Monitoring nicht.</p>
+  </div>
+
+  <h2><span class="sec">5.2</span> Was ein Trace sichtbar macht</h2>
+  <p>Eine gute Observability-Plattform erzeugt hochauflösende <span class="term">Traces</span>, die den vollständigen Ausführungsbaum eines Agenten rendern: Du siehst jede Tool-Auswahl, die abgerufenen Dokumente und die exakten Parameter auf jeder Stufe.</p>
+
+  <figure class="diagram reveal">
+    <svg viewBox="0 0 720 320" role="img" aria-label="Beispiel eines Agent-Trace als Baum">
+      <g font-family="JetBrains Mono, monospace" font-size="12.5">
+        <rect x="20" y="20" width="680" height="36" rx="8" fill="#161619"/>
+        <text x="36" y="43" fill="#fff">▾ run · „Storniere Bestellung 4711 &amp; erstatte"  <tspan fill="#9ece6a">1.84s</tspan> <tspan fill="#9a9aa6">· 6 200 tok</tspan></text>
+
+        <rect x="50" y="64" width="650" height="32" rx="7" fill="#1e1e22"/>
+        <text x="66" y="85" fill="#7dcfff">▾ llm.reason <tspan fill="#9a9aa6">→ plan: „erst Status prüfen"</tspan> <tspan fill="#9ece6a">0.4s</tspan></text>
+
+        <rect x="80" y="104" width="620" height="32" rx="7" fill="#1e1e22"/>
+        <text x="96" y="125" fill="#bb9af7">▸ tool.getOrderStatus(id=4711) <tspan fill="#9ece6a">0.1s ✓ „shipped"</tspan></text>
+
+        <rect x="80" y="144" width="620" height="32" rx="7" fill="#2a1c0c"/>
+        <text x="96" y="165" fill="#ffb168">▸ tool.cancelOrder(id=4711) <tspan fill="#ff7f7f">0.2s ✗ „already shipped"</tspan></text>
+
+        <rect x="50" y="184" width="650" height="32" rx="7" fill="#1e1e22"/>
+        <text x="66" y="205" fill="#7dcfff">▾ llm.reason <tspan fill="#9a9aa6">→ erkennt Fehler, plant Retoure statt Storno</tspan> <tspan fill="#9ece6a">0.5s</tspan></text>
+
+        <rect x="80" y="224" width="620" height="32" rx="7" fill="#1e1e22"/>
+        <text x="96" y="245" fill="#bb9af7">▸ tool.createReturn(id=4711) <tspan fill="#9ece6a">0.1s ✓</tspan></text>
+
+        <rect x="50" y="264" width="650" height="32" rx="7" fill="#16261a"/>
+        <text x="66" y="285" fill="#9ece6a">▾ llm.final → „Retoure angelegt, Erstattung folgt nach Wareneingang."</text>
+      </g>
+    </svg>
+    <figcaption>Ein Trace macht jede Entscheidung nachvollziehbar – inklusive des fehlgeschlagenen <code class="inline">cancelOrder</code>, aus dem der Agent korrekt umgeplant hat. Ohne Trace wäre nur das Endergebnis sichtbar.</figcaption>
+  </figure>
+
+  <h2><span class="sec">5.3</span> Von Tracing zu Evals</h2>
+  <p>Tracing zeigt dir, <em>was</em> passiert ist. <span class="term">Evals</span> (Evaluations) sagen dir, ob es <em>gut</em> war. Zwei Bausteine:</p>
+  <ul>
+    <li><strong>Datasets &amp; Offline-Evals:</strong> Du sammelst Beispiele (Eingabe + erwartete Ausgabe) und benchmarkst neue Versionen <em>vor</em> dem Deployment dagegen – idealerweise in der CI/CD-Pipeline. Edge Cases aus Produktion fließen laufend zurück ins Dataset.</li>
+    <li><strong>LLM-as-a-Judge / Online-Evals:</strong> Ein zweites Modell bewertet Ausgaben automatisch nach Kriterien (korrekt? höflich? sicher?). So scorest du Qualität auch live in Produktion, nicht nur im Test.</li>
+  </ul>
+
+  <div class="box note reveal">
+    <div class="t">Der Produktions-Kreislauf</div>
+    <p>Tracing findet Edge Cases → diese werden ins Eval-Dataset aufgenommen → neue Agenten-Version wird dagegen getestet → erst dann Deployment. Dieser Loop ist das, was „wir haben einen Agenten gebaut" von „wir betreiben einen Agenten verlässlich" trennt.</p>
+  </div>
+
+  <h2><span class="sec">5.4</span> Werkzeuge &amp; Standard</h2>
+  <div class="cards c3 reveal">
+    <div class="card"><div class="ic">🪶</div><h4>Langfuse</h4><p>Open Source, LLM-nativ: Token-Tracking, Prompt-Management, LLM-as-a-Judge, Datasets. Selbst-hostbar.</p><div class="tagrow"><span class="tag good">Open Source</span><span class="tag">OTEL</span></div></div>
+    <div class="card"><div class="ic">🔗</div><h4>LangSmith</h4><p>Von LangChain: Instrumentieren, Debuggen, Evaluieren, Monitoren – mit detailliertem Ausführungsbaum.</p><div class="tagrow"><span class="tag">SaaS</span><span class="tag">Evals</span></div></div>
+    <div class="card"><div class="ic">📡</div><h4>OpenTelemetry</h4><p>Der Industriestandard, auf den sich 2026 alles zubewegt: herstellerneutrale Telemetrie, kein Lock-in.</p><div class="tagrow"><span class="tag good">Standard</span><span class="tag">vendor-neutral</span></div></div>
+  </div>
+
+  <div class="box tip reveal">
+    <div class="t">Trend 2026</div>
+    <p>Die Branche konvergiert auf <b>OpenTelemetry (OTEL)</b> als Standard zum Sammeln von Agenten-Telemetrie. Viele Frameworks (Pydantic AI, smolagents, Strands u. a.) emittieren ihre Traces bereits via OTEL. Praxisfolge: Bau deine Observability möglichst OTEL-kompatibel – dann bist du nicht an einen Anbieter gekettet.</p>
+  </div>
+
+  <div class="merke reveal">
+    <div class="lbl">Merksatz</div>
+    <div class="q">„200 OK" heißt bei Agenten nichts. Ein Agent kann erfolgreich antworten und trotzdem komplett falsch liegen. Observability ist nicht Nice-to-have, sondern die Voraussetzung dafür, einem Agenten in Produktion überhaupt vertrauen zu dürfen.</div>
+  </div>
+
+  <!-- QUIZ -->
+  <section class="quiz reveal" data-quiz="observability">
+    <div class="quiz-head"><span class="qbadge">Quiz</span><h3>Check: Observability</h3><span class="score"></span></div>
+    <div class="quiz-body">
+
+      <div class="q" data-correct="2">
+        <div class="stem"><span class="qn">1.</span> Warum reicht klassisches APM (Latenz + Fehlerraten) für Agenten nicht?</div>
+        <label class="opt"><span class="mk"></span><span>Weil APM zu teuer ist</span></label>
+        <label class="opt"><span class="mk"></span><span>Weil Agenten keine HTTP-Requests machen</span></label>
+        <label class="opt"><span class="mk"></span><span>Weil ein Agent „200 OK / schnell" sein und trotzdem inhaltlich falsch liegen kann – Qualität/Faithfulness sieht APM nicht</span></label>
+        <label class="opt"><span class="mk"></span><span>Weil APM keine Logs schreibt</span></label>
+        <div class="explain"><b>Richtig: C.</b> Die kritischen Agenten-Fehler sind inhaltlich (falsches Tool, Halluzination im Zwischenschritt) – sie erzeugen keine technischen Fehler, die APM erkennt.</div>
+      </div>
+
+      <div class="q" data-correct="1,3">
+        <div class="stem"><span class="qn">2.</span> Welche Fehlermodi macht ein Trace sichtbar, die sonst verborgen blieben? <i>(zwei richtige)</i></div>
+        <label class="opt"><span class="mk"></span><span>Eine zu hohe CPU-Temperatur des Servers</span></label>
+        <label class="opt"><span class="mk"></span><span>Die Auswahl eines falschen Tools im Zwischenschritt</span></label>
+        <label class="opt"><span class="mk"></span><span>Ein abgelaufenes TLS-Zertifikat</span></label>
+        <label class="opt"><span class="mk"></span><span>Eine Reasoning-Schleife oder Halluzination, die trotzdem ein plausibles Endergebnis erzeugt</span></label>
+        <div class="explain"><b>Richtig: B &amp; D.</b> Genau diese „weichen" Fehler im Inneren des Loops macht ein Trace sichtbar. Hardware/TLS sind klassische Infra-Themen.</div>
+      </div>
+
+      <div class="q" data-correct="0">
+        <div class="stem"><span class="qn">3.</span> Was ist „LLM-as-a-Judge"?</div>
+        <label class="opt"><span class="mk"></span><span>Ein zweites Modell, das Agenten-Ausgaben automatisch nach Kriterien bewertet</span></label>
+        <label class="opt"><span class="mk"></span><span>Ein Gericht, das über KI-Recht entscheidet</span></label>
+        <label class="opt"><span class="mk"></span><span>Ein Tool, das das LLM beschleunigt</span></label>
+        <label class="opt"><span class="mk"></span><span>Ein Verfahren, um Modelle zu trainieren</span></label>
+        <div class="explain"><b>Richtig: A.</b> Ein Bewerter-Modell scort Ausgaben (korrekt? sicher? höflich?) – nützlich für automatisierte Online- und Offline-Evals.</div>
+      </div>
+
+      <div class="q" data-correct="2">
+        <div class="stem"><span class="qn">4.</span> Auf welchen Standard konvergiert die Observability-Landschaft 2026, um Vendor-Lock-in zu vermeiden?</div>
+        <label class="opt"><span class="mk"></span><span>SOAP</span></label>
+        <label class="opt"><span class="mk"></span><span>GraphQL</span></label>
+        <label class="opt"><span class="mk"></span><span>OpenTelemetry (OTEL)</span></label>
+        <label class="opt"><span class="mk"></span><span>FTP</span></label>
+        <div class="explain"><b>Richtig: C.</b> OTEL ist der herstellerneutrale Telemetrie-Standard; viele Agenten-Frameworks emittieren ihre Traces bereits darüber.</div>
+      </div>
+
+      <div class="quiz-actions">
+        <button class="btn check">Auswerten</button>
+        <button class="btn ghost reset" style="display:none">Nochmal</button>
+        <span class="quiz-result"></span>
+      </div>
+    </div>
+  </section>
+
+  <div class="box deep reveal">
+    <div class="t">Tiefer graben</div>
+    <p><a href="https://langfuse.com/docs/observability/overview" target="_blank" rel="noopener">Langfuse – Observability Overview</a> (Open Source, gut zum Selbst-Ausprobieren) und <a href="https://www.langchain.com/langsmith/observability" target="_blank" rel="noopener">LangSmith Observability</a>.</p>
+  </div>
+
+  <div id="pager" class="pager"></div>
+
+</main>
+
+<footer class="foot">Agentic AI · CBT · Modul 5 von 10 · Orange Business</footer>
+<script src="assets/cbt.js"></script>
+</body>
+</html>

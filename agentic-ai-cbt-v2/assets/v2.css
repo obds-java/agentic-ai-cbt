@@ -1,0 +1,57 @@
+/* =========================================================================
+   Agentic AI – CBT  |  Ergänzungen zu styles.css
+   ========================================================================= */
+
+/* ---- WICHTIG: Inhalte immer sichtbar machen ----
+   styles.css blendet .reveal-Elemente per JS ein (Default: unsichtbar).
+   Falls JS langsam/blockiert ist, blieben Modulkacheln & Grafiken unsichtbar.
+   Diese Regel macht alle Inhalte unbedingt sichtbar – die Einblend-Animation
+   ist damit nur noch eine optionale Zugabe, keine Voraussetzung. */
+.reveal { opacity: 1 !important; transform: none !important; }
+
+/* Version badge on code header */
+.codeblock .codehead .ver {
+  margin-left: auto; font: 11px var(--mono); color: #ffb168;
+  background: rgba(255,121,0,.14); border: 1px solid rgba(255,121,0,.3);
+  padding: 2px 8px; border-radius: 999px;
+}
+
+/* Troubleshooting box */
+.box.bug { border-left: 4px solid #b8860b; }
+.box.bug::before { content: "🐞"; }
+.box.bug .t { color: #b8860b; }
+[data-theme="dark"] .box.bug .t { color: #e0af68; }
+
+/* Permission-matrix cell markers */
+.pm { display: inline-flex; align-items: center; gap: 6px; font-weight: 650; font-size: 13.5px; white-space: nowrap; }
+.pm::before { width: 9px; height: 9px; border-radius: 50%; content: ""; flex: none; }
+.pm-ok   { color: var(--c-tip); }  .pm-ok::before   { background: var(--c-tip); }
+.pm-hitl { color: #b8860b; }       .pm-hitl::before { background: #e0af68; }
+[data-theme="dark"] .pm-hitl { color: #e0af68; }
+.pm-no   { color: var(--c-warn); } .pm-no::before   { background: var(--c-warn); }
+
+/* Part label on landing groups */
+.part-label { display: flex; align-items: center; gap: 12px; margin: 42px 0 6px; font-size: 12.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-faint); }
+.part-label::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+.part-label .pi { width: 22px; height: 22px; border-radius: 6px; background: var(--orange); color: #fff; display: grid; place-items: center; font-size: 12px; }
+
+/* Oversight ladder */
+.ladder { display: grid; gap: 10px; margin: 24px 0; }
+.ladder .rung { display: grid; grid-template-columns: 180px 1fr; gap: 16px; align-items: center; padding: 14px 18px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-elev); box-shadow: var(--shadow); }
+.ladder .rung b { font-size: 15px; display: block; }
+.ladder .rung .lvl { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--orange-600); }
+[data-theme="dark"] .ladder .rung .lvl { color: var(--orange); }
+.ladder .rung span.d { font-size: 14px; color: var(--text-soft); }
+@media (max-width: 700px) { .ladder .rung { grid-template-columns: 1fr; gap: 4px; } }
+
+/* Scenario quiz tag */
+.q .qtype { display: inline-block; font-size: 10.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: 2px 7px; border-radius: 5px; margin-bottom: 8px; }
+.qtype.t-basic { background: var(--bg-soft); color: var(--text-faint); border: 1px solid var(--border); }
+.qtype.t-scen  { background: rgba(91,91,214,.12); color: var(--c-deep); border: 1px solid rgba(91,91,214,.3); }
+.qtype.t-diag  { background: rgba(255,121,0,.12); color: var(--orange-600); border: 1px solid rgba(255,121,0,.3); }
+.qtype.t-anti  { background: rgba(214,73,47,.1); color: var(--c-warn); border: 1px solid rgba(214,73,47,.3); }
+[data-theme="dark"] .qtype.t-diag { color: var(--orange); }
+
+/* Pattern grid for multi-agent */
+.patternrow { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0; }
+@media (max-width: 700px){ .patternrow { grid-template-columns: 1fr; } }

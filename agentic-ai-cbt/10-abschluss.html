@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10 · Abschluss &amp; Ressourcen — Agentic AI CBT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-mod="abschluss">
+
+<main class="wrap">
+
+  <div class="page-head">
+    <span class="eyebrow"><span class="num">10</span> Ziellinie</span>
+    <h1 class="page-title">Abschluss &amp; Ressourcen</h1>
+    <p class="lede">Du hast es durch alle Module geschafft. Hier verdichten wir das Wichtigste, ein letztes Quiz quer durch alles – und die besten Anlaufstellen, wenn du Lust auf mehr hast.</p>
+  </div>
+
+  <h2><span class="sec">10.1</span> Das Wichtigste in zehn Sätzen</h2>
+  <div class="goals">
+    <h4>Deine Mitnahme</h4>
+    <ul>
+      <li>Chat, Workflow und Agent sind ein Spektrum – entscheidend ist, <i>wer den Kontrollfluss bestimmt</i>.</li>
+      <li>Ein Agent braucht minimal: Ziel, eigenständige Schrittwahl, Aktionen/Tools und eine beobachtende Schleife.</li>
+      <li>Architektur: LLM (Gehirn) · Agent (Loop) · Harness (Körper).</li>
+      <li>Das Harness – Memory, Tools, Skills, MCP, Observability, Guardrails – ist das dominierende Thema 2026/27.</li>
+      <li>MCP ist der „USB-C-Anschluss" für KI; Tools sind Funktionen, Skills sind verpacktes Vorgehenswissen.</li>
+      <li>Observability ist Pflicht: „200 OK" sagt bei Agenten nichts über Qualität.</li>
+      <li>Bauen: workflow-first, Tools gezielt ergänzen, von Anfang an tracen.</li>
+      <li>Context Engineering schlägt „alles reinkippen" – Kontext ist ein knappes Budget.</li>
+      <li>Cascading Errors machen lange Ketten fragil; Demos sind keine Produktion.</li>
+      <li>Security ist neu &amp; real: Prompt Injection, Least Privilege, Untrusted Content isolieren, Mensch in die Schleife.</li>
+    </ul>
+  </div>
+
+  <h2><span class="sec">10.2</span> Abschluss-Quiz (quer durch alles)</h2>
+  <p>Sechs Fragen, gemischt. Schaffst du 5 von 6?</p>
+
+  <section class="quiz reveal" data-quiz="abschluss">
+    <div class="quiz-head"><span class="qbadge">Final</span><h3>Gesamtcheck</h3><span class="score"></span></div>
+    <div class="quiz-body">
+
+      <div class="q" data-correct="2">
+        <div class="stem"><span class="qn">1.</span> Die schärfste Grenze zwischen Workflow und Agent ist …</div>
+        <label class="opt"><span class="mk"></span><span>die Anzahl der genutzten Tools</span></label>
+        <label class="opt"><span class="mk"></span><span>ob ein Vektorspeicher verwendet wird</span></label>
+        <label class="opt"><span class="mk"></span><span>wer den Kontrollfluss bestimmt: Entwickler oder Modell</span></label>
+        <label class="opt"><span class="mk"></span><span>die Größe des Modells</span></label>
+        <div class="explain"><b>Richtig: C.</b> Kernunterscheidung aus Modul 1.</div>
+      </div>
+
+      <div class="q" data-correct="1,3">
+        <div class="stem"><span class="qn">2.</span> Welche zwei gehören zum <em>Harness</em>, nicht zum Modell? <i>(zwei richtige)</i></div>
+        <label class="opt"><span class="mk"></span><span>Parameteranzahl</span></label>
+        <label class="opt"><span class="mk"></span><span>Memory / persistenter Zustand</span></label>
+        <label class="opt"><span class="mk"></span><span>Tokenizer-Vokabular</span></label>
+        <label class="opt"><span class="mk"></span><span>Observability &amp; Guardrails</span></label>
+        <div class="explain"><b>Richtig: B &amp; D.</b> Siehe Modul 3 &amp; 4.</div>
+      </div>
+
+      <div class="q" data-correct="0">
+        <div class="stem"><span class="qn">3.</span> 95 % Zuverlässigkeit pro Schritt über 10 Schritte ergeben grob welche Gesamterfolgsquote?</div>
+        <label class="opt"><span class="mk"></span><span>≈ 60 %</span></label>
+        <label class="opt"><span class="mk"></span><span>≈ 95 %</span></label>
+        <label class="opt"><span class="mk"></span><span>≈ 99 %</span></label>
+        <label class="opt"><span class="mk"></span><span>≈ 30 %</span></label>
+        <div class="explain"><b>Richtig: A.</b> 0,95<sup>10</sup> ≈ 0,60 – Cascading Errors aus Modul 8.</div>
+      </div>
+
+      <div class="q" data-correct="2">
+        <div class="stem"><span class="qn">4.</span> Warum reicht klassisches APM für Agenten nicht?</div>
+        <label class="opt"><span class="mk"></span><span>APM ist zu teuer</span></label>
+        <label class="opt"><span class="mk"></span><span>Agenten haben keine Logs</span></label>
+        <label class="opt"><span class="mk"></span><span>Es misst Latenz/Fehler, aber nicht Ergebnisqualität, Faithfulness und Drift</span></label>
+        <label class="opt"><span class="mk"></span><span>APM funktioniert nur on-premise</span></label>
+        <div class="explain"><b>Richtig: C.</b> Modul 5.</div>
+      </div>
+
+      <div class="q" data-correct="1">
+        <div class="stem"><span class="qn">5.</span> Du willst möglichst einfach starten. Was ist die beste erste Architektur-Wahl?</div>
+        <label class="opt"><span class="mk"></span><span>Sofort ein autonomes Multi-Agenten-System</span></label>
+        <label class="opt"><span class="mk"></span><span>Ein fest verdrahteter Workflow; Agentic-Anteile nur wo nötig</span></label>
+        <label class="opt"><span class="mk"></span><span>Ein eigenes Modell fine-tunen</span></label>
+        <label class="opt"><span class="mk"></span><span>Möglichst viele Tools gleichzeitig anbieten</span></label>
+        <div class="explain"><b>Richtig: B.</b> Workflow-first, Modul 1 &amp; 6.</div>
+      </div>
+
+      <div class="q" data-correct="0,2">
+        <div class="stem"><span class="qn">6.</span> Welche Aussagen zu Agent-Security stimmen? <i>(zwei richtige)</i></div>
+        <label class="opt"><span class="mk"></span><span>Indirekte Prompt Injection versteckt Anweisungen in abgerufenen Inhalten</span></label>
+        <label class="opt"><span class="mk"></span><span>Mehr Berechtigungen für den Agenten erhöhen die Sicherheit</span></label>
+        <label class="opt"><span class="mk"></span><span>Folgenreiche Aktionen sollten ein menschliches OK erfordern</span></label>
+        <label class="opt"><span class="mk"></span><span>Security-Risiken sitzen ausschließlich im LLM selbst</span></label>
+        <div class="explain"><b>Richtig: A &amp; C.</b> Least Privilege (nicht mehr Rechte!) und Skill-/Plugin-Grenzen sind zentral – Modul 9.</div>
+      </div>
+
+      <div class="quiz-actions">
+        <button class="btn check">Auswerten</button>
+        <button class="btn ghost reset" style="display:none">Nochmal</button>
+        <span class="quiz-result"></span>
+      </div>
+    </div>
+  </section>
+
+  <h2><span class="sec">10.3</span> Weiterlernen — kuratierte Videos</h2>
+  <div class="reslist reveal">
+    <a class="reslink" href="https://www.youtube.com/watch?v=OaRhpwz_TGM" target="_blank" rel="noopener"><span class="rico">▶️</span><span class="rmeta"><b>The Future of AI Agents — Andrew Ng &amp; Harrison Chase</b><span>Fireside Chat (Interrupt) · großer Überblick, wo die Reise hingeht</span></span><span class="rarrow">↗</span></a>
+    <a class="reslink" href="https://www.youtube.com/watch?v=KrRD7r7y7NY" target="_blank" rel="noopener"><span class="rico">▶️</span><span class="rmeta"><b>The Rise of AI Agents &amp; Agentic Reasoning — Andrew Ng (Keynote)</b><span>warum sich der Fokus von Modellen zu agentischen Systemen verschiebt</span></span><span class="rarrow">↗</span></a>
+    <a class="reslink" href="https://www.deeplearning.ai/courses/agentic-ai/" target="_blank" rel="noopener"><span class="rico">🎓</span><span class="rmeta"><b>Agentic AI — DeepLearning.AI Kurs</b><span>strukturierter Hands-On-Kurs: planen, iterieren, Tools nutzen, reflektieren <span class="pill">Kurs</span></span></span><span class="rarrow">↗</span></a>
+  </div>
+
+  <h2><span class="sec">10.4</span> Top-Ressourcen zum Weitermachen</h2>
+  <div class="reslist reveal">
+    <a class="reslink" href="https://www.anthropic.com/research/building-effective-agents" target="_blank" rel="noopener"><span class="rico">📘</span><span class="rmeta"><b>Anthropic — Building Effective Agents</b><span>der pragmatische Klassiker zu Workflows vs. Agenten <span class="pill">Pflicht</span></span></span><span class="rarrow">↗</span></a>
+    <a class="reslink" href="https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents" target="_blank" rel="noopener"><span class="rico">🛠️</span><span class="rmeta"><b>Anthropic — Effective Harnesses for Long-Running Agents</b><span>tief in die Harness-Praxis</span></span><span class="rarrow">↗</span></a>
+    <a class="reslink" href="https://modelcontextprotocol.io" target="_blank" rel="noopener"><span class="rico">🔌</span><span class="rmeta"><b>Model Context Protocol (MCP)</b><span>Spezifikation, SDKs &amp; Server-Verzeichnis – der „USB-C"-Standard</span></span><span class="rarrow">↗</span></a>
+    <a class="reslink" href="https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/" target="_blank" rel="noopener"><span class="rico">🛡️</span><span class="rmeta"><b>OWASP Top 10 for Agentic Applications 2026</b><span>die maßgebliche Security-Referenz</span></span><span class="rarrow">↗</span></a>
+    <a class="reslink" href="https://docs.spring.io/spring-ai/reference/" target="_blank" rel="noopener"><span class="rico">☕</span><span class="rmeta"><b>Spring AI — Reference Docs</b><span>für unseren Stack: Tools, Advisors, Memory, MCP in Java</span></span><span class="rarrow">↗</span></a>
+    <a class="reslink" href="https://langfuse.com/docs/observability/overview" target="_blank" rel="noopener"><span class="rico">📊</span><span class="rmeta"><b>Langfuse — Observability</b><span>Open-Source-Tracing &amp; Evals zum Selbst-Ausprobieren</span></span><span class="rarrow">↗</span></a>
+    <a class="reslink" href="https://github.com/ai-boost/awesome-harness-engineering" target="_blank" rel="noopener"><span class="rico">⭐</span><span class="rmeta"><b>Awesome Harness Engineering</b><span>kuratierte Liste: Tools, Patterns, Memory, MCP, Observability</span></span><span class="rarrow">↗</span></a>
+  </div>
+
+  <div class="merke reveal">
+    <div class="lbl">Zum Schluss</div>
+    <div class="q">Du kennst Agentic AI jetzt im Überblick: die Begriffe, die Architektur, das Harness, Observability, das Vorgehen, die Fallstricke und die Security. Das Feld bewegt sich schnell – aber dieses Gerüst trägt. Jetzt: ausprobieren, kaputt machen, lernen. Viel Spaß damit. 🚀</div>
+  </div>
+
+  <div class="statstrip reveal">
+    <div class="stat"><b id="progPct">0%</b><span>dein Fortschritt</span></div>
+    <div class="stat"><b id="progCount">0 / 10</b><span>Module erledigt</span></div>
+    <div class="stat"><b>♻︎</b><span><a href="#" data-reset-progress style="cursor:pointer">Fortschritt zurücksetzen</a></span></div>
+  </div>
+
+  <div id="pager" class="pager"></div>
+
+</main>
+
+<footer class="foot">
+  Agentic AI · CBT für das Java/Spring/Angular-Team · Orange Business · Juni 2026<br>
+  Inhaltliche Quellen u. a.: Anthropic (Building Effective Agents / Harnesses), OWASP GenAI Security Project, Langfuse, LangChain, Spring AI, DeepLearning.AI.
+</footer>
+<script src="assets/cbt.js"></script>
+</body>
+</html>

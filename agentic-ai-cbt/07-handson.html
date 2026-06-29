@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>7 · Hands-On Lab — Agentic AI CBT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-mod="handson" data-complete-on-visit>
+
+<main class="wrap">
+
+  <div class="page-head">
+    <span class="eyebrow"><span class="num">7</span> Hands-On</span>
+    <h1 class="page-title">Lab: Dein erster Agent in ~20 Minuten</h1>
+    <p class="lede">Genug Theorie. Jetzt baust du selbst einen kleinen Tool-nutzenden Agenten – kostenlos, No-Code, ohne Java-Setup. Ziel ist nicht Perfektion, sondern das Aha-Erlebnis.</p>
+  </div>
+
+  <div class="box note reveal">
+    <div class="t">Was du am Ende hast</div>
+    <p>Einen Chat-Agenten, der ein <b>Tool</b> selbst aufruft (z. B. Rechner oder Websuche), in einer <b>Schleife</b> arbeitet und dir dabei zusieht, wie er entscheidet. Du wirst die Konzepte aus Modul 2–4 „in echt" wiedererkennen.</p>
+  </div>
+
+  <h2><span class="sec">7.1</span> Wähle deinen Weg</h2>
+  <p>Beide sind kostenlos und ohne Kreditkarte machbar. Nimm Weg A, wenn du es maximal einfach willst; Weg B, wenn dich Automatisierung/Verkettung reizt.</p>
+
+  <div class="cards c2 reveal">
+    <div class="card">
+      <div class="ic">🟧</div><h4>Weg A · Flowise <span class="tag good" style="vertical-align:middle">empfohlen</span></h4>
+      <p>Visueller Agent-/RAG-Baukasten auf LangChain-Basis. Entweder Cloud-Free-Tier (Anmeldung) oder lokal in einer Zeile starten. Ideal für „Chat mit Tool".</p>
+      <div class="tagrow"><span class="tag">drag &amp; drop</span><span class="tag">Open Source</span></div>
+    </div>
+    <div class="card">
+      <div class="ic">🔗</div><h4>Weg B · n8n</h4>
+      <p>Automations-Plattform mit „AI Agent"-Node. Stark, wenn der Agent echte Aktionen verketten soll (Mail lesen, DB schreiben, Slack posten). Cloud-Trial oder lokal.</p>
+      <div class="tagrow"><span class="tag">workflow</span><span class="tag">viele Integrationen</span></div>
+    </div>
+  </div>
+
+  <div class="box tip reveal">
+    <div class="t">Lokal starten in einer Zeile</div>
+    <p>Hast du Node.js? Dann brauchst du für Flowise nichts zu installieren: <code class="inline">npx flowise start</code> und im Browser <code class="inline">http://localhost:3000</code> öffnen. Für n8n analog: <code class="inline">npx n8n</code>. Alternativ jeweils der gehostete Free-Tier – Links unten.</p>
+  </div>
+
+  <h2><span class="sec">7.2</span> Schritt für Schritt (Weg A · Flowise)</h2>
+  <p>Die genauen Button-Beschriftungen ändern sich zwischen Versionen – die <em>Konzepte</em> bleiben. Halte beim Bauen Ausschau nach genau den Bausteinen, die du aus dieser CBT kennst.</p>
+
+  <ol>
+    <li><strong>Modell-Zugang bereitstellen.</strong> Du brauchst einen API-Key eines LLM-Anbieters (OpenAI, Anthropic, Google – viele haben Gratis-Startguthaben). Trag ihn in den Credentials ein. <em>→ Das ist Schicht 1: das Gehirn.</em></li>
+    <li><strong>Neuen Flow / „Agentflow" anlegen.</strong> Wähl eine Agent-Vorlage statt eines reinen Chatflows. <em>→ Das ist Schicht 2: der Loop.</em></li>
+    <li><strong>Ein Tool hinzufügen.</strong> Zieh dir ein einfaches Tool in den Canvas – z. B. <code class="inline">Calculator</code> oder eine Websuche (z. B. SerpAPI/Tavily Free-Tier). <em>→ Das ist ein Baustein des Harness aus Modul 4.</em></li>
+    <li><strong>Tool mit dem Agenten verbinden</strong> und einen System-Prompt setzen, der dem Agenten sein Ziel gibt: „Du bist ein hilfreicher Assistent. Nutze Werkzeuge, wenn nötig."</li>
+    <li><strong>Chat öffnen und testen.</strong> Frag etwas, das das Tool erzwingt: <em>„Was ist 1.348 × 27 + 99?"</em> oder <em>„Wie ist das aktuelle Wetter in Zürich?"</em></li>
+    <li><strong>Beobachte den Verlauf / die Logs.</strong> Du siehst, wie der Agent <em>entscheidet</em>, das Tool zu rufen, das Ergebnis aufnimmt und dann antwortet. Genau das ist der Reason-Act-Observe-Loop – live.</li>
+  </ol>
+
+  <div class="box deep reveal">
+    <div class="t">Mini-Experimente, die wirklich etwas zeigen</div>
+    <p>
+      <b>1. Tool-Beschreibung verschlechtern:</b> Benenne das Tool kryptisch oder lösch die Beschreibung. Beobachte, wie der Agent es plötzlich <i>nicht mehr</i> oder falsch nutzt. → Das ist die Lektion aus Modul 4, am eigenen Leib.<br><br>
+      <b>2. Zwei Tools anbieten:</b> Füge ein zweites, überflüssiges Tool hinzu und schau, ob die Tool-Wahl unsicherer wird. → Vorgeschmack auf „zu viele Tools" aus Modul 8.<br><br>
+      <b>3. Gleiche Frage, mehrfach:</b> Stell dieselbe Frage 3×. Achte auf Variationen in Formulierung und Tool-Nutzung. → Nicht-Determinismus zum Anfassen.
+    </p>
+  </div>
+
+  <h2><span class="sec">7.3</span> Selbstcheck</h2>
+  <p>Du hast das Lab geschafft, wenn du Folgendes selbst gesehen hast – hak es im Kopf (oder auf Papier) ab:</p>
+  <div class="goals">
+    <h4>Geschafft, wenn …</h4>
+    <ul>
+      <li>dein Agent ein Tool <i>von selbst</i> aufgerufen hat (du hast es nicht erzwungen)</li>
+      <li>du im Log die Abfolge „denken → Tool rufen → Ergebnis → antworten" erkannt hast</li>
+      <li>du gesehen hast, wie eine schlechtere Tool-Beschreibung das Verhalten verändert</li>
+      <li>du eine Frage gestellt hast, bei der <i>kein</i> Tool nötig war – und der Agent korrekt direkt geantwortet hat</li>
+    </ul>
+  </div>
+
+  <div class="merke reveal">
+    <div class="lbl">Merksatz</div>
+    <div class="q">Der Moment, in dem du im Log siehst, wie der Agent <b>selbst</b> entscheidet ein Tool zu rufen, ist der Moment, in dem „Agentic AI" vom Buzzword zur greifbaren Sache wird.</div>
+  </div>
+
+  <h2><span class="sec">7.4</span> Direkt loslegen</h2>
+  <div class="reslist reveal">
+    <a class="reslink" href="https://flowiseai.com/" target="_blank" rel="noopener"><span class="rico">🟧</span><span class="rmeta"><b>Flowise</b><span>Visueller Agent-/RAG-Baukasten · Open Source · Cloud-Free oder <code class="inline">npx flowise start</code></span></span><span class="rarrow">↗</span></a>
+    <a class="reslink" href="https://n8n.io/" target="_blank" rel="noopener"><span class="rico">🔗</span><span class="rmeta"><b>n8n</b><span>Automatisierung mit AI-Agent-Node · Cloud-Trial oder self-hosted</span></span><span class="rarrow">↗</span></a>
+    <a class="reslink" href="https://www.langflow.org/" target="_blank" rel="noopener"><span class="rico">🟩</span><span class="rmeta"><b>LangFlow</b><span>Visuelles Prototyping von Agenten-Logik · Python-nativ · Open Source</span></span><span class="rarrow">↗</span></a>
+  </div>
+
+  <div class="box warn reveal">
+    <div class="t">Bitte beachten</div>
+    <p>Nutze für dieses Lab <b>keine</b> echten Firmen- oder Kundendaten und keine produktiven API-Keys. Ein Wegwerf-Key mit Gratis-Guthaben und Spielzeug-Eingaben genügt vollkommen. Warum das wichtig ist, klärt Modul 9 (Security).</p>
+  </div>
+
+  <div id="pager" class="pager"></div>
+
+</main>
+
+<footer class="foot">Agentic AI · CBT · Modul 7 von 10 · Orange Business</footer>
+<script src="assets/cbt.js"></script>
+</body>
+</html>

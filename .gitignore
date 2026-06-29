@@ -1,0 +1,8 @@
+# Persönliche / sensible Dateien – NICHT veröffentlichen
+Xurce-Lebenslauf_Jonas-Thommen.pdf
+I-26032 ERZ 25115_Los2_Kriterienkatalog_Jonas_Thommen.xlsx
+Nachweise/
+
+# Sicherheitshalber generische Muster
+*.pdf
+*.xlsx

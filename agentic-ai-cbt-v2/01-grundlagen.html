@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1 · Chat vs. Workflow vs. Agent — Agentic AI CBT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+<link rel="stylesheet" href="assets/v2.css">
+</head>
+<body data-mod="grundlagen">
+
+<main class="wrap">
+
+  <div class="page-head">
+    <span class="eyebrow"><span class="num">1</span> Grundlagen</span>
+    <h1 class="page-title">Chat vs. Workflow vs. Agent</h1>
+    <p class="lede">Bevor wir Agenten bauen, müssen wir sie sauber von dem abgrenzen, was wir schon kennen. Drei Begriffe – ein Spektrum, nicht drei Schubladen.</p>
+  </div>
+
+  <div class="goals">
+    <h4>Nach diesem Modul kannst du …</h4>
+    <ul>
+      <li>Chat, Workflow und Agent klar voneinander unterscheiden</li>
+      <li>die entscheidende Frage benennen: <i>Wer bestimmt den Kontrollfluss?</i></li>
+      <li>erklären, warum die Oberfläche (Chat-UI) <em>nicht</em> das Kriterium ist</li>
+      <li>begründen, warum „mehr Agentic" nicht automatisch besser ist</li>
+    </ul>
+  </div>
+
+  <h2><span class="sec">1.1</span> Das Spektrum der Autonomie</h2>
+  <p>In der Praxis hört man die Begriffe oft synonym – „wir bauen einen KI-Bot / Workflow / Agenten". Tatsächlich beschreiben sie unterschiedliche Punkte auf <strong>einem Spektrum</strong>: Wie viel Entscheidungsgewalt überlässt das System dem Sprachmodell?</p>
+
+  <figure class="diagram reveal">
+    <svg viewBox="0 0 820 300" role="img" aria-label="Spektrum von Chat über Workflow zu Agent">
+      <defs>
+        <linearGradient id="spec" x1="0" x2="1">
+          <stop offset="0" stop-color="#7dcfff"/><stop offset=".5" stop-color="#ffb168"/><stop offset="1" stop-color="#ff7900"/>
+        </linearGradient>
+        <marker id="ar" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0 0l6 3-6 3z" fill="#8a8a93"/></marker>
+      </defs>
+      <rect x="40" y="40" width="740" height="10" rx="5" fill="url(#spec)"/>
+      <text x="40" y="30" font-size="13" fill="#8a8a93" font-family="Inter">Mensch bestimmt den Ablauf</text>
+      <text x="780" y="30" font-size="13" fill="#ff7900" text-anchor="end" font-family="Inter" font-weight="700">Modell bestimmt den Ablauf</text>
+      <g font-family="Inter">
+        <circle cx="120" cy="45" r="9" fill="#7dcfff" stroke="#fff" stroke-width="2"/>
+        <text x="120" y="85" text-anchor="middle" font-size="15" font-weight="700" fill="#1d1d1f">Chat / Assistant</text>
+        <text x="120" y="105" text-anchor="middle" font-size="12" fill="#8a8a93">ein Ziel-Turn,</text>
+        <text x="120" y="121" text-anchor="middle" font-size="12" fill="#8a8a93">kein offener Loop</text>
+        <circle cx="370" cy="45" r="9" fill="#ffb168" stroke="#fff" stroke-width="2"/>
+        <text x="370" y="85" text-anchor="middle" font-size="15" font-weight="700" fill="#1d1d1f">Workflow</text>
+        <text x="370" y="105" text-anchor="middle" font-size="12" fill="#8a8a93">feste Schritte im Code</text>
+        <text x="370" y="121" text-anchor="middle" font-size="12" fill="#8a8a93">Modell füllt Lücken</text>
+        <circle cx="700" cy="45" r="11" fill="#ff7900" stroke="#fff" stroke-width="2"/>
+        <text x="700" y="85" text-anchor="middle" font-size="15" font-weight="800" fill="#ff7900">Agent</text>
+        <text x="700" y="105" text-anchor="middle" font-size="12" fill="#8a8a93">Modell plant &amp; schleift</text>
+        <text x="700" y="121" text-anchor="middle" font-size="12" fill="#8a8a93">eigene Tool-Wahl</text>
+      </g>
+      <g font-family="Inter" font-size="12" fill="#54545c">
+        <rect x="60" y="170" width="120" height="70" rx="10" fill="#161619"/>
+        <text x="120" y="200" text-anchor="middle" fill="#fff" font-size="12">User-Ziel</text>
+        <text x="120" y="220" text-anchor="middle" fill="#7dcfff" font-size="12">→ Ergebnis-Turn</text>
+        <g>
+          <rect x="300" y="160" width="55" height="36" rx="8" fill="#161619"/><text x="327" y="183" text-anchor="middle" fill="#fff">Step 1</text>
+          <rect x="365" y="160" width="55" height="36" rx="8" fill="#161619"/><text x="392" y="183" text-anchor="middle" fill="#fff">Step 2</text>
+          <rect x="430" y="160" width="55" height="36" rx="8" fill="#161619"/><text x="457" y="183" text-anchor="middle" fill="#ffb168">LLM</text>
+          <line x1="355" y1="178" x2="363" y2="178" stroke="#8a8a93" marker-end="url(#ar)"/>
+          <line x1="420" y1="178" x2="428" y2="178" stroke="#8a8a93" marker-end="url(#ar)"/>
+          <text x="392" y="225" text-anchor="middle">Pfad steht fest</text>
+        </g>
+        <g>
+          <circle cx="700" cy="190" r="34" fill="none" stroke="#ff7900" stroke-width="2.5" stroke-dasharray="5 4"/>
+          <text x="700" y="186" text-anchor="middle" fill="#ff7900" font-weight="700" font-size="12">denke</text>
+          <text x="700" y="202" text-anchor="middle" fill="#ff7900" font-weight="700" font-size="12">→ handle</text>
+          <path d="M700 156 a34 34 0 0 1 30 18" fill="none" stroke="#ff7900" stroke-width="2.5" marker-end="url(#ar)"/>
+          <text x="700" y="248" text-anchor="middle">Loop bis Ziel erreicht</text>
+        </g>
+      </g>
+    </svg>
+    <figcaption>Das gleiche LLM steckt überall drin. Was sich ändert, ist <b>wer die Kontrolle über den Ablauf hat</b>.</figcaption>
+  </figure>
+
+  <div class="merke reveal">
+    <div class="lbl">Merksatz</div>
+    <div class="q">Ein Chatbot <b>beantwortet</b>. Ein Assistant <b>hilft beim Arbeiten</b>. Ein Agent <b>erledigt die Arbeit selbst</b> – inklusive der Entscheidung, welche Schritte dafür nötig sind.</div>
+  </div>
+
+  <h2><span class="sec">1.2</span> Die drei Typen im Klartext</h2>
+
+  <h3>Chat / Assistant</h3>
+  <p>Das System bearbeitet einen Ziel-Turn und gibt ein Ergebnis zurück. Auch ein Assistant darf dabei intern durchaus <em>mehrere</em> Tool-Aufrufe machen (z. B. erst Wetter abfragen, dann Kalender prüfen) – entscheidend ist, dass es keinen offenen, modellgesteuerten Loop gibt, der sich selbst neue Ziele setzt und unbegrenzt weiterarbeitet. Die Struktur bleibt: Anfrage rein, kuratiertes Ergebnis raus.</p>
+
+  <div class="box warn reveal">
+    <div class="t">Wichtige Präzisierung: Die UI ist nicht das Kriterium</div>
+    <p>Ein Chat-<i>Interface</i> kann auch einen vollwertigen Agenten bedienen (Claude Code, Cursor &amp; Co. laufen im Chatfenster). Umgekehrt kann ein „headless" Batch-Job ein reiner Workflow sein. Lass dich nicht von der Oberfläche täuschen. Entscheidend ist allein, ob im Inneren ein <b>modellgesteuerter Loop mit eigener Tool-Auswahl und Feedback</b> läuft – nicht, ob du in ein Chatfeld tippst.</p>
+  </div>
+
+  <h3>Workflow</h3>
+  <p>Hier orchestriert <strong>dein Code</strong> LLM-Aufrufe und Tools entlang fest definierter Pfade. Das Modell trifft lokale Entscheidungen, aber die <em>Reihenfolge der Schritte</em> hast du als Entwickler verdrahtet. Workflows sind vorhersehbar, auditierbar und günstiger.</p>
+
+  <h3>Agent</h3>
+  <p>Das LLM <strong>steuert seinen eigenen Prozess</strong>: Es plant, wählt selbst Tools, beobachtet Ergebnisse und entscheidet, was als Nächstes zu tun ist – in einer Schleife, bis das Ziel erreicht ist. Flexibel und mächtig, aber teurer, schwerer vorhersehbar und schwerer zu debuggen.</p>
+
+  <div class="box note reveal">
+    <div class="t">Die eine entscheidende Frage</div>
+    <p>Anthropic bringt es in „Building Effective Agents" auf den Punkt: Der Unterschied zwischen Workflow und Agent ist, <b>wer den Kontrollfluss bestimmt</b> – der Entwickler (Workflow) oder das Modell (Agent). Alles andere folgt daraus.</p>
+  </div>
+
+  <h2><span class="sec">1.3</span> Stärken, Schwächen, Kosten</h2>
+  <div class="tablewrap reveal">
+    <table class="matrix">
+      <thead><tr><th>Dimension</th><th>Chat / Assistant</th><th>Workflow</th><th>Agent</th></tr></thead>
+      <tbody>
+        <tr><td>Kontrollfluss</td><td>ein Ziel-Turn</td><td>Entwickler (fester Graph)</td><td>Modell (dynamisch, Loop)</td></tr>
+        <tr><td>Vorhersehbarkeit</td><td>hoch</td><td>hoch</td><td>niedrig–mittel</td></tr>
+        <tr><td>Flexibilität</td><td>gering</td><td>mittel</td><td>hoch</td></tr>
+        <tr><td>Kosten / Latenz</td><td>niedrig</td><td>mittel</td><td>hoch (viele LLM-Calls)</td></tr>
+        <tr><td>Debugbarkeit</td><td>einfach</td><td>gut</td><td>anspruchsvoll → Observability nötig</td></tr>
+        <tr><td>Gut für …</td><td>Q&amp;A, Textarbeit, Co-Pilot</td><td>klar definierte, wiederkehrende Abläufe</td><td>offene Aufgaben mit hoher Varianz</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="box warn reveal">
+    <div class="t">Anti-Hype-Hinweis</div>
+    <p>„Mehr Agentic" ist kein Qualitätsmerkmal. Anthropics Empfehlung: <b>Starte mit der einfachsten Lösung</b> und erhöhe Komplexität nur, wenn die Aufgabe es erzwingt. Oft ist das beste „Agentensystem" gar keins, sondern ein sauberer Workflow. Ein Agent kostet dich Geld, Latenz und Vorhersehbarkeit – diesen Preis zahlst du nur, wenn die Varianz der Aufgabe ihn rechtfertigt.</p>
+  </div>
+
+  <div class="merke reveal">
+    <div class="lbl">Merksatz</div>
+    <div class="q">Ship a workflow first. Graduiere erst zum Agenten, wenn die Varianz der Aufgabe es <b>wirklich</b> verlangt.</div>
+  </div>
+
+  <!-- QUIZ -->
+  <section class="quiz reveal" data-quiz="grundlagen">
+    <div class="quiz-head"><span class="qbadge">Quiz</span><h3>Check: Chat, Workflow oder Agent?</h3><span class="score"></span></div>
+    <div class="quiz-body">
+
+      <div class="q" data-correct="2">
+        <div class="stem"><span class="qtype t-basic">Verständnis</span><span class="qn">1.</span> Was ist das <em>trennscharfe</em> Kriterium zwischen Workflow und Agent?</div>
+        <label class="opt"><span class="mk"></span><span>Ob das System Tools / Function-Calling benutzt</span></label>
+        <label class="opt"><span class="mk"></span><span>Ob es ein Chat-Interface hat</span></label>
+        <label class="opt"><span class="mk"></span><span>Wer den Kontrollfluss bestimmt – Entwickler (Workflow) oder Modell (Agent)</span></label>
+        <label class="opt"><span class="mk"></span><span>Ob das System auf eine Datenbank zugreift</span></label>
+        <div class="explain"><b>Richtig: C.</b> Tools, UI und DB-Zugriff können in allen Varianten vorkommen. Entscheidend ist, wer die Reihenfolge der Schritte festlegt.</div>
+      </div>
+
+      <div class="q" data-correct="1">
+        <div class="stem"><span class="qtype t-scen">Szenario</span><span class="qn">2.</span> Ein Kunde will eingehende Reklamationsmails automatisch analysieren, klassifizieren und als Ticketentwurf vorbereiten. In ~5 % der Fälle soll beim Kunden rückgefragt werden. Welche Architektur passt am besten?</div>
+        <label class="opt"><span class="mk"></span><span>Voll autonomer Multi-Agent, der alles selbst entscheidet</span></label>
+        <label class="opt"><span class="mk"></span><span>Workflow-first: LLM-Klassifikation + RAG für Policies + Tool für Ticketentwurf, mit Human-in-the-Loop nur für die externe Rückfrage</span></label>
+        <label class="opt"><span class="mk"></span><span>Reiner Chatbot ohne Tools</span></label>
+        <label class="opt"><span class="mk"></span><span>Ein Agent ohne Guardrails, der direkt Mails an Kunden sendet</span></label>
+        <div class="explain"><b>Richtig: B.</b> Die Schritte sind weitgehend bekannt → Workflow. Nur die seltene, folgenreiche Aktion (Kundenkontakt) braucht einen Agentic-/HITL-Anteil. Das ist „so einfach wie möglich, so agentisch wie nötig".</div>
+      </div>
+
+      <div class="q" data-correct="1">
+        <div class="stem"><span class="qtype t-diag">Diagnose</span><span class="qn">3.</span> Ein Kollege sagt: „Das läuft im Chatfenster, also ist es ein Agent." Wie ordnest du das ein?</div>
+        <label class="opt"><span class="mk"></span><span>Stimmt – ein Chatfenster macht es zum Agenten</span></label>
+        <label class="opt"><span class="mk"></span><span>Die UI sagt nichts aus; entscheidend ist, ob intern ein modellgesteuerter Loop mit eigener Tool-Wahl und Feedback läuft</span></label>
+        <label class="opt"><span class="mk"></span><span>Nur Kommandozeilen-Tools können Agenten sein</span></label>
+        <label class="opt"><span class="mk"></span><span>Es ist sicher nur ein Chatbot, weil es ein Chatfenster ist</span></label>
+        <div class="explain"><b>Richtig: B.</b> Claude Code läuft im Chat und ist hochgradig agentisch; ein Batch-Job ohne Loop ist es nicht. Die Oberfläche ist irrelevant.</div>
+      </div>
+
+      <div class="q" data-correct="1,2">
+        <div class="stem"><span class="qtype t-anti">Was NICHT tun</span><span class="qn">4.</span> Welche Vorgehensweisen widersprechen „workflow-first"? <i>(zwei richtige)</i></div>
+        <label class="opt"><span class="mk"></span><span>Bekannte, stabile Schritte zuerst als Workflow verdrahten</span></label>
+        <label class="opt"><span class="mk"></span><span>Sofort den vollständigsten autonomen Agenten bauen, „weil man später vereinfachen kann"</span></label>
+        <label class="opt"><span class="mk"></span><span>Komplexität als Selbstzweck erhöhen, um „moderner" zu wirken</span></label>
+        <label class="opt"><span class="mk"></span><span>Agentic-Anteile gezielt nur dort ergänzen, wo die Varianz es verlangt</span></label>
+        <div class="explain"><b>Richtig: B &amp; C.</b> Komplexität hat einen Preis (Kosten, Latenz, Debugbarkeit) und ist nie ein Ziel an sich. A und D sind genau die empfohlene Linie.</div>
+      </div>
+
+      <div class="quiz-actions">
+        <button class="btn check">Auswerten</button>
+        <button class="btn ghost reset" style="display:none">Nochmal</button>
+        <span class="quiz-result"></span>
+      </div>
+    </div>
+  </section>
+
+  <div class="box deep reveal">
+    <div class="t">Tiefer graben</div>
+    <p>Der kanonische Text dazu ist Anthropics <a href="https://www.anthropic.com/research/building-effective-agents" target="_blank" rel="noopener">Building Effective Agents</a> – kurz, pragmatisch, ohne Hype.</p>
+  </div>
+
+  <div id="pager" class="pager"></div>
+
+</main>
+
+<footer class="foot">Agentic AI · CBT V2 · Modul 1 von 12 · Orange Business</footer>
+<script src="assets/cbt.js"></script>
+</body>
+</html>

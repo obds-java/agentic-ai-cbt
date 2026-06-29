@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>6 · Agenten bauen — Agentic AI CBT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-mod="bauen">
+
+<main class="wrap">
+
+  <div class="page-head">
+    <span class="eyebrow"><span class="num">6</span> Praxis</span>
+    <h1 class="page-title">Agenten bauen: Vorgehen &amp; Frameworks</h1>
+    <p class="lede">Vom Problem zum laufenden Agenten – mit einem pragmatischen Vorgehen, einem Überblick über die Framework-Landschaft und kurzen Spring-AI-Fragmenten für unseren Stack.</p>
+  </div>
+
+  <div class="goals">
+    <h4>Nach diesem Modul kannst du …</h4>
+    <ul>
+      <li>ein bewährtes, schrittweises Vorgehen anwenden (workflow-first)</li>
+      <li>die Framework-Landschaft 2026 einordnen: No-Code, Python, Java</li>
+      <li>lesen, wie ein Tool und Memory in Spring AI aussehen</li>
+      <li>Context Engineering als zentrale Stellschraube erkennen</li>
+    </ul>
+  </div>
+
+  <h2><span class="sec">6.1</span> Ein pragmatisches Vorgehen</h2>
+  <p>Die wichtigste Regel kennst du schon aus Modul 1: <strong>so einfach wie möglich anfangen</strong>. Daraus ergibt sich ein bewährter Pfad:</p>
+
+  <figure class="diagram reveal">
+    <svg viewBox="0 0 760 180" role="img" aria-label="Vorgehen in fünf Schritten">
+      <defs><marker id="ab" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0 0l6 3-6 3z" fill="#ff7900"/></marker></defs>
+      <g font-family="Inter">
+        <g>
+          <circle cx="80" cy="70" r="30" fill="#161619"/><text x="80" y="76" text-anchor="middle" fill="#ff7900" font-size="20" font-weight="800">1</text>
+          <text x="80" y="130" text-anchor="middle" font-size="12.5" fill="#1d1d1f" font-weight="700">Use Case</text>
+          <text x="80" y="147" text-anchor="middle" font-size="11" fill="#8a8a93">eng &amp; wertvoll</text>
+        </g>
+        <g>
+          <circle cx="250" cy="70" r="30" fill="#161619"/><text x="250" y="76" text-anchor="middle" fill="#ff7900" font-size="20" font-weight="800">2</text>
+          <text x="250" y="130" text-anchor="middle" font-size="12.5" fill="#1d1d1f" font-weight="700">Workflow</text>
+          <text x="250" y="147" text-anchor="middle" font-size="11" fill="#8a8a93">erst fest verdrahten</text>
+        </g>
+        <g>
+          <circle cx="420" cy="70" r="30" fill="#161619"/><text x="420" y="76" text-anchor="middle" fill="#ff7900" font-size="20" font-weight="800">3</text>
+          <text x="420" y="130" text-anchor="middle" font-size="12.5" fill="#1d1d1f" font-weight="700">Tools + Loop</text>
+          <text x="420" y="147" text-anchor="middle" font-size="11" fill="#8a8a93">nur wo nötig</text>
+        </g>
+        <g>
+          <circle cx="590" cy="70" r="30" fill="#161619"/><text x="590" y="76" text-anchor="middle" fill="#ff7900" font-size="20" font-weight="800">4</text>
+          <text x="590" y="130" text-anchor="middle" font-size="12.5" fill="#1d1d1f" font-weight="700">Observe</text>
+          <text x="590" y="147" text-anchor="middle" font-size="11" fill="#8a8a93">tracen &amp; evaluieren</text>
+        </g>
+        <g>
+          <circle cx="700" cy="70" r="30" fill="#ff7900"/><text x="700" y="76" text-anchor="middle" fill="#fff" font-size="20" font-weight="800">5</text>
+          <text x="700" y="130" text-anchor="middle" font-size="12.5" fill="#1d1d1f" font-weight="700">Härten</text>
+          <text x="700" y="147" text-anchor="middle" font-size="11" fill="#8a8a93">Guardrails &amp; Security</text>
+        </g>
+      </g>
+      <g stroke="#ff7900" stroke-width="2.5" fill="none">
+        <line x1="113" y1="70" x2="216" y2="70" marker-end="url(#ab)"/>
+        <line x1="283" y1="70" x2="386" y2="70" marker-end="url(#ab)"/>
+        <line x1="453" y1="70" x2="556" y2="70" marker-end="url(#ab)"/>
+        <line x1="623" y1="70" x2="666" y2="70" marker-end="url(#ab)"/>
+      </g>
+    </svg>
+    <figcaption>Workflow-first, dann gezielt Agentic-Anteile ergänzen. Observability kommt nicht am Ende, sondern begleitet ab Schritt 3.</figcaption>
+  </figure>
+
+  <ol>
+    <li><strong>Use Case schneiden:</strong> eng, klar messbar, echter Mehrwert. „Beantworte alle Kundenmails" ist zu breit; „erstelle aus einer Reklamationsmail einen strukturierten Ticket-Entwurf" ist machbar.</li>
+    <li><strong>Als Workflow starten:</strong> Verdrahte die Schritte, die du kennst. Du wirst überrascht sein, wie weit das trägt.</li>
+    <li><strong>Tools + Loop ergänzen,</strong> nur an den Stellen, wo die Varianz echte Autonomie verlangt.</li>
+    <li><strong>Von Anfang an tracen</strong> (Modul 5) – nicht erst, wenn es brennt.</li>
+    <li><strong>Härten:</strong> Guardrails, Berechtigungen, Security (Modul 9), bevor es echte Nutzer oder echte Daten berührt.</li>
+  </ol>
+
+  <h2><span class="sec">6.2</span> Die Framework-Landschaft 2026</h2>
+  <p>Grob drei Lager. Wähl nach Team-Skill und Aufgabe – nicht nach Hype.</p>
+  <div class="tablewrap reveal">
+    <table class="matrix">
+      <thead><tr><th>Lager</th><th>Vertreter</th><th>Stärke</th><th>Wann wählen</th></tr></thead>
+      <tbody>
+        <tr><td>No-/Low-Code</td><td>n8n, Flowise, LangFlow</td><td>schnell, visuell, kein Build</td><td>Prototyp, Ops-Automation, schnelles Lernen</td></tr>
+        <tr><td>Python-Code</td><td>LangGraph, CrewAI, Pydantic AI, smolagents</td><td>volle Kontrolle, größtes Ökosystem</td><td>Data/ML-Teams, komplexe Architekturen</td></tr>
+        <tr><td>Java / JVM</td><td>Spring AI, LangChain4j</td><td>passt in bestehenden Enterprise-Stack</td><td>unser Fall: Spring-Backends</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="box note reveal">
+    <div class="t">Merksatz aus der Praxis</div>
+    <p>„Don't use a hammer to turn a screw." <b>n8n</b> für Ops &amp; App-Verkettung, <b>Flowise</b> für RAG-Bots, <b>LangFlow</b> für visuelles Prototyping von Logik. Für Produktions-Backends in unserem Haus ist <b>Spring AI</b> der natürliche Andockpunkt.</p>
+  </div>
+
+  <h2><span class="sec">6.3</span> Wie das in Spring AI aussieht</h2>
+  <p>Du musst das hier nicht zum Laufen bringen – es geht ums <em>Lesen</em> und Wiedererkennen. Auffällig: Wie wenig „KI-Magie" und wie viel vertrautes Spring drinsteckt.</p>
+
+  <h3>Ein Tool ist einfach eine annotierte Methode</h3>
+  <p>Spring AI generiert das JSON-Schema aus deiner Methode und übernimmt das Parameter-Mapping über die <code class="inline">@Tool</code>-Annotation. Mehr braucht es nicht, damit der Agent diese Funktion aufrufen kann:</p>
+  <div class="codeblock reveal">
+    <div class="codehead"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname">OrderService.java</span></div>
+<pre><code><span class="tok-an">@Service</span>
+<span class="tok-key">public class</span> <span class="tok-cls">OrderService</span> {
+
+    <span class="tok-an">@Tool</span>(description = <span class="tok-str">"Liefert den aktuellen Versandstatus einer Bestellung per ID."</span>)
+    <span class="tok-key">public</span> <span class="tok-cls">String</span> <span class="tok-fn">getOrderStatus</span>(<span class="tok-cls">String</span> orderId) {
+        <span class="tok-key">return</span> orderRepository.<span class="tok-fn">findById</span>(orderId)
+            .<span class="tok-fn">map</span>(<span class="tok-cls">Order</span>::getShippingStatus)
+            .<span class="tok-fn">orElseThrow</span>(() -> <span class="tok-key">new</span> <span class="tok-cls">OrderNotFoundException</span>(orderId));
+    }
+}</code></pre>
+  </div>
+  <p>Die <code class="inline">description</code> ist hier kein Kommentar fürs Team, sondern das, woran das LLM erkennt, wann es dieses Tool nutzen soll (siehe Modul 4). Gute Beschreibung = gute Tool-Nutzung.</p>
+
+  <h3>Memory &amp; Tools über Advisors zusammenstecken</h3>
+  <p>Spring AI nutzt das <span class="term">Advisor</span>-Muster: Memory, Tool-Calling und mehr sind komponierbare Bausteine, die du in den <code class="inline">ChatClient</code> einhängst – das Harness in Spring-Sprache.</p>
+  <div class="codeblock reveal">
+    <div class="codehead"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname">AgentConfig.java</span></div>
+<pre><code><span class="tok-cls">ChatClient</span> chatClient = chatClientBuilder
+    .<span class="tok-fn">defaultAdvisors</span>(
+        <span class="tok-com">// Kurzzeitgedächtnis: gleitendes Fenster über die Konversation</span>
+        <span class="tok-cls">MessageChatMemoryAdvisor</span>.<span class="tok-fn">builder</span>(
+            <span class="tok-cls">MessageWindowChatMemory</span>.<span class="tok-fn">builder</span>().<span class="tok-fn">maxMessages</span>(<span class="tok-num">100</span>).<span class="tok-fn">build</span>())
+            .<span class="tok-fn">build</span>(),
+        <span class="tok-com">// Tool-Calling-Loop</span>
+        <span class="tok-cls">ToolCallAdvisor</span>.<span class="tok-fn">builder</span>().<span class="tok-fn">build</span>())
+    .<span class="tok-fn">defaultTools</span>(<span class="tok-key">new</span> <span class="tok-cls">OrderService</span>())
+    .<span class="tok-fn">build</span>();</code></pre>
+  </div>
+
+  <div class="box tip reveal">
+    <div class="t">Der Aha-Moment für Java-Devs</div>
+    <p>Ein Agent in Spring AI ist kein exotisches neues Paradigma – es ist <b>Dependency Injection + ein Loop + gut beschriebene Methoden</b>. Das meiste, was du brauchst, kannst du schon. Neu ist vor allem das Denken in Kontext, Tools und Nicht-Determinismus.</p>
+  </div>
+
+  <h2><span class="sec">6.4</span> Context Engineering — die zentrale Stellschraube</h2>
+  <p>Der erste Reflex vieler Teams: alles ins Kontextfenster kippen, „sicherheitshalber". Das ist fast immer ein Fehler. Über die Kosten- und Latenznachteile hinaus <strong>sinkt die Fähigkeit des Modells, einzelne Informationen zu beachten, je größer der Input wird</strong>. Teams haben erlebt, dass ein Agent mit einer 100K-Token-Zusammenfassung <em>schlechter</em> abschnitt als mit gezielten 5K Token zur selben Aufgabe.</p>
+  <div class="merke reveal">
+    <div class="lbl">Merksatz</div>
+    <div class="q">Context Engineering heißt nicht „möglichst viel reingeben", sondern „das Richtige reingeben". Der Kontext ist ein knappes Budget – kuratiere ihn wie ein Redakteur, nicht wie ein Messie.</div>
+  </div>
+
+  <!-- QUIZ -->
+  <section class="quiz reveal" data-quiz="bauen">
+    <div class="quiz-head"><span class="qbadge">Quiz</span><h3>Check: Bauen &amp; Frameworks</h3><span class="score"></span></div>
+    <div class="quiz-body">
+
+      <div class="q" data-correct="1">
+        <div class="stem"><span class="qn">1.</span> Was ist der empfohlene erste Schritt nach dem Schneiden des Use Case?</div>
+        <label class="opt"><span class="mk"></span><span>Sofort einen voll autonomen Multi-Agenten bauen</span></label>
+        <label class="opt"><span class="mk"></span><span>Die bekannten Schritte erst als fest verdrahteten Workflow umsetzen</span></label>
+        <label class="opt"><span class="mk"></span><span>Zuerst das größte verfügbare Modell fine-tunen</span></label>
+        <label class="opt"><span class="mk"></span><span>Observability bewusst weglassen, um schneller zu sein</span></label>
+        <div class="explain"><b>Richtig: B.</b> Workflow-first trägt erstaunlich weit. Agentic-Anteile ergänzt man gezielt dort, wo Varianz echte Autonomie verlangt.</div>
+      </div>
+
+      <div class="q" data-correct="2">
+        <div class="stem"><span class="qn">2.</span> In Spring AI definierst du ein Tool, indem du …</div>
+        <label class="opt"><span class="mk"></span><span>ein neuronales Netz trainierst</span></label>
+        <label class="opt"><span class="mk"></span><span>eine XML-Konfiguration pro Tool schreibst</span></label>
+        <label class="opt"><span class="mk"></span><span>eine Methode mit <code class="inline">@Tool</code> annotierst und beschreibst – Spring generiert das Schema</span></label>
+        <label class="opt"><span class="mk"></span><span>das Tool im Modell-Anbieter-Portal registrierst</span></label>
+        <div class="explain"><b>Richtig: C.</b> Eine annotierte, gut beschriebene Methode genügt. Die <code class="inline">description</code> steuert, ob das Modell das Tool korrekt einsetzt.</div>
+      </div>
+
+      <div class="q" data-correct="0,3">
+        <div class="stem"><span class="qn">3.</span> Warum ist „alles ins Kontextfenster kippen" meist kontraproduktiv? <i>(zwei richtige)</i></div>
+        <label class="opt"><span class="mk"></span><span>Die Fähigkeit des Modells, Einzelinfos zu beachten, sinkt mit wachsendem Input</span></label>
+        <label class="opt"><span class="mk"></span><span>Große Kontexte sind technisch unmöglich</span></label>
+        <label class="opt"><span class="mk"></span><span>Das Modell vergisst dann seine Trainingsdaten</span></label>
+        <label class="opt"><span class="mk"></span><span>Es erhöht Kosten und Latenz – oft bei schlechterem Ergebnis</span></label>
+        <div class="explain"><b>Richtig: A &amp; D.</b> Gezielte 5K Token schlagen regelmäßig eine 100K-Zusammenfassung. Kontext ist ein knappes Budget.</div>
+      </div>
+
+      <div class="q" data-correct="1">
+        <div class="stem"><span class="qn">4.</span> Du willst schnell und ohne Build einen RAG-Chatbot prototypen. Welches Tool passt am besten?</div>
+        <label class="opt"><span class="mk"></span><span>Spring AI</span></label>
+        <label class="opt"><span class="mk"></span><span>Flowise (drag-and-drop, auf LangChain.js aufbauend)</span></label>
+        <label class="opt"><span class="mk"></span><span>OpenTelemetry</span></label>
+        <label class="opt"><span class="mk"></span><span>LangSmith</span></label>
+        <div class="explain"><b>Richtig: B.</b> Flowise ist auf schnelles RAG-Prototyping ausgelegt. Spring AI ist für Produktions-Backends, OTEL/LangSmith sind Observability.</div>
+      </div>
+
+      <div class="quiz-actions">
+        <button class="btn check">Auswerten</button>
+        <button class="btn ghost reset" style="display:none">Nochmal</button>
+        <span class="quiz-result"></span>
+      </div>
+    </div>
+  </section>
+
+  <div class="box deep reveal">
+    <div class="t">Tiefer graben</div>
+    <p><a href="https://docs.spring.io/spring-ai/reference/api/advisors.html" target="_blank" rel="noopener">Spring AI – Advisors API</a> · <a href="https://spring.io/blog/2026/04/07/spring-ai-agentic-patterns-6-memory-tools/" target="_blank" rel="noopener">Spring AI Agentic Patterns: Memory Tools</a> · <a href="https://www.deeplearning.ai/courses/agentic-ai/" target="_blank" rel="noopener">Andrew Ngs „Agentic AI"-Kurs</a>.</p>
+  </div>
+
+  <div id="pager" class="pager"></div>
+
+</main>
+
+<footer class="foot">Agentic AI · CBT · Modul 6 von 10 · Orange Business</footer>
+<script src="assets/cbt.js"></script>
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>7 · Hands-On Labs — Agentic AI CBT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+<link rel="stylesheet" href="assets/v2.css">
+</head>
+<body data-mod="handson" data-complete-on-visit>
+
+<main class="wrap">
+
+  <div class="page-head">
+    <span class="eyebrow"><span class="num">7</span> Hands-On</span>
+    <h1 class="page-title">Hands-On Labs</h1>
+    <p class="lede">Genug Theorie. <strong>Lab 1</strong> ist Pflicht und geführt – ein einziger, getesteter Pfad mit Erfolgsgarantie. <strong>Lab 2</strong> ist optional für den Transfer in unseren Java/Spring-Stack.</p>
+  </div>
+
+  <div class="box note reveal">
+    <div class="t">Warum nur ein Pfad?</div>
+    <p>Statt mehrerer Wege, die nur Varianz und Frust erzeugen, gibt es <b>genau einen</b> getesteten Pfad: <b>genau ein</b> Tool (Flowise), <b>genau ein</b> Werkzeug (Calculator), <b>keine</b> Websuche (die bräuchte Zusatz-Keys). So bist du in ~20 Minuten durch und siehst den Agent-Loop garantiert live.</p>
+  </div>
+
+  <!-- ===================== LAB 1 ===================== -->
+  <h2><span class="sec">Lab 1</span> Flowise · geführter Agent mit Calculator <span class="tag good" style="font-size:12px;vertical-align:middle">Pflicht</span></h2>
+  <p><b>Ziel:</b> Du baust einen Chat-Agenten, der selbstständig ein Rechen-Tool aufruft, und siehst im Log die Abfolge <i>denken → Tool rufen → Ergebnis → antworten</i>. Dauer ~20 Min, kostenlos.</p>
+
+  <h3>Schritt 0 · Flowise starten</h3>
+  <p>Du hast zwei gleichwertige Optionen – nimm die, die auf deinem Gerät erlaubt ist:</p>
+  <ul>
+    <li><strong>Lokal (empfohlen, wenn Node ≥ 18 vorhanden):</strong> Terminal öffnen, <code class="inline">npx flowise start</code> ausführen, dann <code class="inline">http://localhost:3000</code> im Browser öffnen.</li>
+    <li><strong>Cloud:</strong> bei <a href="https://flowiseai.com/" target="_blank" rel="noopener">flowiseai.com</a> den kostenlosen Cloud-Tier nutzen (Login nötig).</li>
+  </ul>
+  <p class="reveal"><b>Erwartetes Ergebnis:</b> Du siehst die Flowise-Oberfläche mit einer leeren Liste von „Chatflows"/„Agentflows".</p>
+
+  <h3>Schritt 1 · Modell-Zugang (Credential) hinterlegen</h3>
+  <p>Lege <em>einen</em> LLM-Anbieter an, zu dem du einen API-Key mit Gratis-/Restguthaben hast (OpenAI, Anthropic oder Google). In Flowise unter <i>Credentials</i> → neuen Eintrag mit deinem Key anlegen. <em>→ Das ist Schicht 1 aus Modul 3: das Gehirn.</em></p>
+  <p class="reveal"><b>Erwartetes Ergebnis:</b> Die Credential erscheint gespeichert in der Liste; sie lässt sich später im Knoten auswählen.</p>
+
+  <h3>Schritt 2 · Einen Agentflow anlegen</h3>
+  <p>Neuen Flow erstellen und eine <strong>Agent</strong>-Vorlage wählen (nicht einen reinen „Conversation Chain"-Chatflow). Kern-Knoten ist ein <i>Tool Agent</i> / <i>AgentExecutor</i>, dem du dein Chatmodell aus Schritt 1 zuweist. <em>→ Das ist Schicht 2: der Loop.</em></p>
+  <p class="reveal"><b>Erwartetes Ergebnis:</b> Im Canvas liegt ein Agent-Knoten, der ein „Chat Model" als Eingang erwartet.</p>
+
+  <h3>Schritt 3 · Das Calculator-Tool verbinden</h3>
+  <p>Zieh den Knoten <strong>Calculator</strong> in den Canvas und verbinde ihn mit dem Tool-Eingang des Agenten. Sonst nichts – keine Websuche, keine Vektor-DB. <em>→ Ein Tool aus dem Harness (Modul 4), bewusst minimal.</em></p>
+  <p class="reveal"><b>Erwartetes Ergebnis:</b> Der Agent listet „Calculator" als verfügbares Tool.</p>
+
+  <h3>Schritt 4 · System-Prompt setzen</h3>
+  <p>Gib dem Agenten ein kurzes Ziel, z. B.: <code class="inline">Du bist ein hilfreicher Assistent. Nutze das Calculator-Tool für jede Rechnung, statt selbst zu rechnen.</code> Flow speichern.</p>
+
+  <h3>Schritt 5 · Testen – das Tool erzwingen</h3>
+  <p>Chat öffnen und fragen: <code class="inline">Was ist 1348 × 27 + 99?</code></p>
+  <p class="reveal"><b>Erwartetes Ergebnis:</b> Die Antwort lautet <b>36 495</b>. Wichtiger als die Zahl: im Verlauf/Log siehst du, dass der Agent das <i>Calculator</i>-Tool aufgerufen hat (mit dem Ausdruck als Parameter) und erst <em>danach</em> geantwortet hat.</p>
+
+  <h3>Schritt 6 · Den Loop sichtbar machen</h3>
+  <p>Öffne die Detailansicht des letzten Laufs (in Flowise meist „View Messages" / das Log-/Trace-Panel). Du erkennst die Sequenz:</p>
+  <div class="codeblock reveal">
+    <div class="codehead"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname">run-log (vereinfacht)</span></div>
+<pre><code><span class="tok-com"># Reason</span>  Agent: „Das ist eine Rechnung -> ich nutze Calculator."
+<span class="tok-com"># Act</span>     tool: Calculator(<span class="tok-str">"1348 * 27 + 99"</span>)
+<span class="tok-com"># Observe</span> result: <span class="tok-num">36495</span>
+<span class="tok-com"># Final</span>   Agent: „1348 × 27 + 99 = 36495."</code></pre>
+  </div>
+  <p>Das ist der Reason-Act-Observe-Loop aus Modul 2 – live, an deinem eigenen Agenten.</p>
+
+  <div class="box bug reveal">
+    <div class="t">Troubleshooting</div>
+    <p>
+      <b>„Invalid API key" / 401:</b> Credential aus Schritt 1 nochmals prüfen; richtigen Anbieter im Modell-Knoten gewählt? Key ohne Leerzeichen eingefügt?<br><br>
+      <b>Agent antwortet, ohne das Tool zu nutzen:</b> System-Prompt schärfen („nutze <i>immer</i> das Calculator-Tool für Rechnungen"); prüfen, ob das Tool wirklich mit dem Agenten verbunden ist (Linie im Canvas).<br><br>
+      <b><code class="inline">npx flowise start</code> hängt oder bricht ab:</b> Node-Version prüfen (<code class="inline">node -v</code> ≥ 18); Firmen-Firewall/Proxy kann npx blockieren → dann den Cloud-Tier nehmen.<br><br>
+      <b>Port 3000 belegt:</b> <code class="inline">npx flowise start --PORT=3100</code> und <code class="inline">http://localhost:3100</code> öffnen.<br><br>
+      <b>Kein API-Key verfügbar:</b> Viele Anbieter geben Gratis-Startguthaben; sonst Kollegen fragen oder den Cloud-Tier mit dortigem Free-Kontingent nutzen.
+    </p>
+  </div>
+
+  <h3>Abschlussaufgabe (das eigentliche Lernen)</h3>
+  <div class="box note reveal">
+    <div class="t">Experiment: Tool-Beschreibung verschlechtern</div>
+    <p>Ändere die Beschreibung/den Namen des Calculator-Tools in etwas Nichtssagendes (z. B. „tool_x", Beschreibung leeren). Stelle dieselbe Rechenfrage erneut. <b>Beobachtung:</b> Der Agent nutzt das Tool nun seltener, falsch – oder rechnet selbst (und liegt evtl. daneben). Damit hast du am eigenen Agenten erlebt, warum Tool-Beschreibungen Teil des Harness-Engineerings sind (Modul 4).</p>
+  </div>
+
+  <div class="goals reveal">
+    <h4>Lab 1 geschafft, wenn …</h4>
+    <ul>
+      <li>dein Agent das Calculator-Tool <i>von selbst</i> aufgerufen hat</li>
+      <li>du im Log die Sequenz denken → Tool → Ergebnis → Antwort erkannt hast</li>
+      <li>du gesehen hast, wie eine schlechtere Tool-Beschreibung das Verhalten verändert</li>
+    </ul>
+  </div>
+
+  <hr class="soft">
+
+  <!-- ===================== LAB 2 ===================== -->
+  <h2><span class="sec">Lab 2</span> Spring-AI-Mini-Agent <span class="tag" style="font-size:12px;vertical-align:middle">optional · Java-Transfer</span></h2>
+  <p>Für die, die den Bezug zu unserem Stack wollen. <b>Ziel:</b> ein winziger Spring-Boot-Agent mit <em>einem</em> Tool (<code class="inline">getOrderStatus</code>) und Kurzzeitgedächtnis – lokal startbar, eine Frage, ein sichtbarer Tool-Call im Log.</p>
+
+  <div class="box warn reveal">
+    <div class="t">Voraussetzungen &amp; Version</div>
+    <p>JDK 17+, Maven, ein LLM-API-Key als Umgebungsvariable. Getestet gegen <b>Spring AI 2.0.0</b> und <b>Spring Boot 3.4.x</b>. Da sich die API bewegt: Bei Abweichungen die <a href="https://docs.spring.io/spring-ai/reference/" target="_blank" rel="noopener">Reference-Docs</a> deiner Version konsultieren.</p>
+  </div>
+
+  <h3>1 · Abhängigkeiten (pom.xml, Auszug)</h3>
+  <div class="codeblock reveal">
+    <div class="codehead"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname">pom.xml</span><span class="ver">Spring AI 2.0.0</span></div>
+<pre><code><span class="tok-an">&lt;dependency&gt;</span>
+    <span class="tok-an">&lt;groupId&gt;</span>org.springframework.ai<span class="tok-an">&lt;/groupId&gt;</span>
+    <span class="tok-an">&lt;artifactId&gt;</span>spring-ai-starter-model-openai<span class="tok-an">&lt;/artifactId&gt;</span>
+<span class="tok-an">&lt;/dependency&gt;</span>
+<span class="tok-com">&lt;!-- BOM verwaltet die Version: spring-ai-bom 2.0.0 --&gt;</span></code></pre>
+  </div>
+
+  <h3>2 · Konfiguration (application.properties)</h3>
+  <div class="codeblock reveal">
+    <div class="codehead"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname">application.properties</span></div>
+<pre><code>spring.ai.openai.api-key=${OPENAI_API_KEY}
+spring.ai.openai.chat.options.model=gpt-4o-mini</code></pre>
+  </div>
+
+  <h3>3 · Tool + Agent + eine Frage</h3>
+  <div class="codeblock reveal">
+    <div class="codehead"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname">MiniAgent.java</span><span class="ver">Spring AI 2.0.0</span></div>
+<pre><code><span class="tok-an">@SpringBootApplication</span>
+<span class="tok-key">public class</span> <span class="tok-cls">MiniAgent</span> {
+  <span class="tok-key">public static void</span> <span class="tok-fn">main</span>(<span class="tok-cls">String</span>[] a){ <span class="tok-cls">SpringApplication</span>.<span class="tok-fn">run</span>(<span class="tok-cls">MiniAgent</span>.<span class="tok-key">class</span>, a); }
+
+  <span class="tok-com">// --- das eine Tool ---</span>
+  <span class="tok-key">static class</span> <span class="tok-cls">OrderTools</span> {
+    <span class="tok-an">@Tool</span>(description = <span class="tok-str">"Liefert den Versandstatus einer Bestellung per ID."</span>)
+    <span class="tok-cls">String</span> <span class="tok-fn">getOrderStatus</span>(<span class="tok-cls">String</span> orderId) {
+      <span class="tok-key">return</span> <span class="tok-str">"4711"</span>.<span class="tok-fn">equals</span>(orderId) ? <span class="tok-str">"versandt am 24.06."</span> : <span class="tok-str">"unbekannt"</span>;
+    }
+  }
+
+  <span class="tok-com">// --- Agent: ChatClient mit Memory; Tools werden in 2.0 automatisch geloopt ---</span>
+  <span class="tok-an">@Bean</span>
+  <span class="tok-cls">CommandLineRunner</span> <span class="tok-fn">run</span>(<span class="tok-cls">ChatClient.Builder</span> builder) {
+    <span class="tok-cls">ChatClient</span> agent = builder
+        .<span class="tok-fn">defaultAdvisors</span>(<span class="tok-cls">MessageChatMemoryAdvisor</span>
+            .<span class="tok-fn">builder</span>(<span class="tok-cls">MessageWindowChatMemory</span>.<span class="tok-fn">builder</span>().<span class="tok-fn">build</span>()).<span class="tok-fn">build</span>())
+        .<span class="tok-fn">defaultTools</span>(<span class="tok-key">new</span> <span class="tok-cls">OrderTools</span>())
+        .<span class="tok-fn">build</span>();
+
+    <span class="tok-key">return</span> args -> {
+      <span class="tok-cls">String</span> answer = agent.<span class="tok-fn">prompt</span>()
+          .<span class="tok-fn">user</span>(<span class="tok-str">"Wie ist der Status von Bestellung 4711?"</span>)
+          .<span class="tok-fn">call</span>().<span class="tok-fn">content</span>();
+      <span class="tok-cls">System</span>.<span class="tok-fn">out</span>.<span class="tok-fn">println</span>(answer);
+    };
+  }
+}</code></pre>
+  </div>
+
+  <h3>4 · Starten &amp; den Tool-Call im Log sehen</h3>
+  <div class="codeblock reveal">
+    <div class="codehead"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname">Terminal</span></div>
+<pre><code>$ export OPENAI_API_KEY=sk-...
+$ ./mvnw spring-boot:run
+...
+DEBUG o.s.a.tool  : calling tool 'getOrderStatus' args={orderId=4711}
+DEBUG o.s.a.tool  : tool result: versandt am 24.06.
+&gt; Die Bestellung 4711 wurde am 24.06. versandt.</code></pre>
+  </div>
+  <p>Tipp: <code class="inline">logging.level.org.springframework.ai=DEBUG</code> setzen, um Tool-Calls im Log zu sehen – euer erster, einfachster „Trace" (mehr in Modul 8).</p>
+
+  <div class="box note reveal">
+    <div class="t">Kleine Transferaufgabe</div>
+    <p>Verbessere die <code class="inline">@Tool</code>-Beschreibung (z. B. präziser, mit Hinweis aufs ID-Format) und stelle eine knifflige Frage („Status der Bestellung mit Nummer 4711?"). Beobachte im DEBUG-Log, ob das Tool zuverlässiger getroffen wird. Gleiche Lektion wie in Lab 1 – diesmal in Java.</p>
+  </div>
+
+  <div class="merke reveal">
+    <div class="lbl">Merksatz</div>
+    <div class="q">Der Moment, in dem du im Log siehst, wie der Agent <b>selbst</b> entscheidet ein Tool zu rufen, ist der Moment, in dem „Agentic AI" vom Buzzword zur greifbaren Sache wird – ob im No-Code-Canvas oder in Spring.</div>
+  </div>
+
+  <div class="box warn reveal">
+    <div class="t">Bitte beachten</div>
+    <p>Nutze für beide Labs <b>keine</b> echten Firmen-/Kundendaten und keine produktiven API-Keys. Ein Wegwerf-Key mit Gratis-Guthaben und Spielzeug-Eingaben genügt. Warum das wichtig ist, klärt Modul 11 (Security).</p>
+  </div>
+
+  <div id="pager" class="pager"></div>
+
+</main>
+
+<footer class="foot">Agentic AI · CBT V2 · Modul 7 von 12 · Orange Business</footer>
+<script src="assets/cbt.js"></script>
+</body>
+</html>

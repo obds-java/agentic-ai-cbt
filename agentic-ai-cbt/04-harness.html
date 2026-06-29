@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>4 · Das Harness im Detail — Agentic AI CBT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-mod="harness">
+
+<main class="wrap">
+
+  <div class="page-head">
+    <span class="eyebrow"><span class="num">4</span> Kernthema</span>
+    <h1 class="page-title">Das Harness im Detail</h1>
+    <p class="lede">Hier entscheidet sich, ob ein Agent ein Demo-Spielzeug bleibt oder produktionsreif wird. Memory, Tools, Skills, MCP, Observability, Guardrails – und warum das Harness <em>das</em> Thema 2026/2027 ist.</p>
+  </div>
+
+  <div class="goals">
+    <h4>Nach diesem Modul kannst du …</h4>
+    <ul>
+      <li>die Hauptbausteine eines Harness benennen und ihre Aufgabe erklären</li>
+      <li>verstehen, was MCP ist und welches Problem es löst</li>
+      <li>den Unterschied zwischen Tools, Skills und Memory sauber ziehen</li>
+      <li>begründen, warum „Harness Engineering" zur eigenen Disziplin geworden ist</li>
+    </ul>
+  </div>
+
+  <h2><span class="sec">4.1</span> Was ist das Harness?</h2>
+  <p>Das <span class="term">Harness</span> ist die komplette Software-Infrastruktur, die ein LLM umschließt: der Orchestrierungs-Loop, die Tools, das Gedächtnis, das Kontext-Management, die Zustands-Persistenz, die Fehlerbehandlung und die Guardrails. Der Begriff wurde Anfang 2026 zum Standardvokabular – das Konzept gab es schon länger. Kurz: Das Harness ist alles, was aus einem rohen Modell ein verlässlich arbeitendes System macht.</p>
+
+  <figure class="diagram reveal">
+    <svg viewBox="0 0 760 420" role="img" aria-label="Bausteine des Harness rund um das LLM">
+      <rect x="300" y="170" width="160" height="80" rx="16" fill="#161619"/>
+      <text x="380" y="206" text-anchor="middle" fill="#fff" font-size="18" font-weight="800" font-family="Inter">LLM</text>
+      <text x="380" y="228" text-anchor="middle" fill="#9a9aa6" font-size="11.5" font-family="Inter">Reasoning &amp; Planung</text>
+
+      <g font-family="Inter" font-size="13">
+        <!-- six satellites -->
+        <g>
+          <rect x="60" y="40" width="180" height="74" rx="14" fill="#fff3e6" stroke="#ff7900" stroke-width="1.5"/>
+          <text x="78" y="68" font-size="20">🧠</text>
+          <text x="110" y="66" font-weight="700" fill="#1d1d1f">Memory</text>
+          <text x="110" y="86" font-size="11.5" fill="#8a8a93">kurz- &amp; langfristig,</text>
+          <text x="110" y="101" font-size="11.5" fill="#8a8a93">über Sessions hinweg</text>
+        </g>
+        <g>
+          <rect x="290" y="30" width="180" height="74" rx="14" fill="#fff3e6" stroke="#ff7900" stroke-width="1.5"/>
+          <text x="308" y="58" font-size="20">🔧</text>
+          <text x="340" y="56" font-weight="700" fill="#1d1d1f">Tools</text>
+          <text x="340" y="76" font-size="11.5" fill="#8a8a93">Funktionen, die der</text>
+          <text x="340" y="91" font-size="11.5" fill="#8a8a93">Agent aufrufen kann</text>
+        </g>
+        <g>
+          <rect x="520" y="40" width="180" height="74" rx="14" fill="#fff3e6" stroke="#ff7900" stroke-width="1.5"/>
+          <text x="538" y="68" font-size="20">📦</text>
+          <text x="570" y="66" font-weight="700" fill="#1d1d1f">Skills</text>
+          <text x="570" y="86" font-size="11.5" fill="#8a8a93">verpackte Anleitungen</text>
+          <text x="570" y="101" font-size="11.5" fill="#8a8a93">&amp; Prozeduren</text>
+        </g>
+        <g>
+          <rect x="60" y="306" width="180" height="74" rx="14" fill="#fff3e6" stroke="#ff7900" stroke-width="1.5"/>
+          <text x="78" y="334" font-size="20">🔌</text>
+          <text x="110" y="332" font-weight="700" fill="#1d1d1f">MCP</text>
+          <text x="110" y="352" font-size="11.5" fill="#8a8a93">Standard-Stecker zu</text>
+          <text x="110" y="367" font-size="11.5" fill="#8a8a93">externen Systemen</text>
+        </g>
+        <g>
+          <rect x="290" y="316" width="180" height="74" rx="14" fill="#fff3e6" stroke="#ff7900" stroke-width="1.5"/>
+          <text x="308" y="344" font-size="20">📊</text>
+          <text x="340" y="342" font-weight="700" fill="#1d1d1f">Observability</text>
+          <text x="340" y="362" font-size="11.5" fill="#8a8a93">Tracing, Evals,</text>
+          <text x="340" y="377" font-size="11.5" fill="#8a8a93">Monitoring</text>
+        </g>
+        <g>
+          <rect x="520" y="306" width="180" height="74" rx="14" fill="#fff3e6" stroke="#ff7900" stroke-width="1.5"/>
+          <text x="538" y="334" font-size="20">🛡️</text>
+          <text x="570" y="332" font-weight="700" fill="#1d1d1f">Guardrails</text>
+          <text x="570" y="352" font-size="11.5" fill="#8a8a93">Grenzen, Policies,</text>
+          <text x="570" y="367" font-size="11.5" fill="#8a8a93">Approvals</text>
+        </g>
+      </g>
+      <!-- connectors -->
+      <g stroke="#ffbb7a" stroke-width="1.6" fill="none">
+        <line x1="240" y1="77"  x2="300" y2="180"/>
+        <line x1="380" y1="104" x2="380" y2="170"/>
+        <line x1="520" y1="77"  x2="460" y2="180"/>
+        <line x1="240" y1="343" x2="300" y2="240"/>
+        <line x1="380" y1="316" x2="380" y2="250"/>
+        <line x1="520" y1="343" x2="460" y2="240"/>
+      </g>
+    </svg>
+    <figcaption>Die sechs Bausteine, die wir hier durchgehen. Dazu kommen Kontext-Management und State-Persistenz als Querschnitt.</figcaption>
+  </figure>
+
+  <h2><span class="sec">4.2</span> Die Bausteine</h2>
+
+  <h3>🧠 Memory — Gedächtnis</h3>
+  <p>Das Modell ist zustandslos. Memory ist das, was Kontinuität schafft. Man unterscheidet grob: <strong>Kurzzeitgedächtnis</strong> (der Gesprächsverlauf im aktuellen Kontextfenster) und <strong>Langzeitgedächtnis</strong> (Fakten, die über Sessions hinweg überleben – z. B. in Dateien, einer DB oder einem Vektorspeicher). Die Königsdisziplin: Was kommt ins Kontextfenster und was bleibt draußen? Genau das ist <span class="term">Context Engineering</span> (Modul 6 &amp; 8).</p>
+
+  <h3>🔧 Tools — Werkzeuge</h3>
+  <p>Tools sind die Hände des Agenten. Sie werden als Schemata definiert (Name, Beschreibung, Parametertypen) und in den Kontext des LLM injiziert, damit das Modell weiß, was verfügbar ist. Die <em>Beschreibung</em> eines Tools ist überraschend wichtig: Ein schlecht beschriebenes Tool wird falsch oder gar nicht genutzt. Tool-Design ist halb Doku-Schreiben, halb API-Design.</p>
+
+  <h3>📦 Skills — Fertigkeiten</h3>
+  <p>Skills sind verpackte, wiederverwendbare Anleitungen oder Prozeduren – „so erstellst du einen Quartalsbericht", inklusive nötiger Schritte, Vorlagen und ggf. zugehöriger Tools. Wo ein Tool eine einzelne Funktion ist, bündelt ein Skill <em>Wissen über ein Vorgehen</em>. Sie lassen den Agenten komplexe, domänenspezifische Aufgaben zuverlässig wiederholen, ohne dass alles im System-Prompt steht.</p>
+
+  <h3>🔌 MCP — Model Context Protocol</h3>
+  <p>Damit Tools verlässlich und wiederverwendbar werden, definiert Anthropics <span class="term">Model Context Protocol (MCP)</span> eine standardisierte, JSON-RPC-basierte Schnittstelle zwischen Modellen und externen Ressourcen. Die Analogie, die sich durchgesetzt hat: <strong>MCP ist der „USB-C-Anschluss" für KI</strong> – statt für jede Kombination aus Agent und System einen eigenen Adapter zu bauen, sprechen beide Seiten dasselbe Protokoll. Ein MCP-Server für Jira, Slack oder eine interne DB lässt sich so an beliebige MCP-fähige Agenten anstecken.</p>
+
+  <div class="box note reveal">
+    <div class="t">Tool vs. Skill vs. MCP – die saubere Abgrenzung</div>
+    <p><b>Tool</b> = eine einzelne aufrufbare Funktion. <b>Skill</b> = verpacktes Vorgehenswissen, das mehrere Tools und Schritte bündelt. <b>MCP</b> = das <i>Protokoll</i>, über das Tools/Ressourcen standardisiert angebunden werden. MCP ist also kein Werkzeug, sondern die Steckdosennorm.</p>
+  </div>
+
+  <h3>📊 Observability — Sicht ins Innere</h3>
+  <p>Observability ist die durchgängige Sichtbarkeit jedes Schritts, den ein Agent macht: LLM-Calls, Tool-Aufrufe, Retrieval, Planungsentscheidungen. Ohne sie fliegt ein produktiver Agent blind. Weil das so zentral ist, bekommt es ein eigenes Modul (Modul 5).</p>
+
+  <h3>🛡️ Guardrails — Leitplanken</h3>
+  <p>Guardrails sind die Grenzen: Welche Aktionen darf der Agent ohne Rückfrage ausführen? Welche Eingaben/Ausgaben werden gefiltert? Wann braucht es ein menschliches „OK" (Human-in-the-Loop)? Guardrails sind teils Policy, teils Code – und eng mit Security verzahnt (Modul 9).</p>
+
+  <h2><span class="sec">4.3</span> Warum das Harness 2026/2027 <em>das</em> Thema ist</h2>
+  <p>Drei Entwicklungen treffen zusammen:</p>
+  <ul>
+    <li><strong>Modelle sind „gut genug".</strong> Der Reasoning-Sprung der letzten Generationen bedeutet: Der Engpass ist nicht mehr das Gehirn, sondern der Körper. Den größten Hebel hat heute, wer das Harness beherrscht.</li>
+    <li><strong>Harness Engineering wird zur Disziplin.</strong> Es gibt mittlerweile etablierte Muster, Bibliotheken und „Awesome-Listen" rund um Harness-Engineering: Tools, Permissions, Memory, MCP, Observability, Orchestrierung. Was 2023 Bastelei war, ist 2026 Engineering mit Best Practices.</li>
+    <li><strong>Standardisierung greift.</strong> MCP für Tool-Anbindung und OpenTelemetry für Telemetrie schaffen Interoperabilität. Das verschiebt den Wettbewerb von „welches Modell" zu „welches Harness".</li>
+  </ul>
+
+  <div class="merke reveal">
+    <div class="lbl">Merksatz</div>
+    <div class="q">2023–2025 war das Rennen um das beste <b>Modell</b>. 2026–2027 ist das Rennen um das beste <b>Harness</b>. Das Gehirn ist Commodity geworden – der Körper ist der Wettbewerbsvorteil.</div>
+  </div>
+
+  <div class="box deep reveal">
+    <div class="t">Tiefer graben</div>
+    <p>Für die Harness-Perspektive lohnen sich Anthropics <a href="https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents" target="_blank" rel="noopener">Effective harnesses for long-running agents</a> und – wenn dich das Ökosystem interessiert – die kuratierte <a href="https://github.com/ai-boost/awesome-harness-engineering" target="_blank" rel="noopener">awesome-harness-engineering</a>-Liste. Zu MCP: <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener">modelcontextprotocol.io</a>.</p>
+  </div>
+
+  <!-- QUIZ -->
+  <section class="quiz reveal" data-quiz="harness">
+    <div class="quiz-head"><span class="qbadge">Quiz</span><h3>Check: Harness-Bausteine</h3><span class="score"></span></div>
+    <div class="quiz-body">
+
+      <div class="q" data-correct="2">
+        <div class="stem"><span class="qn">1.</span> Was beschreibt MCP am treffendsten?</div>
+        <label class="opt"><span class="mk"></span><span>Ein besonders großes Sprachmodell</span></label>
+        <label class="opt"><span class="mk"></span><span>Ein einzelnes Werkzeug zum Datenbankzugriff</span></label>
+        <label class="opt"><span class="mk"></span><span>Ein standardisiertes Protokoll (JSON-RPC) zur Anbindung von Tools/Ressourcen – der „USB-C-Anschluss" für KI</span></label>
+        <label class="opt"><span class="mk"></span><span>Ein Observability-Dashboard</span></label>
+        <div class="explain"><b>Richtig: C.</b> MCP ist die <i>Steckdosennorm</i>, nicht das Gerät. Es standardisiert, wie Agenten und externe Systeme miteinander reden.</div>
+      </div>
+
+      <div class="q" data-correct="1">
+        <div class="stem"><span class="qn">2.</span> Worin unterscheidet sich ein <em>Skill</em> von einem <em>Tool</em>?</div>
+        <label class="opt"><span class="mk"></span><span>Skills sind langsamer als Tools</span></label>
+        <label class="opt"><span class="mk"></span><span>Ein Tool ist eine einzelne Funktion; ein Skill bündelt Vorgehenswissen über mehrere Schritte/Tools</span></label>
+        <label class="opt"><span class="mk"></span><span>Skills laufen auf dem Modell, Tools auf der CPU</span></label>
+        <label class="opt"><span class="mk"></span><span>Es gibt keinen Unterschied, die Begriffe sind synonym</span></label>
+        <div class="explain"><b>Richtig: B.</b> Tool = einzelne aufrufbare Funktion. Skill = verpacktes „so geht das"-Wissen, oft mit mehreren Tools und Schritten.</div>
+      </div>
+
+      <div class="q" data-correct="0,2">
+        <div class="stem"><span class="qn">3.</span> Warum ist die <em>Beschreibung</em> eines Tools so wichtig? <i>(zwei richtige)</i></div>
+        <label class="opt"><span class="mk"></span><span>Sie wird ins LLM-Kontextfenster injiziert – daran erkennt das Modell, wann es das Tool nutzen soll</span></label>
+        <label class="opt"><span class="mk"></span><span>Sie beschleunigt die Netzwerkverbindung zum Tool</span></label>
+        <label class="opt"><span class="mk"></span><span>Eine schlechte Beschreibung führt dazu, dass das Tool falsch oder gar nicht genutzt wird</span></label>
+        <label class="opt"><span class="mk"></span><span>Beschreibungen sind nur Doku für Menschen und egal fürs Modell</span></label>
+        <div class="explain"><b>Richtig: A &amp; C.</b> Das Modell wählt Tools allein anhand von Name und Beschreibung. Tool-Design ist halb Doku, halb API-Design.</div>
+      </div>
+
+      <div class="q" data-correct="3">
+        <div class="stem"><span class="qn">4.</span> Warum gilt das Harness 2026/27 als <em>das</em> dominierende Thema?</div>
+        <label class="opt"><span class="mk"></span><span>Weil Modelle plötzlich viel schlechter geworden sind</span></label>
+        <label class="opt"><span class="mk"></span><span>Weil niemand mehr Tools braucht</span></label>
+        <label class="opt"><span class="mk"></span><span>Weil MCP alle anderen Bausteine überflüssig macht</span></label>
+        <label class="opt"><span class="mk"></span><span>Weil Modelle „gut genug" sind – der Engpass und der größte Hebel liegen jetzt im Harness</span></label>
+        <div class="explain"><b>Richtig: D.</b> Das Gehirn ist Commodity geworden. Der Wettbewerbsvorteil verschiebt sich auf den „Körper" – das Harness.</div>
+      </div>
+
+      <div class="quiz-actions">
+        <button class="btn check">Auswerten</button>
+        <button class="btn ghost reset" style="display:none">Nochmal</button>
+        <span class="quiz-result"></span>
+      </div>
+    </div>
+  </section>
+
+  <div id="pager" class="pager"></div>
+
+</main>
+
+<footer class="foot">Agentic AI · CBT · Modul 4 von 10 · Orange Business</footer>
+<script src="assets/cbt.js"></script>
+</body>
+</html>

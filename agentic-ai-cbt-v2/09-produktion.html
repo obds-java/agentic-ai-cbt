@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>9 · Produktion: State &amp; Oversight — Agentic AI CBT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+<link rel="stylesheet" href="assets/v2.css">
+</head>
+<body data-mod="produktion">
+
+<main class="wrap">
+
+  <div class="page-head">
+    <span class="eyebrow"><span class="num">9</span> Betrieb</span>
+    <h1 class="page-title">Produktion: Durable State &amp; Human Oversight</h1>
+    <p class="lede">Was passiert, wenn ein Agent 30 Minuten läuft – und mittendrin der Container neu startet? Und wer schaut ihm dabei über die Schulter? Zwei Themen, die Demos ignorieren und Produktion entscheiden.</p>
+  </div>
+
+  <div class="goals">
+    <h4>Nach diesem Modul kannst du …</h4>
+    <ul>
+      <li>erklären, warum long-running Agents durable State, Checkpoints und Resumability brauchen</li>
+      <li>Working Memory, Long-term Memory und Artefakte unterscheiden</li>
+      <li>Budgets als Sicherheitsnetz einsetzen</li>
+      <li>Human-in/on/over-the-loop sauber auseinanderhalten und passend zuordnen</li>
+    </ul>
+  </div>
+
+  <h2><span class="sec">9.1</span> Long-running Agents: die unbequemen Fragen</h2>
+  <p>Ein Agent, der eine Minute läuft, verzeiht viel. Ein Agent, der 30 Minuten oder über mehrere Kontextfenster hinweg arbeitet, stellt harte Fragen, die man <em>vor</em> dem Go-Live beantworten muss:</p>
+  <ul>
+    <li>Was passiert bei <strong>Restart, Timeout, Deploy oder Tool-Fehler</strong> mitten im Lauf?</li>
+    <li>Wie werden <strong>Zwischenergebnisse</strong> gespeichert, damit nichts doppelt passiert?</li>
+    <li>Kann der Agent später <strong>genau dort fortsetzen</strong>, wo er war?</li>
+    <li>Wie trennt man <strong>Working Memory</strong>, <strong>Long-term Memory</strong> und <strong>Artefakte</strong>?</li>
+  </ul>
+
+  <div class="box note reveal">
+    <div class="t">Anthropics Antwort für long-running Agents</div>
+    <p>Anthropic behandelt Harness-Design explizit für <i>long-running agents</i>: Ein <b>Initializer-Agent</b> richtet beim ersten Lauf eine strukturierte Umgebung ein (z. B. Feature-Liste, Repo, Fortschritts-Dateien), ein <b>Coding-Agent</b> macht dann Session für Session inkrementelle Fortschritte und hält den Zustand sauber – über mehrere Kontextfenster hinweg. Kerngedanke: Der Fortschritt lebt in <i>durable Artefakten</i>, nicht nur im flüchtigen Kontext.</p>
+  </div>
+
+  <h2><span class="sec">9.2</span> Durable Execution: Checkpoints &amp; Resumability</h2>
+  <p>Ein nackter <code class="inline">while</code>-Loop ist nicht produktionsfest: Stürzt der Prozess ab, ist alles weg. <span class="term">Durable Execution</span> löst das, indem der Zustand an definierten Punkten gespeichert (Checkpoint) und nach einem Ausfall wiederhergestellt wird – der Agent setzt am Punkt des Fehlers fort, ohne erledigte Arbeit zu wiederholen.</p>
+
+  <figure class="diagram reveal">
+    <svg viewBox="0 0 720 200" role="img" aria-label="Checkpoints entlang eines langen Laufs mit Wiederaufnahme nach Crash">
+      <defs><marker id="ax" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0 0l6 3-6 3z" fill="#8a8a93"/></marker></defs>
+      <line x1="40" y1="90" x2="690" y2="90" stroke="#d3d3da" stroke-width="2" marker-end="url(#ax)"/>
+      <g font-family="Inter" font-size="11.5" fill="#54545c">
+        <g><circle cx="120" cy="90" r="8" fill="#1aa179"/><text x="120" y="120" text-anchor="middle">Schritt 1 ✓</text><text x="120" y="135" text-anchor="middle" fill="#1aa179">checkpoint</text></g>
+        <g><circle cx="280" cy="90" r="8" fill="#1aa179"/><text x="280" y="120" text-anchor="middle">Schritt 2 ✓</text><text x="280" y="135" text-anchor="middle" fill="#1aa179">checkpoint</text></g>
+        <g><circle cx="440" cy="90" r="11" fill="#d6492f"/><text x="440" y="64" text-anchor="middle" fill="#d6492f" font-weight="700">💥 Crash</text><text x="440" y="120" text-anchor="middle">Schritt 3</text></g>
+        <g><circle cx="600" cy="90" r="8" fill="#ff7900"/><text x="600" y="120" text-anchor="middle" fill="#ff7900" font-weight="700">resume ab CP2</text></g>
+      </g>
+      <path d="M280 70 C 360 30 520 30 600 72" fill="none" stroke="#ff7900" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#ax)"/>
+    </svg>
+    <figcaption>Nach dem Crash setzt der Agent am letzten Checkpoint fort – nicht von vorn. Idempotente Tools sorgen dafür, dass nichts doppelt ausgeführt wird.</figcaption>
+  </figure>
+
+  <div class="box note reveal">
+    <div class="t">Zwei Ebenen von Ausfallsicherheit</div>
+    <p>Wichtig, weil oft verwechselt: <b>App-Level</b> (z. B. LangGraph-Checkpoints) schützt vor <i>logischen</i> Problemen – schlechte Entscheidungen, falsche Branches, Human-in-the-Loop-Pausen. <b>Infra-Level</b> (z. B. Temporal) schützt vor <i>technischen</i> Ausfällen – Container-Crash, Netzwerk, Host-Preemption. Für echte Robustheit braucht man beides; ein Checkpoint allein ist noch keine vollständige durable Execution.</p>
+  </div>
+
+  <h3>Drei Arten von „Gedächtnis", die man trennen muss</h3>
+  <div class="cards c3 reveal">
+    <div class="card"><div class="ic">⚙️</div><h4>Working Memory</h4><p>Der flüchtige Arbeitskontext des aktuellen Schritts/der Session. Klein halten.</p></div>
+    <div class="card"><div class="ic">🗄️</div><h4>Long-term Memory</h4><p>Fakten &amp; Erfahrungen, die über Sessions überleben – DB, Dateien, Vektorspeicher.</p></div>
+    <div class="card"><div class="ic">📄</div><h4>Artefakte</h4><p>Konkrete Ergebnisse (Dateien, Tickets, Code, Reports) – die durable „Spur" der Arbeit.</p></div>
+  </div>
+
+  <h2><span class="sec">9.3</span> Budgets als Sicherheitsnetz</h2>
+  <p>Jeder produktive Agent braucht harte Grenzen: <strong>Schrittlimit</strong>, <strong>Token-/Kostenbudget</strong>, <strong>Zeitlimit</strong> und ein Verhalten beim Überschreiten (sauber abbrechen, eskalieren, Teil-Ergebnis liefern). Budgets verhindern, dass ein außer Kontrolle geratener Loop nachts unbemerkt Geld verbrennt – und sie machen Kosten planbar.</p>
+
+  <h2><span class="sec">9.4</span> Human Oversight – nicht alles ist gleich</h2>
+  <p>„Mensch beteiligt" ist kein Schalter, sondern eine Leiter. Drei Stufen, die man bewusst pro Aktion wählt:</p>
+
+  <div class="ladder reveal">
+    <div class="rung"><div><span class="lvl">eng</span><b>Human-in-the-Loop</b></div><span class="d">Der Mensch muss an definierten Punkten aktiv prüfen, freigeben oder korrigieren, bevor es weitergeht. Für folgenreiche Aktionen: Zahlung, Löschung, externe Kommunikation, Vertragsänderung.</span></div>
+    <div class="rung"><div><span class="lvl">mittel</span><b>Human-on-the-Loop</b></div><span class="d">Der Agent arbeitet autonom; der Mensch überwacht und greift bei Bedarf ein. Sinnvoll für weniger kritische Aufgaben – mit Monitoring, Limits und Audit-Trail als Netz.</span></div>
+    <div class="rung"><div><span class="lvl">weit</span><b>Human-over-the-Loop</b></div><span class="d">Governance statt Einzelfreigabe: Policies, Audits, Stichproben, Nachkontrolle. Die Aufsichtsebene über dem laufenden Betrieb.</span></div>
+  </div>
+
+  <div class="merke reveal">
+    <div class="lbl">Merksatz</div>
+    <div class="q">Nicht jede menschliche Beteiligung ist gleich. Für Zahlung, Löschung, externe Kommunikation oder Vertragsänderung braucht es Human-<b>in</b>-the-Loop. Für weniger Kritisches reicht oft Human-<b>on</b>-the-Loop mit Monitoring, Limits und Audit-Trail. Darüber liegt Human-<b>over</b>-the-Loop: Policies und Nachkontrolle.</div></div>
+  </div>
+
+  <!-- QUIZ -->
+  <section class="quiz reveal" data-quiz="produktion">
+    <div class="quiz-head"><span class="qbadge">Quiz</span><h3>Check: State &amp; Oversight</h3><span class="score"></span></div>
+    <div class="quiz-body">
+
+      <div class="q" data-correct="2">
+        <div class="stem"><span class="qtype t-basic">Verständnis</span><span class="qn">1.</span> Was leistet ein <em>Checkpoint</em> in einem long-running Agent?</div>
+        <label class="opt"><span class="mk"></span><span>Er macht das Modell schneller</span></label>
+        <label class="opt"><span class="mk"></span><span>Er ersetzt das Tracing</span></label>
+        <label class="opt"><span class="mk"></span><span>Er speichert den Zustand, sodass der Agent nach einem Ausfall fortsetzen kann, statt von vorn zu beginnen</span></label>
+        <label class="opt"><span class="mk"></span><span>Er verhindert Prompt Injection</span></label>
+        <div class="explain"><b>Richtig: C.</b> Checkpoints + idempotente Tools = Resumability: Wiederaufnahme am Fehlerpunkt ohne Doppelarbeit.</div>
+      </div>
+
+      <div class="q" data-correct="1">
+        <div class="stem"><span class="qtype t-scen">Szenario</span><span class="qn">2.</span> Euer Agent darf Bestellungen bis CHF 50 automatisch rückerstatten; ab CHF 50 braucht es Freigabe; alle Aktionen werden stichprobenartig auditiert. Welche Oversight-Formen sind enthalten?</div>
+        <label class="opt"><span class="mk"></span><span>Nur Human-in-the-Loop</span></label>
+        <label class="opt"><span class="mk"></span><span>Human-on-the-Loop (autonom bis 50), Human-in-the-Loop (Freigabe ab 50) und Human-over-the-Loop (Stichproben-Audit)</span></label>
+        <label class="opt"><span class="mk"></span><span>Gar keine – das ist voll autonom</span></label>
+        <label class="opt"><span class="mk"></span><span>Nur Human-over-the-Loop</span></label>
+        <div class="explain"><b>Richtig: B.</b> Genau diese drei Ebenen greifen ineinander: autonomer Normalfall, Freigabe für Riskantes, Governance per Audit.</div>
+      </div>
+
+      <div class="q" data-correct="3">
+        <div class="stem"><span class="qtype t-diag">Diagnose</span><span class="qn">3.</span> Nach jedem Deploy verliert euer 20-Minuten-Agent seinen Fortschritt und startet Aufgaben doppelt. Was fehlt am ehesten?</div>
+        <label class="opt"><span class="mk"></span><span>Ein größeres Modell</span></label>
+        <label class="opt"><span class="mk"></span><span>Mehr Tools</span></label>
+        <label class="opt"><span class="mk"></span><span>Ein schöneres UI</span></label>
+        <label class="opt"><span class="mk"></span><span>Durable State mit Checkpoints/Resumability und idempotente Tools</span></label>
+        <div class="explain"><b>Richtig: D.</b> Ohne persistente Checkpoints beginnt der Agent nach Restart/Deploy von vorn; ohne Idempotenz werden Schritte doppelt ausgeführt.</div>
+      </div>
+
+      <div class="q" data-correct="0,2">
+        <div class="stem"><span class="qtype t-anti">Was NICHT tun</span><span class="qn">4.</span> Welche Entscheidungen sind für einen produktiven long-running Agent riskant? <i>(zwei richtige)</i></div>
+        <label class="opt"><span class="mk"></span><span>Eine Zahlung über CHF 10 000 ohne menschliche Freigabe automatisch auslösen</span></label>
+        <label class="opt"><span class="mk"></span><span>Ein Token-/Zeitbudget mit klarem Abbruchverhalten setzen</span></label>
+        <label class="opt"><span class="mk"></span><span>Den gesamten Fortschritt nur im flüchtigen Working Memory halten, ohne Artefakte/Checkpoints</span></label>
+        <label class="opt"><span class="mk"></span><span>Working Memory, Long-term Memory und Artefakte sauber trennen</span></label>
+        <div class="explain"><b>Richtig: A &amp; C.</b> Folgenreiche Aktionen brauchen HITL; flüchtiger Zustand ohne Persistenz geht bei jedem Crash/Deploy verloren. B und D sind Best Practice.</div>
+      </div>
+
+      <div class="quiz-actions">
+        <button class="btn check">Auswerten</button>
+        <button class="btn ghost reset" style="display:none">Nochmal</button>
+        <span class="quiz-result"></span>
+      </div>
+    </div>
+  </section>
+
+  <div class="box deep reveal">
+    <div class="t">Tiefer graben</div>
+    <p><a href="https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents" target="_blank" rel="noopener">Anthropic – Effective harnesses for long-running agents</a> · <a href="https://docs.langchain.com/oss/python/langgraph/durable-execution" target="_blank" rel="noopener">LangGraph – Durable Execution</a> · <a href="https://www.ibm.com/think/topics/human-in-the-loop" target="_blank" rel="noopener">IBM – Human in the Loop</a>.</p>
+  </div>
+
+  <div id="pager" class="pager"></div>
+
+</main>
+
+<footer class="foot">Agentic AI · CBT V2 · Modul 9 von 12 · Orange Business</footer>
+<script src="assets/cbt.js"></script>
+</body>
+</html>

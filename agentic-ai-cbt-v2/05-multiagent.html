@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5 · Single- vs. Multi-Agent — Agentic AI CBT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+<link rel="stylesheet" href="assets/v2.css">
+</head>
+<body data-mod="multiagent">
+
+<main class="wrap">
+
+  <div class="page-head">
+    <span class="eyebrow"><span class="num">5</span> Architektur</span>
+    <h1 class="page-title">Single- vs. Multi-Agent</h1>
+    <p class="lede">Subagents, Handoffs, Supervisor, Swarm – die Architekturformen, sobald ein einzelner Agent nicht mehr reicht. Wir gehen sie kritisch durch: Multi-Agent ist mächtig, aber selten der erste Schritt.</p>
+  </div>
+
+  <div class="goals">
+    <h4>Nach diesem Modul kannst du …</h4>
+    <ul>
+      <li>die wichtigsten Multi-Agent-Muster benennen und unterscheiden</li>
+      <li>Subagent (Agent-as-Tool) sauber von Handoff abgrenzen</li>
+      <li>Context Isolation als Hauptvorteil von Subagents erklären</li>
+      <li>begründen, <em>wann</em> Multi-Agent echten Nutzen bringt – und wann nicht</li>
+    </ul>
+  </div>
+
+  <h2><span class="sec">5.1</span> Wann überhaupt mehr als ein Agent?</h2>
+  <p>Ein Multi-Agent-System ist eine Architektur, in der zwei oder mehr autonome LLM-Agenten zusammenarbeiten, um eine Aufgabe zu lösen, die ein einzelner Agent nicht – oder nicht <em>sollte</em> – allein bearbeitet. Jeder Agent hat eigenen Prompt, eigenes Toolset, oft ein eigenes Modell und eine definierte Art, Arbeit weiterzureichen.</p>
+  <p>Die ehrliche Reihenfolge: <strong>Single-Agent-first.</strong> Greife erst zu mehreren Agenten, wenn mindestens einer dieser Gründe klar zutrifft:</p>
+  <div class="cards c2 reveal">
+    <div class="card"><div class="ic">🎓</div><h4>Spezialisierung</h4><p>Teilaufgaben brauchen sehr unterschiedliche Prompts, Tools oder Modelle (z. B. ein „SQL-Spezialist" vs. ein „Texter").</p></div>
+    <div class="card"><div class="ic">🧱</div><h4>Context Isolation</h4><p>Ein Teilbereich soll nur seinen relevanten Kontext sehen – nicht alles. Schützt vor Context-Decay und Leaks.</p></div>
+    <div class="card"><div class="ic">⚡</div><h4>Parallelität</h4><p>Die Aufgabe lässt sich breit zerlegen und mehrere Teile parallel bearbeiten (Scatter-Gather).</p></div>
+    <div class="card"><div class="ic">🔀</div><h4>Distinkte Domänen</h4><p>Die Arbeit spannt klar getrennte Tool- oder Policy-Domänen auf, die man nicht in einem Agenten mischen will.</p></div>
+  </div>
+
+  <div class="box warn reveal">
+    <div class="t">Kritisch bleiben</div>
+    <p>Multi-Agent klingt nach „mehr" und damit nach „besser" – ist es oft nicht. Mehr Agenten heißt mehr LLM-Calls, mehr Latenz, mehr Fehlerquellen an den Übergabestellen und schwierigeres Debugging. Collaboration zwischen Peers lohnt nur, wenn sie wirklich <i>unabhängige</i> Evidenz oder Explorationspfade beitragen, die ein Supervisor nicht billig selbst nachbilden könnte.</p>
+  </div>
+
+  <h2><span class="sec">5.2</span> Die wichtigsten Muster</h2>
+
+  <figure class="diagram reveal">
+    <svg viewBox="0 0 760 300" role="img" aria-label="Supervisor-Muster vs. Swarm-Muster">
+      <defs><marker id="m1" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0 0l6 3-6 3z" fill="#5b5bd6"/></marker>
+      <marker id="m2" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0 0l6 3-6 3z" fill="#ff7900"/></marker></defs>
+      <!-- Supervisor -->
+      <text x="190" y="34" text-anchor="middle" font-family="Inter" font-size="14" font-weight="700" fill="#1d1d1f">Supervisor (hierarchisch)</text>
+      <rect x="140" y="48" width="100" height="44" rx="12" fill="#5b5bd6"/><text x="190" y="75" text-anchor="middle" fill="#fff" font-size="13" font-family="Inter">Supervisor</text>
+      <g font-family="Inter" font-size="11.5" fill="#1d1d1f">
+        <rect x="40"  y="150" width="90" height="40" rx="10" fill="#fff" stroke="#5b5bd6" stroke-width="1.5"/><text x="85"  y="175" text-anchor="middle">Spezialist A</text>
+        <rect x="150" y="150" width="90" height="40" rx="10" fill="#fff" stroke="#5b5bd6" stroke-width="1.5"/><text x="195" y="175" text-anchor="middle">Spezialist B</text>
+        <rect x="260" y="150" width="90" height="40" rx="10" fill="#fff" stroke="#5b5bd6" stroke-width="1.5"/><text x="305" y="175" text-anchor="middle">Spezialist C</text>
+      </g>
+      <g stroke="#5b5bd6" stroke-width="2" fill="none">
+        <line x1="170" y1="92" x2="95" y2="148" marker-end="url(#m1)"/>
+        <line x1="190" y1="92" x2="195" y2="148" marker-end="url(#m1)"/>
+        <line x1="210" y1="92" x2="300" y2="148" marker-end="url(#m1)"/>
+      </g>
+      <text x="190" y="225" text-anchor="middle" font-family="Inter" font-size="11.5" fill="#8a8a93">zentrale Koordination · gut kontrollierbar</text>
+
+      <!-- Swarm -->
+      <text x="580" y="34" text-anchor="middle" font-family="Inter" font-size="14" font-weight="700" fill="#1d1d1f">Swarm (dezentral)</text>
+      <g font-family="Inter" font-size="11.5" fill="#1d1d1f">
+        <rect x="470" y="70" width="80" height="38" rx="10" fill="#fff" stroke="#ff7900" stroke-width="1.5"/><text x="510" y="93" text-anchor="middle">Agent 1</text>
+        <rect x="610" y="70" width="80" height="38" rx="10" fill="#fff" stroke="#ff7900" stroke-width="1.5"/><text x="650" y="93" text-anchor="middle">Agent 2</text>
+        <rect x="470" y="170" width="80" height="38" rx="10" fill="#fff" stroke="#ff7900" stroke-width="1.5"/><text x="510" y="193" text-anchor="middle">Agent 3</text>
+        <rect x="610" y="170" width="80" height="38" rx="10" fill="#fff" stroke="#ff7900" stroke-width="1.5"/><text x="650" y="193" text-anchor="middle">Agent 4</text>
+      </g>
+      <g stroke="#ff7900" stroke-width="1.8" fill="none">
+        <line x1="550" y1="89" x2="608" y2="89" marker-end="url(#m2)"/>
+        <line x1="650" y1="108" x2="650" y2="168" marker-end="url(#m2)"/>
+        <line x1="610" y1="189" x2="552" y2="189" marker-end="url(#m2)"/>
+        <line x1="510" y1="168" x2="510" y2="110" marker-end="url(#m2)"/>
+        <line x1="558" y1="100" x2="612" y2="175" marker-end="url(#m2)"/>
+      </g>
+      <text x="580" y="232" text-anchor="middle" font-family="Inter" font-size="11.5" fill="#8a8a93">jeder übergibt selbst · flexibel, schwer zu debuggen</text>
+    </svg>
+    <figcaption>Zwei Pole: zentrale Koordination (Supervisor) vs. dezentrale Selbstübergabe (Swarm). Dazwischen liegen Pipeline und Parallel-Fan-out.</figcaption>
+  </figure>
+
+  <div class="tablewrap reveal">
+    <table class="matrix">
+      <thead><tr><th>Muster</th><th>Idee</th><th>Stärke</th><th>Schwäche</th></tr></thead>
+      <tbody>
+        <tr><td>Supervisor</td><td>zentraler Koordinator routet Teilaufgaben an Spezialisten (2026 der Produktions-Default)</td><td>kontrollierbar, klare Verantwortung</td><td>Supervisor wird zum Flaschenhals</td></tr>
+        <tr><td>Subagent / Agent-as-Tool</td><td>Hauptagent ruft Spezial-Subagenten <em>wie ein Tool</em> auf; Subagent bleibt zustandslos</td><td>starke Context Isolation, einfach</td><td>begrenzte Eigenständigkeit der Subagenten</td></tr>
+        <tr><td>Handoff</td><td>ein Agent <em>übergibt Kontrolle &amp; Kontext</em> an einen anderen (Einbahn)</td><td>transparent, zuverlässig</td><td>wenig flexibel, höherer Entwicklungsaufwand</td></tr>
+        <tr><td>Pipeline</td><td>sequentielle Kette: Output A → Input B → …</td><td>einfach, auditierbar</td><td>Fehler pflanzen sich fort</td></tr>
+        <tr><td>Parallel / Fan-out</td><td>Scatter-Gather: gleiche/verschiedene Teilfragen parallel, dann zusammenführen</td><td>schnell bei breiten Aufgaben</td><td>Aggregation &amp; Kosten</td></tr>
+        <tr><td>Swarm</td><td>Peers ohne Chef, jeder entscheidet selbst über Übergabe</td><td>leichtgewichtig aufzusetzen</td><td>kein globaler Blick, schwer zu debuggen</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Der feine, wichtige Unterschied: Subagent vs. Handoff</h3>
+  <p>Beide reichen Arbeit weiter – aber anders. Beim <strong>Subagent / Agent-as-Tool</strong> bleibt der Hauptagent „am Steuer": Er ruft den Subagenten wie ein Tool auf, bekommt ein Ergebnis zurück und behält den Gesprächskontext. Beim <strong>Handoff</strong> gibt ein Agent die Kontrolle <em>ab</em> – der andere übernimmt Konversation und Kontext. OpenAI trennt diese beiden bewusst.</p>
+
+  <div class="box note reveal">
+    <div class="t">Context Isolation – der eigentliche Gewinn</div>
+    <p>Der Hauptvorteil von Subagents ist nicht „mehr Intelligenz", sondern <b>Context Isolation</b>: Jeder Subagent sieht nur den für seine Teilaufgabe relevanten Kontext, nicht die gesamte Historie. Das hält Kontextfenster klein (weniger Context-Decay, siehe Modul 10), reduziert Kosten und begrenzt, welche Daten wohin fließen (relevant für Security, Modul 11).</p>
+  </div>
+
+  <div class="merke reveal">
+    <div class="lbl">Merksatz</div>
+    <div class="q">Subagent = der Hauptagent ruft einen Spezialisten <b>wie ein Tool</b> und behält die Kontrolle. Handoff = die Kontrolle wird <b>abgegeben</b>. Supervisor koordiniert von oben; Swarm koordiniert sich selbst – und ist am schwersten zu debuggen.</div>
+  </div>
+
+  <h2><span class="sec">5.3</span> Single-Agent-first – die Haltung</h2>
+  <p>Wie schon bei Workflow-vs-Agent gilt: Erhöhe die Komplexität nur, wenn die Aufgabe es erzwingt. Ein gut gebauter Single-Agent mit klaren Tools schlägt regelmäßig ein vorschnell zusammengestecktes Multi-Agent-System – das in Produktion an seinen Übergabestellen, Kosten und der mangelnden Beobachtbarkeit scheitert. „Was in Produktion überlebt" sind meist Supervisor-Architekturen mit wenigen, klar geschnittenen Spezialisten, nicht entfesselte Swarms.</p>
+
+  <!-- QUIZ -->
+  <section class="quiz reveal" data-quiz="multiagent">
+    <div class="quiz-head"><span class="qbadge">Quiz</span><h3>Check: Multi-Agent</h3><span class="score"></span></div>
+    <div class="quiz-body">
+
+      <div class="q" data-correct="1">
+        <div class="stem"><span class="qtype t-basic">Verständnis</span><span class="qn">1.</span> Worin unterscheidet sich ein <em>Subagent (Agent-as-Tool)</em> von einem <em>Handoff</em>?</div>
+        <label class="opt"><span class="mk"></span><span>Subagents sind immer schneller</span></label>
+        <label class="opt"><span class="mk"></span><span>Beim Subagent behält der Hauptagent die Kontrolle und ruft den Spezialisten wie ein Tool; beim Handoff wird die Kontrolle abgegeben</span></label>
+        <label class="opt"><span class="mk"></span><span>Handoffs funktionieren nur mit einem einzigen Modell</span></label>
+        <label class="opt"><span class="mk"></span><span>Es gibt keinen Unterschied</span></label>
+        <div class="explain"><b>Richtig: B.</b> Agent-as-Tool = Hauptagent bleibt am Steuer. Handoff = Kontroll- und Kontextübergabe an einen anderen Agenten.</div>
+      </div>
+
+      <div class="q" data-correct="2">
+        <div class="stem"><span class="qtype t-scen">Szenario</span><span class="qn">2.</span> Ein Recherche-Agent soll zu einem Thema 6 Quellen <em>parallel</em> auswerten und die Befunde dann zusammenführen. Welches Muster passt am besten?</div>
+        <label class="opt"><span class="mk"></span><span>Swarm ohne Koordination</span></label>
+        <label class="opt"><span class="mk"></span><span>Eine einzige sequentielle Pipeline</span></label>
+        <label class="opt"><span class="mk"></span><span>Parallel/Fan-out (Scatter-Gather) unter einem Supervisor, der die Ergebnisse aggregiert</span></label>
+        <label class="opt"><span class="mk"></span><span>Gar kein Agent</span></label>
+        <div class="explain"><b>Richtig: C.</b> Breite, zerlegbare Arbeit + Zusammenführung = Fan-out mit aggregierendem Supervisor. Das ist kontrollierbar und schnell.</div>
+      </div>
+
+      <div class="q" data-correct="0">
+        <div class="stem"><span class="qtype t-diag">Diagnose</span><span class="qn">3.</span> Ein Multi-Agent-System verhält sich unvorhersehbar; niemand kann nachvollziehen, welcher Agent wann übernommen hat. Welche Architektur liegt am wahrscheinlichsten vor – und was ist die Gegenmaßnahme?</div>
+        <label class="opt"><span class="mk"></span><span>Ein Swarm (dezentrale Selbstübergabe, kein globaler Blick) → auf Supervisor mit zentralem Routing und Tracing umstellen</span></label>
+        <label class="opt"><span class="mk"></span><span>Ein Single-Agent → noch mehr Agenten hinzufügen</span></label>
+        <label class="opt"><span class="mk"></span><span>Ein Workflow → Stop-Bedingung entfernen</span></label>
+        <label class="opt"><span class="mk"></span><span>Ein Pipeline-Muster → parallelisieren</span></label>
+        <div class="explain"><b>Richtig: A.</b> „Kein globaler Blick" ist das Swarm-Symptom. Supervisor + Observability bringt Nachvollziehbarkeit zurück.</div>
+      </div>
+
+      <div class="q" data-correct="1,2">
+        <div class="stem"><span class="qtype t-anti">Was NICHT tun</span><span class="qn">4.</span> Welche Begründungen für Multi-Agent sind <em>schlecht</em>? <i>(zwei richtige)</i></div>
+        <label class="opt"><span class="mk"></span><span>Echte Spezialisierung mit sehr unterschiedlichen Tools/Modellen</span></label>
+        <label class="opt"><span class="mk"></span><span>„Klingt moderner und beeindruckender als ein einzelner Agent"</span></label>
+        <label class="opt"><span class="mk"></span><span>„Mehr Agenten = automatisch besser"</span></label>
+        <label class="opt"><span class="mk"></span><span>Context Isolation, um Kontextfenster klein und Datenflüsse begrenzt zu halten</span></label>
+        <div class="explain"><b>Richtig: B &amp; C.</b> Multi-Agent erhöht Kosten, Latenz und Debugging-Aufwand. Es lohnt nur bei echtem Nutzen (Spezialisierung, Isolation, Parallelität), nie als Selbstzweck.</div>
+      </div>
+
+      <div class="quiz-actions">
+        <button class="btn check">Auswerten</button>
+        <button class="btn ghost reset" style="display:none">Nochmal</button>
+        <span class="quiz-result"></span>
+      </div>
+    </div>
+  </section>
+
+  <div class="box deep reveal">
+    <div class="t">Tiefer graben</div>
+    <p><a href="https://docs.langchain.com/oss/python/langchain/multi-agent/subagents" target="_blank" rel="noopener">LangChain – Subagents</a> · <a href="https://www.langchain.com/blog/choosing-the-right-multi-agent-architecture" target="_blank" rel="noopener">Choosing the Right Multi-Agent Architecture</a> · <a href="https://openai.github.io/openai-agents-python/" target="_blank" rel="noopener">OpenAI Agents SDK (Handoffs, Guardrails)</a>.</p>
+  </div>
+
+  <div id="pager" class="pager"></div>
+
+</main>
+
+<footer class="foot">Agentic AI · CBT V2 · Modul 5 von 12 · Orange Business</footer>
+<script src="assets/cbt.js"></script>
+</body>
+</html>

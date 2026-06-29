@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2 · Was macht einen Agenten aus? — Agentic AI CBT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-mod="agent-minimal">
+
+<main class="wrap">
+
+  <div class="page-head">
+    <span class="eyebrow"><span class="num">2</span> Definition</span>
+    <h1 class="page-title">Was macht einen Agenten <em>zum</em> Agenten?</h1>
+    <p class="lede">„Agent" ist das meistmissbrauchte Wort der Branche. Hier die Minimalbedingungen – ab wann der Begriff wirklich gerechtfertigt ist.</p>
+  </div>
+
+  <div class="goals">
+    <h4>Nach diesem Modul kannst du …</h4>
+    <ul>
+      <li>die vier Minimalbestandteile eines Agenten aufzählen</li>
+      <li>den Agent-Loop (Reason → Act → Observe) erklären</li>
+      <li>das ReAct-Muster einordnen</li>
+      <li>einen „Pseudo-Agenten" (nur Prompt-Chaining) von einem echten unterscheiden</li>
+    </ul>
+  </div>
+
+  <h2><span class="sec">2.1</span> Die Definition von „agentisch"</h2>
+  <p>„Agentisch" beschreibt jedes System, in dem ein LLM <strong>Agency</strong> zeigt: Es plant, entscheidet, nutzt Tools und passt sich auf ein Ziel hin an – <em>ohne</em> dass ein Mensch jeden Schritt vorgibt. Das ist weniger ein Ja/Nein als ein Grad. Die spannende Frage ist deshalb: Was muss <i>minimal</i> vorhanden sein, damit man von einem Agenten sprechen darf?</p>
+
+  <h2><span class="sec">2.2</span> Die vier Minimalbestandteile</h2>
+  <p>Streiche einen davon, und du hast keinen Agenten mehr, sondern einen Chatbot oder ein Skript:</p>
+
+  <div class="cards c2 reveal">
+    <div class="card"><div class="ic">🎯</div><h4>1 · Ein Ziel</h4><p>Ein Zielzustand, der mehr als einen Schritt erfordert. „Beantworte X" ist kein Agentenziel – „bring die Reise von A nach B unter 300 € zustande" schon.</p></div>
+    <div class="card"><div class="ic">🧠</div><h4>2 · Das Modell als Entscheider</h4><p>Das LLM wählt den <em>nächsten</em> Schritt selbst, statt ihn vom Code diktiert zu bekommen. Hier sitzt die Autonomie.</p></div>
+    <div class="card"><div class="ic">🔧</div><h4>3 · Aktionen / Tools</h4><p>Der Agent kann auf die Welt einwirken: API aufrufen, Datei schreiben, Suche absetzen. Ohne Aktionen bleibt „Denken" folgenlos.</p></div>
+    <div class="card"><div class="ic">🔁</div><h4>4 · Die Schleife (Feedback)</h4><p>Der Agent <em>beobachtet</em> das Ergebnis seiner Aktion und entscheidet auf dieser Basis neu – iterativ, bis das Ziel erreicht oder ein Limit erreicht ist.</p></div>
+  </div>
+
+  <div class="box note reveal">
+    <div class="t">Faustregel</div>
+    <p>Wenn du den Ablauf als festes Flussdiagramm aufzeichnen kannst, das immer gleich läuft, ist es <b>kein</b> Agent – egal wie viele LLM-Calls drinstecken. Ein Agent ist erkennbar daran, dass <b>die Anzahl und Reihenfolge der Schritte vorab nicht feststeht</b>.</p>
+  </div>
+
+  <h2><span class="sec">2.3</span> Der Agent-Loop</h2>
+  <p>Das Herzstück jedes Agenten ist eine Schleife. Klassisch: <strong>Reason → Act → Observe</strong> (oft „ReAct" genannt). Das Modell denkt nach, führt eine Aktion aus, sieht das Resultat, denkt erneut – so lange, bis es entscheidet, dass es fertig ist.</p>
+
+  <figure class="diagram reveal">
+    <svg viewBox="0 0 760 360" role="img" aria-label="Agent-Loop: Reason, Act, Observe">
+      <defs>
+        <marker id="a2" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto"><path d="M0 0l6 3-6 3z" fill="#ff7900"/></marker>
+      </defs>
+      <!-- center goal -->
+      <circle cx="380" cy="180" r="58" fill="#161619"/>
+      <text x="380" y="172" text-anchor="middle" fill="#fff" font-size="14" font-family="Inter">Ziel</text>
+      <text x="380" y="194" text-anchor="middle" fill="#ff7900" font-size="13" font-family="Inter" font-weight="700">erreicht?</text>
+
+      <!-- three nodes around -->
+      <g font-family="Inter">
+        <rect x="300" y="20" width="160" height="62" rx="14" fill="#fff" stroke="#ff7900" stroke-width="2"/>
+        <text x="380" y="48" text-anchor="middle" font-size="16" font-weight="700" fill="#1d1d1f">1 · Reason</text>
+        <text x="380" y="68" text-anchor="middle" font-size="12" fill="#8a8a93">Was ist der nächste Schritt?</text>
+
+        <rect x="560" y="240" width="170" height="62" rx="14" fill="#fff" stroke="#ff7900" stroke-width="2"/>
+        <text x="645" y="268" text-anchor="middle" font-size="16" font-weight="700" fill="#1d1d1f">2 · Act</text>
+        <text x="645" y="288" text-anchor="middle" font-size="12" fill="#8a8a93">Tool aufrufen</text>
+
+        <rect x="30" y="240" width="170" height="62" rx="14" fill="#fff" stroke="#ff7900" stroke-width="2"/>
+        <text x="115" y="268" text-anchor="middle" font-size="16" font-weight="700" fill="#1d1d1f">3 · Observe</text>
+        <text x="115" y="288" text-anchor="middle" font-size="12" fill="#8a8a93">Ergebnis aufnehmen</text>
+      </g>
+
+      <!-- arrows clockwise -->
+      <path d="M455 75 C 560 110 600 170 615 235" fill="none" stroke="#ff7900" stroke-width="2.5" marker-end="url(#a2)"/>
+      <path d="M560 285 C 430 330 280 330 205 290" fill="none" stroke="#ff7900" stroke-width="2.5" marker-end="url(#a2)"/>
+      <path d="M120 238 C 150 160 200 110 305 78" fill="none" stroke="#ff7900" stroke-width="2.5" marker-end="url(#a2)"/>
+
+      <text x="380" y="330" text-anchor="middle" font-size="12.5" fill="#54545c" font-family="Inter">Schleife, bis Ziel erreicht — oder Stop-Bedingung (Schrittlimit, Budget, Fehler)</text>
+    </svg>
+    <figcaption>Der minimale Agent-Loop. Nach jeder Beobachtung entscheidet das Modell neu — daher steht der Pfad vorab nicht fest.</figcaption>
+  </figure>
+
+  <p>In der Praxis prüft der Loop nach jeder Runde eine <strong>Stop-Bedingung</strong>: Ziel erreicht, Schrittlimit überschritten, Budget aufgebraucht oder Fehler. Ohne saubere Stop-Bedingung kann ein Agent in Endlosschleifen laufen – ein häufiger und teurer Anfängerfehler (mehr dazu in Modul 8).</p>
+
+  <h3>So sieht der Loop im Pseudocode aus</h3>
+  <div class="codeblock reveal">
+    <div class="codehead"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname">agent-loop.txt</span></div>
+<pre><code><span class="tok-key">while</span> ziel_nicht_erreicht <span class="tok-key">and</span> schritte &lt; LIMIT:
+    gedanke, aktion = <span class="tok-fn">llm</span>(ziel, verlauf, verfügbare_tools)   <span class="tok-com"># Reason</span>
+    <span class="tok-key">if</span> aktion == <span class="tok-str">"fertig"</span>:
+        <span class="tok-key">break</span>
+    ergebnis = <span class="tok-fn">tool_ausführen</span>(aktion)                       <span class="tok-com"># Act</span>
+    verlauf.<span class="tok-fn">append</span>(gedanke, aktion, ergebnis)              <span class="tok-com"># Observe</span>
+    schritte += <span class="tok-num">1</span>
+</code></pre>
+  </div>
+
+  <div class="box deep reveal">
+    <div class="t">Begriff: ReAct</div>
+    <p><b>ReAct</b> = „Reasoning + Acting". Das Modell verschränkt im selben Kontext explizite Gedanken („Ich sollte zuerst den Lagerbestand prüfen") mit Tool-Aufrufen. Dieses Muster aus einem Forschungspapier von 2022/23 ist bis heute das mentale Grundmodell für die meisten Agenten – auch wenn moderne Frameworks es unterschiedlich umsetzen.</p>
+  </div>
+
+  <h2><span class="sec">2.4</span> Echter Agent vs. Pseudo-Agent</h2>
+  <p>Viele „Agenten" im Markt sind in Wahrheit fest verdrahtete Prompt-Ketten (Prompt-Chaining). Das ist völlig in Ordnung – aber nenn es nicht Agent. Der Test:</p>
+  <div class="tablewrap reveal">
+    <table class="matrix">
+      <thead><tr><th>Frage</th><th>Pseudo-Agent (Chain)</th><th>Echter Agent</th></tr></thead>
+      <tbody>
+        <tr><td>Steht die Schrittfolge vorab fest?</td><td>ja</td><td>nein</td></tr>
+        <tr><td>Wählt das Modell die Tools selbst?</td><td>nein, Code wählt</td><td>ja</td></tr>
+        <tr><td>Reagiert es auf unerwartete Zwischenergebnisse?</td><td>nur wie programmiert</td><td>ja, plant neu</td></tr>
+        <tr><td>Kann die Schrittzahl variieren?</td><td>nein</td><td>ja</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="merke reveal">
+    <div class="lbl">Merksatz</div>
+    <div class="q">Ziel + eigenständige Entscheidung + Aktionen + Feedback-Schleife. Fehlt eines davon, ist es kein Agent – sondern ein Chatbot oder ein Skript mit LLM-Würze.</div>
+  </div>
+
+  <!-- QUIZ -->
+  <section class="quiz reveal" data-quiz="agent-minimal">
+    <div class="quiz-head"><span class="qbadge">Quiz</span><h3>Check: Minimaldefinition</h3><span class="score"></span></div>
+    <div class="quiz-body">
+
+      <div class="q" data-correct="1,3">
+        <div class="stem"><span class="qn">1.</span> Welche zwei Elemente sind <em>zwingend</em> nötig, damit aus „LLM ruft Tools auf" ein Agent wird? <i>(zwei richtige)</i></div>
+        <label class="opt"><span class="mk"></span><span>Ein besonders großes Modell (&gt;100B Parameter)</span></label>
+        <label class="opt"><span class="mk"></span><span>Das Modell entscheidet selbst über den nächsten Schritt</span></label>
+        <label class="opt"><span class="mk"></span><span>Eine grafische Benutzeroberfläche</span></label>
+        <label class="opt"><span class="mk"></span><span>Eine Feedback-Schleife, die Ergebnisse beobachtet und neu plant</span></label>
+        <div class="explain"><b>Richtig: B &amp; D.</b> Modellgröße und UI sind irrelevant. Entscheidend sind eigenständige Schrittwahl und die beobachtende Schleife.</div>
+      </div>
+
+      <div class="q" data-correct="2">
+        <div class="stem"><span class="qn">2.</span> Ein Skript ruft immer dieselben drei LLM-Prompts in fester Reihenfolge auf. Marketing nennt es „Agent". Was stimmt?</div>
+        <label class="opt"><span class="mk"></span><span>Korrekt benannt – drei LLM-Calls genügen für einen Agenten</span></label>
+        <label class="opt"><span class="mk"></span><span>Es ist ein Agent, sobald einer der Prompts ein Tool nutzt</span></label>
+        <label class="opt"><span class="mk"></span><span>Es ist Prompt-Chaining / ein Workflow – die Schrittfolge steht fest, also kein Agent</span></label>
+        <label class="opt"><span class="mk"></span><span>Es ist ein Agent, weil Marketing das Wort verwendet</span></label>
+        <div class="explain"><b>Richtig: C.</b> Feste Reihenfolge = kein Agent. Das ist nicht schlimm – nur eine andere Architektur (und oft die robustere Wahl).</div>
+      </div>
+
+      <div class="q" data-correct="0">
+        <div class="stem"><span class="qn">3.</span> Wofür braucht ein produktiver Agent-Loop zwingend eine <em>Stop-Bedingung</em>?</div>
+        <label class="opt"><span class="mk"></span><span>Damit er nicht in Endlosschleifen läuft und Budget/Zeit verbrennt</span></label>
+        <label class="opt"><span class="mk"></span><span>Damit das LLM kreativer wird</span></label>
+        <label class="opt"><span class="mk"></span><span>Damit man weniger Tools definieren muss</span></label>
+        <label class="opt"><span class="mk"></span><span>Stop-Bedingungen sind optional und meist überflüssig</span></label>
+        <div class="explain"><b>Richtig: A.</b> Ohne Stop-Bedingung (Ziel erreicht, Schrittlimit, Budget, Fehler) kann ein Agent endlos schleifen – ein realer, teurer Produktionsfehler.</div>
+      </div>
+
+      <div class="q" data-correct="1">
+        <div class="stem"><span class="qn">4.</span> Was bedeutet das ReAct-Muster?</div>
+        <label class="opt"><span class="mk"></span><span>Die Verwendung des React-Frameworks im Frontend des Agenten</span></label>
+        <label class="opt"><span class="mk"></span><span>„Reasoning + Acting": das Modell verschränkt explizite Gedanken mit Tool-Aufrufen im selben Kontext</span></label>
+        <label class="opt"><span class="mk"></span><span>Eine Methode, um LLMs schneller zu machen</span></label>
+        <label class="opt"><span class="mk"></span><span>Ein Sicherheitsmechanismus gegen Prompt Injection</span></label>
+        <div class="explain"><b>Richtig: B.</b> ReAct hat nichts mit dem JS-Framework zu tun. Es bezeichnet das Verschränken von Denken und Handeln – das mentale Grundmodell vieler Agenten.</div>
+      </div>
+
+      <div class="quiz-actions">
+        <button class="btn check">Auswerten</button>
+        <button class="btn ghost reset" style="display:none">Nochmal</button>
+        <span class="quiz-result"></span>
+      </div>
+    </div>
+  </section>
+
+  <div id="pager" class="pager"></div>
+
+</main>
+
+<footer class="foot">Agentic AI · CBT · Modul 2 von 10 · Orange Business</footer>
+<script src="assets/cbt.js"></script>
+</body>
+</html>

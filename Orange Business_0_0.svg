@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Keyshape -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" text-rendering="geometricPrecision" shape-rendering="geometricPrecision" style="white-space: pre;">
+    <style>
+@keyframes a0_t { 0% { transform: translate(20px,20px) scale(1,1) translate(-15px,-15px); } 100% { transform: translate(20px,20px) scale(1.2,1.2) translate(-15px,-15px); } }
+    </style>
+    <g transform="translate(20,20) translate(-15,-15)" style="animation: 0.2s linear both a0_t;">
+        <rect width="30" height="30" fill="#ff7900" rx="0" stroke="none" transform="translate(15,15) translate(-15,-15)"/>
+        <rect width="24" height="4" fill="#ffffff" rx="0" stroke="none" transform="translate(18,10) translate(-15,11)"/>
+    </g>
+</svg>
