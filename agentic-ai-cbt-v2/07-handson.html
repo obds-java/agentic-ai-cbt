@@ -38,7 +38,26 @@
   <p class="reveal"><b>Erwartetes Ergebnis:</b> Du siehst die Flowise-Oberfläche mit einer leeren Liste von „Chatflows"/„Agentflows".</p>
 
   <h3>Schritt 1 · Modell-Zugang (Credential) hinterlegen</h3>
-  <p>Lege <em>einen</em> LLM-Anbieter an, zu dem du einen API-Key mit Gratis-/Restguthaben hast (OpenAI, Anthropic oder Google). In Flowise unter <i>Credentials</i> → neuen Eintrag mit deinem Key anlegen. <em>→ Das ist Schicht 1 aus Modul 3: das Gehirn.</em></p>
+  <p>Du brauchst Zugang zu <em>einem</em> Chat-Modell. Am einfachsten und <b>kostenlos</b>: <strong>GitHub Models</strong> – ihr habt den GitHub-Account ja ohnehin, keine Kreditkarte nötig (Empfehlung unten). Alternativ ein API-Key mit Gratis-/Restguthaben bei OpenAI, Anthropic oder Google. <em>→ Das ist Schicht 1 aus Modul 3: das Gehirn.</em></p>
+
+  <div class="box tip reveal">
+    <div class="t">Empfohlen: kostenlos mit GitHub Models</div>
+    <p>GitHub Models ist OpenAI-kompatibel – man hängt es in Flowise einfach an den <b>ChatOpenAI</b>-Knoten und überschreibt die Basis-URL. So geht's:</p>
+    <p>
+      <b>1. Token erzeugen:</b> GitHub → <i>Settings → Developer settings → Personal access tokens → Fine-grained tokens</i> → neuen Token mit Scope <code class="inline">models:read</code> erstellen.<br>
+      <b>2. In Flowise:</b> als Modell-Knoten <b>ChatOpenAI</b> wählen (nicht den Anthropic/Google-Knoten). In den Credentials den Token als „OpenAI API Key" eintragen.<br>
+      <b>3. Basis-URL überschreiben:</b> im Knoten das Feld <i>Base Path / BasePath</i> (manchmal unter „Additional Parameters") auf <code class="inline">https://models.github.ai/inference</code> setzen.<br>
+      <b>4. Modell wählen:</b> z. B. <code class="inline">gpt-4o-mini</code> oder <code class="inline">openai/gpt-4o-mini</code> (Schreibweise je nach Flowise-Version; im GitHub-Models-Katalog steht die exakte Modell-ID).
+    </p>
+    <p style="margin-bottom:0"><b>Zu den Limits – wichtig:</b> Bei GitHub Models sind nur <b>~50 API-Calls pro Tag kostenfrei</b> (Richtwert für GPT-4o; variiert je nach Modell und GitHub-Plan). Das gilt <b>pro Person</b> – jeder nutzt sein eigenes Token, es ist kein geteilter Topf. Für dieses Lab reicht das locker: Ein Durchlauf braucht nur ~2–4 Calls, also ~15–25 Testläufe pro Tag. Tipp: <code class="inline">gpt-4o-mini</code> wählen – meist höheres Limit und für den Calculator-Agenten mehr als schlau genug. Für <i>echte</i> Agenten mit langen Loops wären 50/Tag zu wenig; dafür gibt es kostenpflichtige Nutzung mit Budget. Token wie ein Passwort behandeln – nicht ins Repo committen.</p>
+  </div>
+
+  <div class="box note reveal">
+    <div class="t">Alternative: dein eigenes Modell über dessen API einbinden</div>
+    <p>Du hast bereits einen <b>API-Key</b> bei OpenAI, Anthropic oder Google? Dann bind dein Modell direkt ein – Flowise hat dafür fertige Knoten: <b>ChatOpenAI</b>, <b>ChatAnthropic</b>, <b>ChatGoogleGenerativeAI</b>. Passenden Knoten wählen, deinen Key als Credential eintragen, Modell setzen (z. B. <code class="inline">gpt-4o-mini</code>, ein Claude-<code class="inline">haiku</code>, ein Gemini-<code class="inline">flash</code>) – fertig. Eine Basis-URL musst du dann nicht überschreiben.</p>
+    <p style="margin-bottom:0"><b>Achtung – Abo ≠ API-Key:</b> Ein Chat-<i>Abo</i> (ChatGPT Plus, Claude Pro, Gemini Advanced) enthält <b>keinen</b> API-Zugang. Den API-Key holst du dir separat im Entwickler-Portal des Anbieters (<code class="inline">platform.openai.com</code>, <code class="inline">console.anthropic.com</code> bzw. <b>Google AI Studio</b>); dort wird pro Nutzung abgerechnet – meist nur Cent-Beträge. <b>Gratis-Tipp:</b> <b>Google AI Studio</b> bietet für die Gemini-API einen echten kostenlosen Tier mit großzügigeren Limits als GitHub Models – eine gute Alternative, wenn dir 50/Tag zu knapp sind.</p>
+  </div>
+
   <p class="reveal"><b>Erwartetes Ergebnis:</b> Die Credential erscheint gespeichert in der Liste; sie lässt sich später im Knoten auswählen.</p>
 
   <h3>Schritt 2 · Einen Agentflow anlegen</h3>
@@ -117,8 +136,19 @@
   <h3>2 · Konfiguration (application.properties)</h3>
   <div class="codeblock reveal">
     <div class="codehead"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname">application.properties</span></div>
-<pre><code>spring.ai.openai.api-key=${OPENAI_API_KEY}
-spring.ai.openai.chat.options.model=gpt-4o-mini</code></pre>
+<pre><code><span class="tok-com"># Variante A: OpenAI direkt</span>
+spring.ai.openai.api-key=${OPENAI_API_KEY}
+spring.ai.openai.chat.options.model=gpt-4o-mini
+
+<span class="tok-com"># Variante B: kostenlos via GitHub Models (OpenAI-kompatibel)</span>
+<span class="tok-com"># spring.ai.openai.api-key=${GITHUB_TOKEN}          # PAT mit Scope models:read</span>
+<span class="tok-com"># spring.ai.openai.base-url=https://models.github.ai</span>
+<span class="tok-com"># spring.ai.openai.chat.completions-path=/inference/chat/completions</span>
+<span class="tok-com"># spring.ai.openai.chat.options.model=openai/gpt-4o-mini</span></code></pre>
+  </div>
+  <div class="box tip reveal">
+    <div class="t">GitHub Models auch hier nutzbar</div>
+    <p>Da GitHub Models OpenAI-kompatibel ist, genügt im Spring-AI-OpenAI-Starter ein Überschreiben von <code class="inline">base-url</code>, <code class="inline">completions-path</code> und Modell-ID (Variante B oben) – als „Key" der GitHub-PAT mit <code class="inline">models:read</code>. Exakte URL/Path/Modell-ID bitte gegen die aktuelle <a href="https://docs.github.com/github-models/prototyping-with-ai-models" target="_blank" rel="noopener">GitHub-Models-Doku</a> und deine Spring-AI-Version prüfen.</p>
   </div>
 
   <h3>3 · Tool + Agent + eine Frage</h3>
