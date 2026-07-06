@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agentic AI · CBT — Orange Business Team</title>
+<meta name="description" content="Interaktives Self-Learning zu Agentic AI: Grundlagen, Multi-Agent, Harness, Observability, Produktion und Security – mit Diagrammen, Quizzes und Hands-On Labs.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+<header class="hero">
+  <span class="kick">Self-Learning · ersetzt den Juli-Fachblock</span>
+  <h1>Agentic AI –<br>vom Buzzword zum <span>Handwerk</span></h1>
+  <p>Von „Chat vs. Agent" über Multi-Agent-Systeme, das Harness und Observability bis Produktion und Security – mit Diagrammen, Merksätzen, kniffligen Quizzes und zwei Hands-On Labs, in denen du deinen ersten Agenten selbst baust.</p>
+  <div class="hero-meta">
+    <div><b>12</b>Module</div>
+    <div><b>≈ 4 h</b>Lernzeit</div>
+    <div><b>11</b>Quizzes</div>
+    <div><b>2</b>Hands-On Labs</div>
+  </div>
+  <div class="hero-cta">
+    <a class="btn" href="01-grundlagen.html">Los geht's
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="goals" style="margin-top:38px">
+    <h4>Warum dieses Thema – und warum wir?</h4>
+    <p style="margin:0 0 10px;color:var(--text-soft)">Da im Juli viele in den Ferien sind, ersetzt dieses Self-Learning unseren Fachblock – Tempo und Zeitpunkt bestimmst du selbst. Das Thema ist bewusst gewählt: <b>Agentic AI ist gerade dabei, vom Hype zum Handwerk zu werden</b> – und dieses Handwerk ist unseres. Drei Gründe, warum es sich für dich lohnt:</p>
+    <ul>
+      <li><b>Du benutzt schon Agenten – täglich.</b> Coding-Assistenten wie Claude Code, Copilot oder Cursor sind vollwertige Agenten. Wer versteht, was darin passiert, nutzt sie besser und kann mitreden, wenn Kunden danach fragen.</li>
+      <li><b>Der Engineering-Hebel liegt bei uns.</b> Die Modelle kommen von Anthropic, OpenAI &amp; Co. – aber das <i>Harness</i> drumherum (Tools, Memory, Observability, Guardrails) ist klassisches Software-Engineering. Genau da werden Projekte 2026/27 gewonnen oder verloren.</li>
+      <li><b>Unser Stack ist bereit.</b> Mit Spring AI ist der Einstieg in Java/Spring first-class. Nach dieser CBT kannst du Agenten-Anforderungen einschätzen, Architekturen bewerten – und hast selbst einen Agenten gebaut.</li>
+    </ul>
+    <p style="margin:12px 0 0;color:var(--text-soft);font-size:14.5px">Zum Format: nicht nur Text, sondern Diagramme, Merksätze, ehrliche Quizzes und zwei Labs. Dein Fortschritt wird lokal im Browser gespeichert (kein Login, keine Cloud). Am Stück oder in Häppchen – beides funktioniert.</p>
+  </section>
+
+  <h2 style="margin-top:46px">Dein Lernpfad</h2>
+  <figure class="diagram" style="margin-top:18px">
+    <svg viewBox="0 0 820 150" role="img" aria-label="Lernpfad in fünf Teilen von Grundlagen bis Abschluss">
+      <defs><marker id="lp" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0 0l6 3-6 3z" fill="#ff7900"/></marker></defs>
+      <g stroke="#ff7900" stroke-width="2.5" fill="none">
+        <line x1="128" y1="58" x2="176" y2="58" marker-end="url(#lp)"/>
+        <line x1="292" y1="58" x2="340" y2="58" marker-end="url(#lp)"/>
+        <line x1="456" y1="58" x2="504" y2="58" marker-end="url(#lp)"/>
+        <line x1="620" y1="58" x2="668" y2="58" marker-end="url(#lp)"/>
+      </g>
+      <g font-family="Inter">
+        <g><rect x="20" y="30" width="108" height="56" rx="14" fill="#161619"/><text x="74" y="54" text-anchor="middle" fill="#ff7900" font-size="13" font-weight="800">A · 1–4</text><text x="74" y="74" text-anchor="middle" fill="#fff" font-size="11.5">Konzepte</text><text x="74" y="112" text-anchor="middle" fill="#8a8a93" font-size="11">Was ist ein Agent?</text></g>
+        <g><rect x="184" y="30" width="108" height="56" rx="14" fill="#161619"/><text x="238" y="54" text-anchor="middle" fill="#ff7900" font-size="13" font-weight="800">B · 5–6</text><text x="238" y="74" text-anchor="middle" fill="#fff" font-size="11.5">Architektur &amp; Bau</text><text x="238" y="112" text-anchor="middle" fill="#8a8a93" font-size="11">Wie baut man das?</text></g>
+        <g><rect x="348" y="30" width="108" height="56" rx="14" fill="#ff7900"/><text x="402" y="54" text-anchor="middle" fill="#fff" font-size="13" font-weight="800">C · 7</text><text x="402" y="74" text-anchor="middle" fill="#fff" font-size="11.5">Hands-On</text><text x="402" y="112" text-anchor="middle" fill="#8a8a93" font-size="11">Selbst bauen!</text></g>
+        <g><rect x="512" y="30" width="108" height="56" rx="14" fill="#161619"/><text x="566" y="54" text-anchor="middle" fill="#ff7900" font-size="13" font-weight="800">D · 8–11</text><text x="566" y="74" text-anchor="middle" fill="#fff" font-size="11.5">Betrieb &amp; Härtung</text><text x="566" y="112" text-anchor="middle" fill="#8a8a93" font-size="11">Produktionsreif machen</text></g>
+        <g><rect x="676" y="30" width="108" height="56" rx="14" fill="#161619"/><text x="730" y="54" text-anchor="middle" fill="#ff7900" font-size="13" font-weight="800">E · 12</text><text x="730" y="74" text-anchor="middle" fill="#fff" font-size="11.5">Abschluss</text><text x="730" y="112" text-anchor="middle" fill="#8a8a93" font-size="11">Final-Quiz &amp; Links</text></g>
+      </g>
+    </svg>
+    <figcaption>Die Module bauen aufeinander auf – über das <b>Module</b>-Menü oben rechts springst du jederzeit irgendwohin.</figcaption>
+  </figure>
+
+  <div class="part-label"><span class="pi">A</span> Grundlagen &amp; Konzepte</div>
+  <div class="modgrid">
+    <a class="modcard" href="01-grundlagen.html"><span class="mc-num">1</span><div><h4>Chat vs. Workflow vs. Agent</h4><p>Das Spektrum der „AI-Systeme", der Kontrollfluss – und warum die UI nicht entscheidet.</p><div class="mc-meta">≈ 18 Min · Quiz</div></div></a>
+    <a class="modcard" href="02-agent-minimal.html"><span class="mc-num">2</span><div><h4>Was macht einen Agenten aus?</h4><p>Die Minimaldefinition, der Agent-Loop – und was in einem LLM-Call wirklich drinsteckt.</p><div class="mc-meta">≈ 15 Min · Quiz</div></div></a>
+    <a class="modcard" href="03-anatomie.html"><span class="mc-num">3</span><div><h4>Anatomie: LLM · Agent · Harness</h4><p>Die drei Schichten und warum dieselbe Aufgabe so unterschiedlich gut läuft.</p><div class="mc-meta">≈ 15 Min · Quiz</div></div></a>
+    <a class="modcard" href="04-harness.html"><span class="mc-num">4</span><div><h4>Das Harness im Detail</h4><p>Memory, Tools, Skills, MCP, Observability, Guardrails – der eigentliche Engineering-Hebel.</p><div class="mc-meta">≈ 22 Min · Quiz</div></div></a>
+  </div>
+
+  <div class="part-label"><span class="pi">B</span> Architektur &amp; Bau</div>
+  <div class="modgrid">
+    <a class="modcard" href="05-multiagent.html"><span class="mc-num">5</span><div><h4>Single- vs. Multi-Agent</h4><p>Subagents, Handoffs, Supervisor, Swarm, Context Isolation – kritisch, nicht hypig.</p><div class="mc-meta">≈ 25 Min · Quiz</div></div></a>
+    <a class="modcard" href="06-bauen.html"><span class="mc-num">6</span><div><h4>Agenten bauen</h4><p>Workflow-first, Frameworks, Spring-AI-Fragmente, Context Engineering.</p><div class="mc-meta">≈ 25 Min · Quiz</div></div></a>
+  </div>
+
+  <div class="part-label"><span class="pi">C</span> Hands-On</div>
+  <div class="modgrid">
+    <a class="modcard" href="07-handson.html"><span class="mc-num">7</span><div><h4>Hands-On Labs</h4><p>Ein geführtes Pflicht-Lab (Flowise) plus ein optionales Spring-AI-Mini-Lab.</p><div class="mc-meta">≈ 35 Min · Praxis</div></div></a>
+  </div>
+
+  <div class="part-label"><span class="pi">D</span> Betreiben &amp; Absichern</div>
+  <div class="modgrid">
+    <a class="modcard" href="08-observability.html"><span class="mc-num">8</span><div><h4>Observability &amp; Evals</h4><p>Warum Agenten ohne Tracing blind fliegen – plus ein echtes Eval-Raster.</p><div class="mc-meta">≈ 22 Min · Quiz</div></div></a>
+    <a class="modcard" href="09-fallstricke.html"><span class="mc-num">9</span><div><h4>Fallstricke</h4><p>Cascading Errors, Context-Decay, zu viele Tools, Set-and-Forget.</p><div class="mc-meta">≈ 18 Min · Quiz</div></div></a>
+    <a class="modcard" href="10-produktion.html"><span class="mc-num">10</span><div><h4>Produktion: State &amp; Oversight</h4><p>Durable Execution, Checkpoints, Budgets, Human-in/on/over-the-loop.</p><div class="mc-meta">≈ 22 Min · Quiz</div></div></a>
+    <a class="modcard" href="11-security.html"><span class="mc-num">11</span><div><h4>Security &amp; Permissions</h4><p>OWASP Agentic 2026, Prompt Injection, Permission-Matrix, Capability-Scoping.</p><div class="mc-meta">≈ 25 Min · Quiz</div></div></a>
+  </div>
+
+  <div class="part-label"><span class="pi">E</span> Abschluss</div>
+  <div class="modgrid">
+    <a class="modcard" href="12-abschluss.html"><span class="mc-num">12</span><div><h4>Abschluss &amp; Ressourcen</h4><p>Zusammenfassung, Final-Quiz, kuratierte Videos &amp; Top-Links zum Weitermachen.</p><div class="mc-meta">≈ 15 Min · Final-Quiz</div></div></a>
+  </div>
+
+  <div class="statstrip">
+    <div class="stat"><b id="progPct">0%</b><span>dein Fortschritt</span></div>
+    <div class="stat"><b id="progCount">0 / 12</b><span>Module erledigt</span></div>
+    <div class="stat"><b>♻︎</b><span><a href="#" data-reset-progress style="cursor:pointer">Fortschritt zurücksetzen</a></span></div>
+  </div>
+
+  <div class="box note">
+    <div class="t">So holst du am meisten raus</div>
+    <p>Mach die Quizzes ehrlich – sie sind bewusst nicht trivial und decken Denkfehler auf. Probier mindestens Lab 1 in Modul 7 wirklich aus (kostenlos, ~20 Min): Der Moment, in dem du den Agent-Loop live siehst, ist der eigentliche Aha-Effekt. Und klick die weiterführenden Links an, wenn dich etwas packt.</p>
+  </div>
+
+  <div class="pager">
+    <a class="prev disabled"><span>← Zurück</span><b>Start</b></a>
+    <a class="next" href="01-grundlagen.html"><span>Weiter →</span><b>1. Chat vs. Workflow vs. Agent</b></a>
+  </div>
+
+</main>
+
+<footer class="foot">
+  Agentic AI · CBT für das Java/Spring/Angular-Team · Orange Business ·
+  <a href="12-abschluss.html">Quellen &amp; Ressourcen</a>
+  <br><span class="vtag">v3 · Juli 2026</span>
+</footer>
+
+<script src="assets/cbt.js"></script>
+</body>
+</html>

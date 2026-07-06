@@ -1,0 +1,20 @@
+# Wetterbericht Rubigen – 2026-07-06
+
+## Aktuelles Wetter
+- Temperatur: ca. 11°C (Morgen), Tageshöchst ca. 28–29°C
+- Gefühlt wie: angenehm warm am Nachmittag
+- Bedingungen: Morgens sonnig, tagsüber meist wolkenlos, abends einzelne Wolken
+- Wind: Böen 11–38 km/h, leichter bis mässiger Wind
+- Luftfeuchtigkeit: ca. 83%
+
+## Tagesvorhersage
+Montag, 6. Juli 2026: Ein freundlicher Sommertag. Morgens scheint die Sonne bei etwa 11°C. Im Tagesverlauf bleibt es weitgehend wolkenlos, die Temperaturen steigen auf rund 28–29°C. Am Abend ziehen vereinzelte Wolken auf, es bleibt trocken. Winde mit gelegentlichen Böen bis 38 km/h.
+
+## 3-Tages-Ausblick
+- **Dienstag, 7. Juli:** Überwiegend sonnig, Höchsttemperaturen um 27–29°C, leichter Wind.
+- **Mittwoch, 8. Juli:** Weiterhin sommerlich warm und sonnig, vereinzelt Quellwolken möglich. Temperaturen um 26–28°C.
+- **Donnerstag, 9. Juli:** Meist sonnig mit wenigen Wolken, weiterhin warme Temperaturen um 24–27°C.
+
+---
+*Quelle: [SRF Meteo](https://www.srf.ch/meteo/wetter/Rubigen/46.8991,7.5448), [wetter.com](https://ch.wetter.com/schweiz/rubigen/CH0CH3393.html), [Kachelmannwetter](https://kachelmannwetter.com/ch/wetter/7286968-rubigen)*
+*Erstellt am: 2026-07-06 um 07:06 Uhr*

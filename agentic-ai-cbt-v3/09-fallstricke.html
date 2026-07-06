@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>9 · Fallstricke — Agentic AI CBT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-mod="fallstricke">
+
+<main class="wrap">
+
+  <div class="page-head">
+    <span class="eyebrow"><span class="num">9</span> Realität</span>
+    <h1 class="page-title">Fallstricke beim Realisieren von Agenten</h1>
+    <p class="lede">Wo Demos glänzen und Produktionssysteme scheitern. Die meisten dieser Fallen sind vermeidbar – wenn man sie kennt. Die Antworten darauf liefert das nächste Modul.</p>
+  </div>
+
+  <div class="goals">
+    <h4>Nach diesem Modul kannst du …</h4>
+    <ul>
+      <li>erklären, warum lange Agentenketten mathematisch fragil sind</li>
+      <li>die häufigsten Fehlermodi 2026 benennen und Gegenmaßnahmen zuordnen</li>
+      <li>„Context-Decay" und „zu viele Tools" als konkrete Risiken erkennen</li>
+      <li>verstehen, warum „set and forget" gefährlich ist</li>
+    </ul>
+  </div>
+
+  <h2><span class="sec">9.1</span> Der Killer: Cascading Errors</h2>
+  <p>Agenten arbeiten in vielen Schritten – und Fehler multiplizieren sich. Selbst bei hoher Zuverlässigkeit pro Schritt bricht die Gesamterfolgsquote über viele Schritte ein. Die Rechnung ist gnadenlos einfach:</p>
+
+  <figure class="diagram reveal">
+    <svg viewBox="0 0 720 300" role="img" aria-label="Erfolgsquote über 10 Schritte bei verschiedenen Genauigkeiten pro Schritt">
+      <line x1="70" y1="250" x2="690" y2="250" stroke="#d3d3da" stroke-width="1.5"/>
+      <line x1="70" y1="40" x2="70" y2="250" stroke="#d3d3da" stroke-width="1.5"/>
+      <text x="40" y="55" font-size="11" fill="#8a8a93" font-family="Inter">100%</text>
+      <text x="44" y="150" font-size="11" fill="#8a8a93" font-family="Inter">50%</text>
+      <text x="52" y="252" font-size="11" fill="#8a8a93" font-family="Inter">0%</text>
+      <text x="380" y="285" font-size="12" fill="#54545c" font-family="Inter" text-anchor="middle">Erfolg nach 10 Schritten →</text>
+      <g font-family="Inter">
+        <rect x="180" y="208" width="90" height="42" rx="6" fill="#d6492f"/><text x="225" y="200" text-anchor="middle" font-size="13" font-weight="700" fill="#d6492f">≈ 20%</text><text x="225" y="234" text-anchor="middle" font-size="11.5" fill="#fff">85% / Schritt</text>
+        <rect x="315" y="124" width="90" height="126" rx="6" fill="#e0af68"/><text x="360" y="116" text-anchor="middle" font-size="13" font-weight="700" fill="#b8860b">≈ 60%</text><text x="360" y="200" text-anchor="middle" font-size="11.5" fill="#1d1d1f">95% / Schritt</text>
+        <rect x="450" y="61" width="90" height="189" rx="6" fill="#1aa179"/><text x="495" y="53" text-anchor="middle" font-size="13" font-weight="700" fill="#1aa179">≈ 90%</text><text x="495" y="170" text-anchor="middle" font-size="11.5" fill="#fff">99% / Schritt</text>
+      </g>
+      <text x="380" y="30" text-anchor="middle" font-size="13" font-weight="700" fill="#1d1d1f" font-family="Inter">Gesamterfolg = (Genauigkeit pro Schritt) ^ Schrittzahl</text>
+    </svg>
+    <figcaption>Bei 85 % pro Schritt gelingt ein 10-Schritte-Workflow nur noch in ~20 % der Fälle. Selbst 95 % ergeben nur ~60 %. Erst ~99 % machen lange Ketten brauchbar.</figcaption>
+  </figure>
+
+  <div class="box warn reveal">
+    <div class="t">Konsequenz</div>
+    <p>Kürze die Ketten. Weniger, robustere Schritte schlagen viele wackelige. Baue Prüfpunkte ein (Validierung, Selbstkorrektur, Human-in-the-Loop an kritischen Stellen – siehe Modul 10). Und miss die Per-Schritt-Zuverlässigkeit – sonst optimierst du blind.</p>
+  </div>
+
+  <h2><span class="sec">9.2</span> Die häufigsten Fehlermodi 2026</h2>
+  <div class="tablewrap reveal">
+    <table class="matrix">
+      <thead><tr><th>Fehlermodus</th><th>Was passiert</th><th>Gegenmaßnahme</th></tr></thead>
+      <tbody>
+        <tr><td>Cascading Errors</td><td>Fehler pflanzen sich über Schritte fort</td><td>kürzere Ketten, Validierung, Checkpoints (Modul 10)</td></tr>
+        <tr><td>Context-Decay</td><td>zu viel Kontext → Modell „übersieht" Relevantes</td><td>gezieltes Retrieval statt „alles reinkippen"</td></tr>
+        <tr><td>Zu viele Tools</td><td>40+ Tools → falsche Wahl oder Zögern</td><td>Toolset einschränken, Routing, Namespacing</td></tr>
+        <tr><td>Indirekte Prompt Injection</td><td>Schadanweisung in abgerufenem Inhalt</td><td>Untrusted Content isolieren (Modul 11)</td></tr>
+        <tr><td>Observability-Lücken</td><td>Fehler bleiben verborgen bis zum Incident</td><td>Tracing &amp; Evals von Anfang an (Modul 8)</td></tr>
+        <tr><td>Kontext-Mangel</td><td>Agent ohne Zugriff auf Firmenwissen → nutzlos</td><td>relevante Daten/Tools sauber anbinden</td></tr>
+        <tr><td>Set-and-Forget-Drift</td><td>Welt ändert sich, Agent nicht → stilles Verschlechtern</td><td>Monitoring, regelmäßige Re-Evals</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2><span class="sec">9.3</span> Drei, die jeden treffen</h2>
+  <h3>„Alles reinkippen" (Context-Decay)</h3>
+  <p>Der erste Reflex – den ganzen Code, alle Dokumente, die komplette Historie in den Kontext geben – schlägt fehl, sobald es viel wird. Teams haben gesehen, dass ein Agent mit 100K Token Zusammenfassung <em>schlechter</em> arbeitet als mit 5K gezielten Token. Mehr Kontext ist nicht mehr Wissen, sondern mehr Rauschen.</p>
+  <h3>Zu viele Tools auf einmal</h3>
+  <p>40+ Tools gleichzeitig anzubieten führt dazu, dass das Modell falsch wählt oder zögert. Lösung: Toolset auf die Aufgabe zuschneiden, einen Router vorschalten oder per Namespacing eingrenzen. Weniger ist verlässlicher.</p>
+  <h3>Set and Forget</h3>
+  <p>Ein Agent ist kein Toaster. Die Welt verändert sich – APIs, Daten, Nutzerverhalten, das zugrunde liegende Modell. Ohne laufendes Monitoring und periodische Re-Evaluierung driftet die Qualität still nach unten, bis es einen Vorfall gibt.</p>
+
+  <div class="merke reveal">
+    <div class="lbl">Merksatz</div>
+    <div class="q">Eine glänzende Demo ist kein Produktionssystem. Demos zeigen den Happy Path bei 3 Schritten; Produktion ist 10 Schritte, Edge Cases, böswillige Eingaben und eine sich verändernde Welt.</div>
+  </div>
+
+  <!-- QUIZ -->
+  <section class="quiz reveal" data-quiz="fallstricke">
+    <div class="quiz-head"><span class="qbadge">Quiz</span><h3>Check: Fallstricke</h3><span class="score"></span></div>
+    <div class="quiz-body">
+
+      <div class="q" data-correct="1">
+        <div class="stem"><span class="qtype t-basic">Verständnis</span><span class="qn">1.</span> Ein Agent ist pro Schritt zu 95 % zuverlässig. Erfolgsquote über 10 Schritte – grob?</div>
+        <label class="opt"><span class="mk"></span><span>≈ 95 %</span></label>
+        <label class="opt"><span class="mk"></span><span>≈ 60 %</span></label>
+        <label class="opt"><span class="mk"></span><span>≈ 90 %</span></label>
+        <label class="opt"><span class="mk"></span><span>≈ 5 %</span></label>
+        <div class="explain"><b>Richtig: B.</b> 0,95<sup>10</sup> ≈ 0,60. Fehler multiplizieren sich.</div>
+      </div>
+
+      <div class="q" data-correct="0,2">
+        <div class="stem"><span class="qtype t-diag">Diagnose</span><span class="qn">2.</span> Ein Agent hat Zugriff auf 40 Tools und ruft häufig das falsche auf. Wahrscheinliche Ursache &amp; zwei sinnvolle Maßnahmen? <i>(zwei richtige)</i></div>
+        <label class="opt"><span class="mk"></span><span>Toolset reduzieren / pro Aufgabe scopen oder per Router eingrenzen</span></label>
+        <label class="opt"><span class="mk"></span><span>Noch mehr Tools hinzufügen</span></label>
+        <label class="opt"><span class="mk"></span><span>Tool-Beschreibungen schärfen und per Namespacing trennen; Tool-Selektion mit Evals prüfen</span></label>
+        <label class="opt"><span class="mk"></span><span>Das Modell zufällig wechseln</span></label>
+        <div class="explain"><b>Richtig: A &amp; C.</b> Zu viele Tools → Verwirrung. Eingrenzen, besser beschreiben, Tool-Selektion messen (Modul 8).</div>
+      </div>
+
+      <div class="q" data-correct="2">
+        <div class="stem"><span class="qtype t-scen">Szenario</span><span class="qn">3.</span> Euer Agent „übersieht" trotz riesigem Kontext relevante Infos. Beste Reaktion?</div>
+        <label class="opt"><span class="mk"></span><span>Noch mehr Kontext hineingeben</span></label>
+        <label class="opt"><span class="mk"></span><span>Alle Tools entfernen</span></label>
+        <label class="opt"><span class="mk"></span><span>Context-Decay erkennen: „alles reinkippen" durch gezieltes Retrieval ersetzen</span></label>
+        <label class="opt"><span class="mk"></span><span>Die Stop-Bedingung entfernen</span></label>
+        <div class="explain"><b>Richtig: C.</b> Je größer der Input, desto schlechter die Aufmerksamkeit aufs Einzelne. Gezielte 5K schlagen oft 100K.</div>
+      </div>
+
+      <div class="q" data-correct="1,3">
+        <div class="stem"><span class="qtype t-anti">Was NICHT tun</span><span class="qn">4.</span> Welche Praktiken erhöhen das Risiko, statt es zu senken? <i>(zwei richtige)</i></div>
+        <label class="opt"><span class="mk"></span><span>Ketten kürzen und Checkpoints einbauen</span></label>
+        <label class="opt"><span class="mk"></span><span>Einen einmal funktionierenden Agenten deployen und nie wieder messen</span></label>
+        <label class="opt"><span class="mk"></span><span>Per-Schritt-Zuverlässigkeit messen</span></label>
+        <label class="opt"><span class="mk"></span><span>Lange Ketten künstlich verlängern „für mehr Gründlichkeit"</span></label>
+        <div class="explain"><b>Richtig: B &amp; D.</b> Set-and-Forget führt zu stiller Drift; längere Ketten verschlimmern Cascading Errors. A und C sind richtig.</div>
+      </div>
+
+      <div class="quiz-actions">
+        <button class="btn check">Auswerten</button>
+        <button class="btn ghost reset" style="display:none">Nochmal</button>
+        <span class="quiz-result"></span>
+      </div>
+    </div>
+  </section>
+
+  <div id="pager" class="pager"></div>
+
+</main>
+
+<footer class="foot">Agentic AI · Modul 9 von 12 · Orange Business <span class="vtag">· v3</span></footer>
+<script src="assets/cbt.js"></script>
+</body>
+</html>

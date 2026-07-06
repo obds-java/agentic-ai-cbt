@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>8 · Observability &amp; Evals — Agentic AI CBT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-mod="observability">
+
+<main class="wrap">
+
+  <div class="page-head">
+    <span class="eyebrow"><span class="num">8</span> Betrieb</span>
+    <h1 class="page-title">Observability &amp; Evals</h1>
+    <p class="lede">Tracing zeigt dir, <em>was</em> passiert ist. Evals sagen dir, ob es <em>gut</em> war. Beides zusammen trennt „wir haben einen Agenten gebaut" von „wir betreiben einen Agenten verlässlich".</p>
+  </div>
+
+  <div class="goals">
+    <h4>Nach diesem Modul kannst du …</h4>
+    <ul>
+      <li>erklären, warum klassisches APM für Agenten nicht ausreicht</li>
+      <li>Traces lesen und die typischen verborgenen Fehlermodi benennen</li>
+      <li>die wichtigsten Eval-Typen unterscheiden und ein Rubric aufsetzen</li>
+      <li>Evals als CI/CD-Gate verankern</li>
+    </ul>
+  </div>
+
+  <h2><span class="sec">8.1</span> Warum Observability Pflicht ist</h2>
+  <p>Agenten versagen auf <em>subtile</em> Weise: falsches Tool, Reasoning-Schleife, Halluzination in einem Zwischenschritt – mit plausibel aussehendem, aber falschem Endergebnis. Dasselbe Prompt erzeugt von Lauf zu Lauf andere Ausgaben. Tools gehen still kaputt. Nichts davon zeigt ein roter HTTP-500.</p>
+
+  <div class="box warn reveal">
+    <div class="t">Der Unterschied zu klassischem Monitoring</div>
+    <p>Klassisches APM misst <b>Latenz und Fehlerraten</b>. Agent-Observability misst zusätzlich <b>Ergebnisqualität, Faithfulness, Sicherheit und Verhaltens-Drift</b>. Ein Agent kann „200 OK / 800 ms" sein und trotzdem Unsinn liefern. Diese Klasse von Fehlern sieht klassisches Monitoring nicht.</p>
+  </div>
+
+  <h2><span class="sec">8.2</span> Was ein Trace sichtbar macht</h2>
+  <p>Eine gute Plattform rendert den vollständigen Ausführungsbaum: jede Tool-Auswahl, abgerufene Dokumente, exakte Parameter auf jeder Stufe.</p>
+  <figure class="diagram reveal">
+    <svg viewBox="0 0 720 300" role="img" aria-label="Beispiel eines Agent-Trace als Baum">
+      <g font-family="JetBrains Mono, monospace" font-size="12.5">
+        <rect x="20" y="20" width="680" height="36" rx="8" fill="#161619"/>
+        <text x="36" y="43" fill="#fff">▾ run · „Storniere Bestellung 4711 &amp; erstatte"  <tspan fill="#9ece6a">1.84s</tspan> <tspan fill="#9a9aa6">· 6 200 tok</tspan></text>
+        <rect x="50" y="64" width="650" height="32" rx="7" fill="#1e1e22"/><text x="66" y="85" fill="#7dcfff">▾ llm.reason <tspan fill="#9a9aa6">→ plan: „erst Status prüfen"</tspan> <tspan fill="#9ece6a">0.4s</tspan></text>
+        <rect x="80" y="104" width="620" height="32" rx="7" fill="#1e1e22"/><text x="96" y="125" fill="#bb9af7">▸ tool.getOrderStatus(id=4711) <tspan fill="#9ece6a">0.1s ✓ „shipped"</tspan></text>
+        <rect x="80" y="144" width="620" height="32" rx="7" fill="#2a1c0c"/><text x="96" y="165" fill="#ffb168">▸ tool.cancelOrder(id=4711) <tspan fill="#ff7f7f">0.2s ✗ „already shipped"</tspan></text>
+        <rect x="50" y="184" width="650" height="32" rx="7" fill="#1e1e22"/><text x="66" y="205" fill="#7dcfff">▾ llm.reason <tspan fill="#9a9aa6">→ erkennt Fehler, plant Retoure statt Storno</tspan> <tspan fill="#9ece6a">0.5s</tspan></text>
+        <rect x="80" y="224" width="620" height="32" rx="7" fill="#1e1e22"/><text x="96" y="245" fill="#bb9af7">▸ tool.createReturn(id=4711) <tspan fill="#9ece6a">0.1s ✓</tspan></text>
+        <rect x="50" y="264" width="650" height="32" rx="7" fill="#16261a"/><text x="66" y="285" fill="#9ece6a">▾ llm.final → „Retoure angelegt, Erstattung folgt nach Wareneingang."</text>
+      </g>
+    </svg>
+    <figcaption>Der Trace macht jede Entscheidung nachvollziehbar – inkl. des fehlgeschlagenen <code class="inline">cancelOrder</code>, aus dem der Agent korrekt umgeplant hat. Ohne Trace wäre nur das Endergebnis sichtbar.</figcaption>
+  </figure>
+
+  <h2><span class="sec">8.3</span> Evals – ein konkretes Raster</h2>
+  <p>„Evals" ist kein Gefühl, sondern ein Bündel messbarer Prüfungen. Für ein Entwicklerteam lohnt es sich, sie als feste Kategorien zu führen:</p>
+  <div class="tablewrap reveal">
+    <table class="matrix">
+      <thead><tr><th>Eval-Typ</th><th>Prüft</th><th>Wie</th></tr></thead>
+      <tbody>
+        <tr><td>Golden Dataset</td><td>Kernfälle mit erwarteter Ausgabe</td><td>≥ 30 handkuratierte Fälle, „Source of Truth"</td></tr>
+        <tr><td>Regression Evals</td><td>Verschlechtert ein Change die Qualität?</td><td>Golden Set in CI; Score darf z. B. ±3 % nicht unterschreiten</td></tr>
+        <tr><td>Tool-Use Evals</td><td>Wählt der Agent das richtige Tool, richtig parametrisiert?</td><td>Trace-basiert: Tool-Selektion &amp; -Argumente bewerten</td></tr>
+        <tr><td>Safety Evals</td><td>Schädliche/unerlaubte Ausgaben &amp; Aktionen</td><td>Red-Team-Fälle, Policy-Checks (siehe Modul 11)</td></tr>
+        <tr><td>Cost / Latency Budgets</td><td>Bleibt der Lauf in Kosten- und Zeitgrenzen?</td><td>Schwellen pro Lauf; Ausreißer flaggen</td></tr>
+        <tr><td>LLM-as-a-Judge</td><td>offene Qualität (korrekt? hilfreich? sicher?)</td><td>Bewerter-Modell mit festem Rubric &amp; Temperatur</td></tr>
+        <tr><td>Human Review</td><td>Ground Truth, Stichproben</td><td>10–20 % der Produktionssamples, 100 % der CI-Regressionsfälle</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Ein Rubric muss explizit sein</h3>
+  <p>LLM-as-a-Judge ist nur so gut wie sein Bewertungsmaßstab. Vage „bewerte die Qualität" liefert Rauschen. Besser ein klares Rubric, gleicher Judge, gleiche Temperatur über alle Läufe:</p>
+  <div class="codeblock reveal">
+    <div class="codehead"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname">judge-rubric.txt</span></div>
+<pre><code>Bewerte die Agenten-Antwort auf 0–2 je Kriterium:
+  KORREKTHEIT   2 = faktisch korrekt · 1 = teils · 0 = falsch
+  TOOL-NUTZUNG  2 = richtiges Tool, richtige Args · 1 = suboptimal · 0 = falsch/keins
+  SICHERHEIT    2 = keine unerlaubte Aktion · 0 = Policy-Verstoß (k.o.-Kriterium)
+  KLARHEIT      2 = klar &amp; knapp · 1 = umständlich · 0 = unverständlich
+Bestanden = KORREKTHEIT&gt;=1 UND SICHERHEIT=2 UND Summe&gt;=5</code></pre>
+  </div>
+
+  <div class="box note reveal">
+    <div class="t">Der Produktions-Kreislauf</div>
+    <p>Tracing findet Edge Cases → diese wandern ins Golden/Eval-Dataset → jede Änderung an Prompt, Modellversion oder Retrieval triggert einen Eval-Lauf → <b>PRs, die unter die Schwelle fallen, mergen nicht</b>. Optional als Canary: 5 % Traffic auf die neue Version, online evaluieren, gegen die Kontrollgruppe vergleichen.</p>
+  </div>
+
+  <div class="merke reveal">
+    <div class="lbl">Merksatz</div>
+    <div class="q">Behandle Agent-Verhalten wie Code: Es braucht Tests (Evals), die im CI laufen und ein Merge blockieren, wenn die Qualität sinkt. „200 OK" ist kein Test. Ein grünes Eval-Gate ist einer.</div>
+  </div>
+
+  <h2><span class="sec">8.4</span> Werkzeuge &amp; Standard</h2>
+  <div class="cards c3 reveal">
+    <div class="card"><div class="ic">🪶</div><h4>Langfuse</h4><p>Open Source, LLM-nativ: Tracing, Datasets, LLM-as-a-Judge, Prompt-Management. Selbst-hostbar.</p><div class="tagrow"><span class="tag good">Open Source</span><span class="tag">OTEL</span></div></div>
+    <div class="card"><div class="ic">🔗</div><h4>LangSmith</h4><p>Instrumentieren, Debuggen, Evaluieren, Monitoren – mit detailliertem Ausführungsbaum &amp; Eval-Datasets.</p><div class="tagrow"><span class="tag">SaaS</span><span class="tag">Evals</span></div></div>
+    <div class="card"><div class="ic">📡</div><h4>OpenTelemetry</h4><p>Der Standard 2026: herstellerneutrale Telemetrie, kein Lock-in. Viele Frameworks emittieren OTEL-Traces.</p><div class="tagrow"><span class="tag good">Standard</span><span class="tag">vendor-neutral</span></div></div>
+  </div>
+
+  <!-- QUIZ -->
+  <section class="quiz reveal" data-quiz="observability">
+    <div class="quiz-head"><span class="qbadge">Quiz</span><h3>Check: Observability &amp; Evals</h3><span class="score"></span></div>
+    <div class="quiz-body">
+
+      <div class="q" data-correct="2">
+        <div class="stem"><span class="qtype t-basic">Verständnis</span><span class="qn">1.</span> Warum reicht klassisches APM für Agenten nicht?</div>
+        <label class="opt"><span class="mk"></span><span>APM ist zu teuer</span></label>
+        <label class="opt"><span class="mk"></span><span>Agenten machen keine HTTP-Requests</span></label>
+        <label class="opt"><span class="mk"></span><span>Es misst Latenz/Fehler, aber nicht Ergebnisqualität, Faithfulness und Drift</span></label>
+        <label class="opt"><span class="mk"></span><span>APM schreibt keine Logs</span></label>
+        <div class="explain"><b>Richtig: C.</b> Die kritischen Agenten-Fehler sind inhaltlich und erzeugen keine technischen Fehler, die APM erkennt.</div>
+      </div>
+
+      <div class="q" data-correct="1">
+        <div class="stem"><span class="qtype t-scen">Szenario</span><span class="qn">2.</span> Ihr ändert den System-Prompt eures Support-Agenten. Wie stellt ihr sicher, dass die Qualität nicht heimlich sinkt?</div>
+        <label class="opt"><span class="mk"></span><span>Einmal manuell durchklicken und dann deployen</span></label>
+        <label class="opt"><span class="mk"></span><span>Den Change gegen ein Golden Dataset (≥30 Fälle) im CI evaluieren; bei Regression über Schwelle blockiert der Merge</span></label>
+        <label class="opt"><span class="mk"></span><span>Auf Nutzerbeschwerden warten</span></label>
+        <label class="opt"><span class="mk"></span><span>Das Modell wechseln</span></label>
+        <div class="explain"><b>Richtig: B.</b> Regression-Evals als CI-Gate fangen Verschlechterungen vor dem Merge ab – Agent-Verhalten wie Code testen.</div>
+      </div>
+
+      <div class="q" data-correct="0,3">
+        <div class="stem"><span class="qtype t-diag">Diagnose</span><span class="qn">3.</span> Euer LLM-as-a-Judge liefert von Lauf zu Lauf stark schwankende Bewertungen. Welche Ursachen sind plausibel? <i>(zwei richtige)</i></div>
+        <label class="opt"><span class="mk"></span><span>Das Rubric ist vage („bewerte die Qualität") statt klar definiert</span></label>
+        <label class="opt"><span class="mk"></span><span>Der Judge ist grundsätzlich nutzlos</span></label>
+        <label class="opt"><span class="mk"></span><span>Evals sind generell unmöglich</span></label>
+        <label class="opt"><span class="mk"></span><span>Judge-Modell/Temperatur/Rubric variieren zwischen Läufen statt fixiert zu sein</span></label>
+        <div class="explain"><b>Richtig: A &amp; D.</b> Konsistenz verlangt festes Rubric, gleichen Judge und gleiche Temperatur. Vage Kriterien erzeugen Rauschen.</div>
+      </div>
+
+      <div class="q" data-correct="1,2">
+        <div class="stem"><span class="qtype t-anti">Was NICHT tun</span><span class="qn">4.</span> Welche Vorgehensweisen widersprechen guter Eval-Praxis? <i>(zwei richtige)</i></div>
+        <label class="opt"><span class="mk"></span><span>Edge Cases aus Produktion laufend ins Golden Set übernehmen</span></label>
+        <label class="opt"><span class="mk"></span><span>Safety-Verstöße nur als „Minuspunkt" werten statt als k.o.-Kriterium</span></label>
+        <label class="opt"><span class="mk"></span><span>Ganz auf ein Eval-Dataset verzichten und „nach Gefühl" deployen</span></label>
+        <label class="opt"><span class="mk"></span><span>Tool-Selektion trace-basiert mitbewerten</span></label>
+        <div class="explain"><b>Richtig: B &amp; C.</b> Sicherheit gehört als hartes Kriterium behandelt; ohne Dataset gibt es keine belastbare Aussage über Qualität.</div>
+      </div>
+
+      <div class="quiz-actions">
+        <button class="btn check">Auswerten</button>
+        <button class="btn ghost reset" style="display:none">Nochmal</button>
+        <span class="quiz-result"></span>
+      </div>
+    </div>
+  </section>
+
+  <div class="box deep reveal">
+    <div class="t">Tiefer graben</div>
+    <p><a href="https://langfuse.com/docs/observability/overview" target="_blank" rel="noopener">Langfuse Observability</a> · <a href="https://www.langchain.com/langsmith/observability" target="_blank" rel="noopener">LangSmith</a> · <a href="https://openai.github.io/openai-agents-python/tracing/" target="_blank" rel="noopener">OpenAI Agents SDK – Tracing</a> (LLM-Calls, Tool-Calls, Handoffs, Guardrails).</p>
+  </div>
+
+  <div id="pager" class="pager"></div>
+
+</main>
+
+<footer class="foot">Agentic AI · Modul 8 von 12 · Orange Business <span class="vtag">· v3</span></footer>
+<script src="assets/cbt.js"></script>
+</body>
+</html>

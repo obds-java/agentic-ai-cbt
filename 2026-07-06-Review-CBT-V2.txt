@@ -1,0 +1,260 @@
+================================================================================
+REVIEW CBT "AGENTIC AI" – V2
+Datum: 06.07.2026 · Basis: C:\temp\Claude\agentic-ai-cbt-v2 (13 Seiten, 2 CSS, 1 JS)
+Geprüft: alle 12 Module + Startseite vollständig gelesen; Quiz-Indizes, Div-Balance,
+Dateienden und Erklärungs-Konsistenz programmatisch geprüft; Spring-AI-Stand
+gegen spring.io verifiziert (Stand heute).
+================================================================================
+
+GESAMTURTEIL
+--------------------------------------------------------------------------------
+Die V2 ist inhaltlich stark und deutlich reifer als V1: Das Review von ChatGPT ist
+sauber eingearbeitet (Multi-Agent, Oversight-Leiter, Evals-Raster, Permission-
+Matrix, geführtes Lab, Senior-Quizzes mit Szenario/Diagnose/Anti-Fragen). Die
+didaktische Linie "workflow-first / single-agent-first" zieht sich konsistent durch.
+Der Handlungsbedarf für V3 liegt in drei Bereichen:
+ (1) einige handfeste technische Defekte (Reste des damaligen Sync-Problems),
+ (2) gezielte inhaltliche Lücken (v. a. RAG, Alltagsbezug Coding-Agenten, Lead-in),
+ (3) Feinschliff an Struktur-Beschriftung, Final-Quiz und Spring-AI-Fakten.
+Kein Umbau nötig – V3 ist eine chirurgische Iteration, keine Neuentwicklung.
+
+
+A · TECHNISCHE DEFEKTE (Muss für V3)
+--------------------------------------------------------------------------------
+A1  assets/styles.css ist ABGESCHNITTEN. Die Datei endet mitten in einer Regel:
+    ".reveal.in { opacit". Das ist ein Überbleibsel des damaligen Datei-Sync-
+    Problems. Es fällt aktuell nur deshalb nicht auf, weil v2.css die .reveal-
+    Elemente mit !important sichtbar erzwingt. Folge: Die Einblend-Animation ist
+    faktisch tot (toter Code auf allen Seiten). Für V3: styles.css sauber und
+    vollständig neu schreiben und die .reveal-Mechanik entweder korrekt umsetzen
+    oder die Klassen konsequent aus dem HTML entfernen.
+
+A2  09-produktion.html hat ein überzähliges </div> (nach dem Merksatz, Zeile ~92).
+    Es schliesst <main class="wrap"> zu früh – Quiz und Folgeinhalte liegen
+    ausserhalb des Layout-Containers. Browser fangen das teilweise ab, sauber ist
+    es nicht. Div-Balance-Check aller anderen Seiten: ok.
+
+A3  index.html enthält nach </html> rund 250 Null-Bytes (Datei-Korruption durch
+    denselben Sync-Bug; grep behandelt die Datei deshalb als Binärdatei). Browser
+    ignorieren das, aber Tools/Validatoren stolpern. Bereinigen.
+
+A4  Sichtbare ASCII-Ersatzschreibungen in der UI (aus cbt.js, das damals bewusst
+    "ASCII-rein" neu geschrieben wurde): "Zurueck", "Uebersicht / Start",
+    "Erklaerungen". Für ein Schweizer Team wirkt das wie ein Encoding-Fehler.
+    Lösung: HTML-Entities (&uuml; etc.) verwenden – Entities sind ASCII-sicher
+    und rendern korrekt.
+
+A5  "CBT V2" steht prominent in jedem Modul-Footer ("Agentic AI · CBT V2 ·
+    Modul X von 12"). Vorgabe war: Version höchstens unscheinbar. Auf der
+    Startseite ist es korrekt gelöst (kleines "v2 · Juni 2026"). Modul-Footer
+    angleichen: "Agentic AI · Modul X von 12 · Orange Business" + kleiner
+    Versionszusatz.
+
+A6  Kleinere Inkonsistenzen:
+    - Hero sagt "~3-4 h", die Summe der Modul-Zeitangaben ist ~257 Min (~4.3 h).
+    - Abschluss-Quiz fragt "Schaffst du 6 von 7?", die Bestanden-Logik liegt aber
+      bei 60 % (= 5 von 7). Text oder Schwelle angleichen.
+    - Modul 7 (Hands-On) wird durch blossen Seitenbesuch als "erledigt" markiert
+      (data-complete-on-visit). Pragmatisch, aber ein Selbstbestätigungs-Element
+      ("Lab geschafft"-Häkchen) wäre ehrlicher und motivierender.
+
+Positiv geprüft: alle 47 Quiz-Fragen haben gültige data-correct-Indizes, die
+"Richtig: X"-Erklärungen stimmen überall mit den Indizes überein, die Quiz-Engine
+(Single/Multi-Select, Auswertung, Fortschritt, Theme) ist sauber, alle 12 Module
+sind in Navigation und Pager korrekt verdrahtet.
+
+
+B · FEHLENDE ODER ZU KNAPPE INHALTE
+--------------------------------------------------------------------------------
+B1  RAG wird vorausgesetzt, aber nie erklärt. In den Quiz-Musterlösungen
+    (Modul 1 und Final-Quiz: "RAG für Policies") und in Modul 6 ("RAG-Bots",
+    "RAG-Chatbot") kommt der Begriff mehrfach vor – definiert wird er nirgends.
+    Für V3: kurzer Kasten "Was ist RAG?" in Modul 4 (bei Memory/Retrieval) oder
+    Modul 6, zwei Absätze genügen.
+
+B2  Alltagsbezug Coding-Agenten fehlt fast ganz. Claude Code/Cursor werden nur
+    als Nebensatz erwähnt (Modul 1). Dabei ist das der stärkste Motivations-
+    hebel für Entwickler: "Ihr benutzt täglich schon Agenten – hier lernt ihr,
+    wie sie innen funktionieren." Ein kurzer Abschnitt in Modul 1 (oder im
+    Lead-in) würde die CBT sofort persönlicher machen.
+
+B3  Kleines Glossar fehlt. Token, Kontextfenster, System-Prompt, Temperatur,
+    Inferenz werden verwendet, ohne definiert zu sein. Senior-Devs kennen vieles,
+    aber nicht alle alles. Eine kompakte Glossar-Box (aufklappbar) oder eine
+    kurze Glossar-Sektion im Abschlussmodul reicht.
+
+B4  "Anatomie eines LLM-Calls" fehlt. Was steht konkret in einem Agenten-Request
+    an das Modell (System-Prompt + Tool-Schemata + Historie + Beobachtungen)?
+    Ein einziges Diagramm dazu (in Modul 2 oder 4) würde Tools/Memory/Context
+    Engineering von "Konzept" zu "aha, so sieht der Request aus" machen.
+
+B5  Ökonomische Basis dünn: Budgets werden behandelt (Modul 9), aber warum
+    Agenten-Loops teuer sind (Token-Pricing, jeder Loop-Schritt = voller Kontext
+    erneut) wird nicht hergeleitet. Zwei, drei Sätze in Modul 1 oder 9.
+
+B6  Fehlerbehandlung/Retries: Modul 4 nennt "Fehlerbehandlung" explizit als
+    Harness-Bestandteil, behandelt sie aber nirgends systematisch (nur verstreut:
+    Fehler-Feedback in Modul 2/3, idempotente Tools in Modul 9). Ein kurzer
+    Unterabschnitt in Modul 4 ("Fehler als Beobachtung zurückspielen, Retries,
+    idempotente Tools") würde die Lücke schliessen.
+
+B7  Angular/Frontend-Bezug fehlt komplett, obwohl das Team Angular macht.
+    Kein eigenes Modul nötig, aber eine Randnotiz (z. B. in Modul 6): Wie spricht
+    ein Frontend mit einem Agent-Backend (Streaming/SSE, Zwischenstatus anzeigen,
+    Approval-UI für Human-in-the-Loop)? Holt die Frontend-Leute ab.
+
+B8  Optional (Kann): A2A (Agent-to-Agent-Protokoll) als Randnotiz in Modul 5 –
+    Inter-Agent-Kommunikation wird in Security (OWASP) erwähnt, das passende
+    Standardisierungs-Pendant zu MCP aber nicht.
+
+
+C · HARNESS: ABDECKUNG UND ERKLÄRUNGSQUALITÄT
+--------------------------------------------------------------------------------
+Die sechs Kernbausteine (Memory, Tools, Skills, MCP, Observability, Guardrails)
+sind vorhanden, sauber abgegrenzt (gute Tool/Skill/MCP-Box!) und mit eigenen
+Vertiefungsmodulen (8, 9, 11) verzahnt. Die USB-C-Analogie für MCP funktioniert.
+Die entschärften Formulierungen ("austauschbarer, aber nicht irrelevant",
+Harness-Begriffseinordnung) sind korrekt und wohltuend unhype-ig.
+
+Lücken aus meiner Sicht:
+C1  Modul 4 kündigt selbst mehr an, als es liefert: "Kontext-Management,
+    State-Persistenz, Fehlerbehandlung" werden als Harness-Bestandteile genannt.
+    State kommt in Modul 9, Kontext in 6/10 – ok mit Verweis. Fehlerbehandlung
+    hängt in der Luft (siehe B6).
+C2  Der System-Prompt / die Instruktionsebene fehlt als expliziter Baustein.
+    In der Praxis ist er ein zentrales Harness-Element (Rolle, Regeln, Grenzen)
+    – die Labs nutzen ihn sogar (Schritt 4), das Konzeptmodul nennt ihn nicht.
+C3  Sandbox/Ausführungsumgebung (wo laufen Tools? Container? Rechte?) wird nur
+    in Security gestreift; ein Satz in Modul 4 würde den Bogen schlagen.
+Fazit: Abdeckung ~85 %, Erklärungen gut. C1-C3 sind kleine Ergänzungen, kein
+neues Modul.
+
+
+D · STRUKTUR UND AUFBAU
+--------------------------------------------------------------------------------
+Die Grundlinie ist logisch und didaktisch richtig: Konzepte (1-4) → Architektur
+(5) → Bauen (6) → sofort anwenden (7) → Betrieb/Härtung (8-11) → Abschluss (12).
+Das Lab direkt nach "Bauen" ist eine gute Entscheidung (Aktivierung zur Halbzeit).
+
+Was ich anders machen würde:
+D1  Part-Beschriftungen auf der Startseite sind inkonsistent:
+    Part B heisst "Architekturen", enthält aber "Agenten bauen" (= Praxis);
+    Part C heisst "Bauen, Betreiben, Absichern", obwohl Bauen in B liegt.
+    Vorschlag: A "Grundlagen & Konzepte" (1-4) · B "Architektur & Bau" (5-6) ·
+    C "Hands-On" (7) · D "Betreiben & Absichern" (8-11) · E "Abschluss" (12).
+D2  Reihenfolge 9/10 überdenken: "Fallstricke" (10) wirkt stärker VOR
+    "Produktion: State & Oversight" (9) – erst das Problem (Cascading Errors,
+    Context-Decay, Set-and-Forget), dann die Antworten (Checkpoints, Budgets,
+    Oversight). Aktuell liefert 9 Lösungen für Probleme, die erst 10 aufmacht.
+    Kein Muss, aber der natürlichere Spannungsbogen.
+D3  Viele Vorwärtsverweise ("mehr in Modul 11") sind okay, aber ein kleines
+    Lernpfad-Diagramm auf der Startseite (die 4 Teile als Reise) würde die
+    Klammer sichtbar machen, bevor man sie liest.
+D4  Redundanz auf der Startseite: Hero-Text und "Worum es geht"-Kasten sagen
+    zweimal fast dasselbe. Zusammenführen und den gewonnenen Platz für die
+    Team-Motivation nutzen (siehe E).
+
+
+E · LEAD-IN: VERSTÄNDLICH, ABER "WIESO WIR?" FEHLT
+--------------------------------------------------------------------------------
+Der Hero ("vom Buzzword zum Handwerk") ist einladend, gut geschrieben und macht
+Lust – das Kriterium "verständlich" ist erfüllt. Was fehlt, ist die Motivation,
+warum SICH DIESES TEAM JETZT damit befasst. Ein Teilnehmer, der kalt auf die URL
+kommt, erfährt nicht:
+  - dass dieses Self-Learning den Juli-Fachblock ersetzt (Kontext/Verbindlichkeit),
+  - warum das Thema für unsere Arbeit relevant ist (Kundenprojekte werden
+    Agenten-Features verlangen; der Markt bewegt sich vom Modell zum Harness –
+    und Harness-Engineering ist klassisches Software-Engineering, also genau
+    unser Handwerk; mit Spring AI ist der Einstieg in unserem Stack da),
+  - dass wir als Entwickler täglich schon Agenten benutzen (Coding-Assistenten)
+    und verstehen sollten, was darin passiert,
+  - was man danach konkret kann (mitreden, bewerten, ersten Agenten bauen).
+Empfehlung: 3-4 Sätze "Warum dieses Thema, warum jetzt, warum wir" zwischen Hero
+und Modulliste – persönlich formuliert, ohne Buzzword-Alarm. Das ist der
+wichtigste inhaltliche Einzelpunkt für V3.
+
+
+F · QUIZZES
+--------------------------------------------------------------------------------
+Das Schema (Verständnis / Szenario / Diagnose / "Was nicht tun") ist konsequent
+umgesetzt und passt zum Senior-Publikum. Technisch alles korrekt (s. o.).
+F1  Schwäche: Das Final-Quiz recycelt 5 von 7 Fragen fast wörtlich aus den
+    Modulen (Kontrollfluss, Reklamations-Szenario, Swarm-Diagnose, 0.95^10,
+    Deploy-Verlust). Wer die Module gemacht hat, erkennt statt zu transferieren.
+    Für V3: mindestens 3 neue modulübergreifende Kombifragen (z. B. ein Szenario,
+    das Architekturwahl + Permission + Eval-Gate gleichzeitig verlangt).
+F2  Bestehens-Schwelle einheitlich 60 % – für 4-Fragen-Quizzes heisst das 3/4;
+    passt. Nur die "6 von 7"-Formulierung im Abschluss widerspricht (A6).
+
+
+G · FAKTEN-CHECK / AKTUALITÄT (Stand 06.07.2026)
+--------------------------------------------------------------------------------
+G1  Spring AI: Die Projektseite führt inzwischen 2.0.0 als aktuelle Version –
+    die Aussage "2.0.0 (GA, 2026)" ist damit haltbar. ABER: Der verlinkte
+    Blogpost in Modul 6 ist die RC1-Ankündigung (06.06.2026) und als "Spring AI
+    2.0 Ankündigung" beschriftet. Link auf GA-Announcement/Release Notes
+    aktualisieren. Inhaltlich korrekt bestätigt: ToolCallAdvisor →
+    ToolCallingAdvisor (alt deprecated).
+G2  Wichtig für die Code-Glaubwürdigkeit: RC1 hat die Tool-API spürbar
+    umgebaut (toolNames()-API entfernt; .tools() akzeptiert ToolCallbacks/
+    Provider direkt; Memory-Advisor liegt jetzt standardmässig AUSSERHALB des
+    Tool-Loops). Die gezeigten Fragmente sind plausibel, wurden aber nie
+    kompiliert. Für V3: die zwei Snippets + Lab 2 einmal real gegen 2.0.0
+    bauen ("getestet mit" dann guten Gewissens).
+G3  GitHub-Models-Limits ("~50 Calls/Tag") und Flowise-UI-Beschreibungen sind
+    naturgemäss volatil → "Stand Juni 2026" dazuschreiben und vor Publikation
+    einmal real durchspielen. Generell: Lab 1 wurde nie end-to-end getestet;
+    echte Screenshots pro Schritt wären der grösste Qualitätssprung fürs Lab.
+G4  Weiche Behauptung in Modul 5: "Supervisor (2026 der Produktions-Default)" –
+    schwer belegbar, besser "in der Praxis das verbreitetste Muster".
+G5  Externe Links (24 unique): Auswahl ist hochwertig und kanonisch (Anthropic,
+    OWASP, MCP, LangChain/LangGraph, OpenAI SDK, Langfuse, IBM, DeepLearning.AI).
+    Spring-Links verifiziert (ok, s. G1). Übrige Links vor Publikation einmal
+    maschinell auf Erreichbarkeit prüfen (insb. die zwei YouTube-IDs und
+    github.com/ai-boost/awesome-harness-engineering).
+
+
+H · VORGEHEN FÜR V3 (Empfehlung)
+--------------------------------------------------------------------------------
+Prinzip: V3 = chirurgische Iteration auf V2. Kopie nach agentic-ai-cbt-v3,
+Root-Weiche (index.html) erst nach Abnahme umstellen. Reihenfolge:
+
+ Schritt 1 · Technische Basis heilen (A1-A5)
+   styles.css vollständig neu erzeugen, Extra-</div> in Modul 9, Null-Bytes in
+   index.html, Umlaut-Entities in cbt.js, Footer vereinheitlichen.
+   Wichtig als Arbeitsweise: Nach jedem Schreiben die Datei per Read-Gegenprobe
+   verifizieren (Ursache der V2-Defekte war genau das Sync-Problem).
+
+ Schritt 2 · Lead-in neu texten (E) und Startseite straffen (D4)
+   "Warum wir, warum jetzt" + Hinweis Juli-Selflearning. Grösster Hebel,
+   kleinster Aufwand.
+
+ Schritt 3 · Inhalts-Ergänzungen einpassen (B1-B7, C1-C3)
+   RAG-Kasten, Coding-Agent-Bezug, Glossar, LLM-Call-Anatomie-Diagramm,
+   Fehlerbehandlung + System-Prompt als Harness-Bausteine, Angular-Randnotiz.
+   Alles als Kästen/Unterabschnitte – keine neue Modulnummerierung nötig.
+
+ Schritt 4 · Struktur-Feinschliff (D1-D2)
+   Part-Labels korrigieren; optional Module 9/10 tauschen (dann Verweise und
+   Nummerierung konsistent nachziehen).
+
+ Schritt 5 · Verifikation mit echtem Durchlauf (G2, G3)
+   Spring-AI-Snippets gegen 2.0.0 kompilieren; Lab 1 einmal real in Flowise
+   durchspielen und pro Schritt einen Screenshot einbetten. Das ist der
+   aufwendigste, aber wertvollste Schritt (Gelinggarantie fürs Team).
+
+ Schritt 6 · Final-Quiz erneuern (F1), Zahlen/Fakten angleichen (A6, G1, G4)
+
+ Schritt 7 · QS vor Publikation
+   Automatisch: Quiz-Index-/Div-/Encoding-Checks (Skripte aus diesem Review
+   wiederverwendbar), Link-Checker, HTML-Validierung.
+   Manuell: Smoke-Test hell/dunkel + mobil, ein kompletter Lern-Durchlauf.
+   Dann 1-2 Kollegen als Beta-Leser, erst danach Root-Weiche auf v3 und Push.
+
+ Priorisierung:
+   MUSS  = Schritte 1, 2, A6, G1, D1
+   SOLL  = B1-B6, C1-C2, F1, Schritt 5 (mind. Spring-Code kompilieren)
+   KANN  = B7, B8, C3, D2/D3, Screenshots im Lab
+
+================================================================================
+Ende des Reviews.
