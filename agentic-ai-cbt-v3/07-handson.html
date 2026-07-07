@@ -16,12 +16,12 @@
   <div class="page-head">
     <span class="eyebrow"><span class="num">7</span> Hands-On</span>
     <h1 class="page-title">Hands-On Labs</h1>
-    <p class="lede">Genug Theorie. <strong>Lab 1</strong> ist Pflicht und geführt – ein einziger, getesteter Pfad mit Erfolgsgarantie. <strong>Lab 2</strong> ist optional für den Transfer in unseren Java/Spring-Stack.</p>
+    <p class="lede">Genug Theorie. <strong>Lab 1</strong> ist Pflicht und geführt – ein einziger, möglichst robuster und getesteter Pfad. <strong>Lab 2</strong> ist optional für den Transfer in unseren Java/Spring-Stack.</p>
   </div>
 
   <div class="box note reveal">
     <div class="t">Warum nur ein Pfad?</div>
-    <p>Statt mehrerer Wege, die nur Varianz und Frust erzeugen, gibt es <b>genau einen</b> getesteten Pfad: <b>genau ein</b> Tool (Flowise), <b>genau ein</b> Werkzeug (Calculator), <b>keine</b> Websuche (die bräuchte Zusatz-Keys). So bist du in ~20 Minuten durch und siehst den Agent-Loop garantiert live. (UI-Beschriftungen und Limits: Stand Juli 2026 – Details können sich ändern.)</p>
+    <p>Statt mehrerer Wege, die nur Varianz und Frust erzeugen, gibt es <b>genau einen</b> getesteten Pfad: <b>genau ein</b> Tool (Flowise), <b>genau ein</b> Werkzeug (Calculator), <b>keine</b> Websuche (die bräuchte Zusatz-Keys). So bist du in ~20 Minuten durch und siehst den Agent-Loop live – und falls doch etwas klemmt (Firewall, Node-Version, PAT-Policy), hilft die Troubleshooting-Box unten. (UI-Beschriftungen und Limits: Stand Juli 2026 – Details können sich ändern.)</p>
   </div>
 
   <!-- ===================== LAB 1 ===================== -->
@@ -31,7 +31,7 @@
   <h3>Schritt 0 · Flowise starten</h3>
   <p>Du hast zwei gleichwertige Optionen – nimm die, die auf deinem Gerät erlaubt ist:</p>
   <ul>
-    <li><strong>Lokal (empfohlen, wenn Node ≥ 18 vorhanden):</strong> Terminal öffnen, <code class="inline">npx flowise start</code> ausführen, dann <code class="inline">http://localhost:3000</code> im Browser öffnen.</li>
+    <li><strong>Lokal (empfohlen mit Node 20 LTS oder neuer):</strong> Terminal öffnen, <code class="inline">npx flowise start</code> ausführen, dann <code class="inline">http://localhost:3000</code> im Browser öffnen. Node 18.15+ kann funktionieren – bei Problemen aber nicht lange knobeln, sondern den Cloud-Tier nehmen.</li>
     <li><strong>Cloud:</strong> bei <a href="https://flowiseai.com/" target="_blank" rel="noopener">flowiseai.com</a> den kostenlosen Cloud-Tier nutzen (Login nötig).</li>
   </ul>
   <p class="reveal"><b>Erwartetes Ergebnis:</b> Du siehst die Flowise-Oberfläche mit einer leeren Liste von „Chatflows"/„Agentflows".</p>
@@ -39,14 +39,19 @@
   <h3>Schritt 1 · Modell-Zugang (Credential) hinterlegen</h3>
   <p>Du brauchst Zugang zu <em>einem</em> Chat-Modell. Am einfachsten und <b>kostenlos</b>: <strong>GitHub Models</strong> – ihr habt den GitHub-Account ja ohnehin, keine Kreditkarte nötig (Empfehlung unten). Alternativ ein API-Key mit Gratis-/Restguthaben bei OpenAI, Anthropic oder Google. <em>→ Das ist Schicht 1 aus Modul 3: das Gehirn.</em></p>
 
+  <div class="box warn reveal">
+    <div class="t">Vorab: nur Lab-Daten &amp; Wegwerf-Token</div>
+    <p>Bevor du gleich ein Token erzeugst: Verwende ein <b>persönliches Wegwerf-/Lab-Token</b> und ausschliesslich Testdaten – <b>keine</b> Firmen- oder Kundendaten, <b>keine</b> produktiven API-Keys. Ein Lab-Token reicht vollständig. (Warum das wichtig ist, klärt Modul 11.)</p>
+  </div>
+
   <div class="box tip reveal">
     <div class="t">Empfohlen: kostenlos mit GitHub Models</div>
     <p>GitHub Models ist OpenAI-kompatibel – man hängt es in Flowise einfach an den <b>ChatOpenAI</b>-Knoten und überschreibt die Basis-URL. So geht's:</p>
     <p>
       <b>1. Token erzeugen:</b> GitHub → <i>Settings → Developer settings → Personal access tokens → Fine-grained tokens</i> → neuen Token mit Scope <code class="inline">models:read</code> erstellen.<br>
       <b>2. In Flowise:</b> als Modell-Knoten <b>ChatOpenAI</b> wählen (nicht den Anthropic/Google-Knoten). In den Credentials den Token als „OpenAI API Key" eintragen.<br>
-      <b>3. Basis-URL überschreiben:</b> im Knoten das Feld <i>Base Path / BasePath</i> (manchmal unter „Additional Parameters") auf <code class="inline">https://models.github.ai/inference</code> setzen.<br>
-      <b>4. Modell wählen:</b> z. B. <code class="inline">gpt-4o-mini</code> oder <code class="inline">openai/gpt-4o-mini</code> (Schreibweise je nach Flowise-Version; im GitHub-Models-Katalog steht die exakte Modell-ID).
+      <b>3. Basis-URL überschreiben:</b> im Knoten das Feld <i>Base Path / BasePath</i> auf <code class="inline">https://models.github.ai/inference</code> setzen. Falls du das Feld nicht siehst: ChatOpenAI-Knoten öffnen, <i>Additional Parameters</i> aufklappen und dort nach <i>Base Path / Base URL</i> suchen (Name variiert je nach Flowise-Version).<br>
+      <b>4. Modell wählen:</b> bevorzugt <code class="inline">openai/gpt-4o-mini</code> bzw. <code class="inline">gpt-4o-mini</code> (Schreibweise je nach Flowise-Version). Wichtig: Nimm ein Modell, das <b>Tool-/Function-Calling</b> unterstützt – nicht jedes Modell im Katalog kann das gleich zuverlässig, und ohne Tool-Support scheitert Schritt 5. Exakte Modell-IDs und Verfügbarkeit im aktuellen GitHub-Models-Katalog prüfen.
     </p>
     <p style="margin-bottom:0"><b>Zu den Limits – wichtig (Stand Juli 2026):</b> Bei GitHub Models sind nur <b>~50 API-Calls pro Tag kostenfrei</b> (Richtwert für GPT-4o; variiert je nach Modell und GitHub-Plan). Das gilt <b>pro Person</b> – jeder nutzt sein eigenes Token, es ist kein geteilter Topf. Für dieses Lab reicht das locker: Ein Durchlauf braucht nur ~2–4 Calls, also ~15–25 Testläufe pro Tag. Tipp: <code class="inline">gpt-4o-mini</code> wählen – meist höheres Limit und für den Calculator-Agenten mehr als schlau genug. Für <i>echte</i> Agenten mit langen Loops wären 50/Tag zu wenig; dafür gibt es kostenpflichtige Nutzung mit Budget. Token wie ein Passwort behandeln – nicht ins Repo committen.</p>
   </div>
@@ -73,6 +78,8 @@
   <h3>Schritt 5 · Testen – das Tool erzwingen</h3>
   <p>Chat öffnen und fragen: <code class="inline">Was ist 1348 × 27 + 99?</code></p>
   <p class="reveal"><b>Erwartetes Ergebnis:</b> Die Antwort lautet <b>36 495</b>. Wichtiger als die Zahl: im Verlauf/Log siehst du, dass der Agent das <i>Calculator</i>-Tool aufgerufen hat (mit dem Ausdruck als Parameter) und erst <em>danach</em> geantwortet hat.</p>
+  <p>Stelle danach noch eine zweite Frage, die ein Modell „im Kopf" kaum sicher löst: <code class="inline">Rechne 17.5 % von 2840 und addiere 123.45.</code></p>
+  <p class="reveal"><b>Erwartetes Ergebnis:</b> <b>620.45</b> (497 + 123.45) – wieder mit sichtbarem Calculator-Aufruf. Genau dafür sind Tools da: exakte Arithmetik ist keine Stärke von Sprachmodellen, und hier merkt man den Unterschied deutlicher als bei einer glatten Multiplikation.</p>
 
   <h3>Schritt 6 · Den Loop sichtbar machen</h3>
   <p>Öffne die Detailansicht des letzten Laufs (in Flowise meist „View Messages" / das Log-/Trace-Panel). Du erkennst die Sequenz:</p>
@@ -90,7 +97,7 @@
     <p>
       <b>„Invalid API key" / 401:</b> Credential aus Schritt 1 nochmals prüfen; richtigen Anbieter im Modell-Knoten gewählt? Key ohne Leerzeichen eingefügt?<br><br>
       <b>Agent antwortet, ohne das Tool zu nutzen:</b> System-Prompt schärfen („nutze <i>immer</i> das Calculator-Tool für Rechnungen"); prüfen, ob das Tool wirklich mit dem Agenten verbunden ist (Linie im Canvas).<br><br>
-      <b><code class="inline">npx flowise start</code> hängt oder bricht ab:</b> Node-Version prüfen (<code class="inline">node -v</code> ≥ 18); Firmen-Firewall/Proxy kann npx blockieren → dann den Cloud-Tier nehmen.<br><br>
+      <b><code class="inline">npx flowise start</code> hängt oder bricht ab:</b> Node-Version prüfen (<code class="inline">node -v</code> – empfohlen 20 LTS oder neuer, mindestens 18.15); Firmen-Firewall/Proxy kann npx blockieren → dann den Cloud-Tier nehmen.<br><br>
       <b>Port 3000 belegt:</b> <code class="inline">npx flowise start --PORT=3100</code> und <code class="inline">http://localhost:3100</code> öffnen.<br><br>
       <b>Kein API-Key verfügbar:</b> Viele Anbieter geben Gratis-Startguthaben; sonst Kollegen fragen oder den Cloud-Tier mit dortigem Free-Kontingent nutzen.
     </p>
@@ -207,8 +214,8 @@ DEBUG o.s.a.tool  : tool result: versandt am 24.06.
   </div>
 
   <div class="box warn reveal">
-    <div class="t">Bitte beachten</div>
-    <p>Nutze für beide Labs <b>keine</b> echten Firmen-/Kundendaten und keine produktiven API-Keys. Ein Wegwerf-Key mit Gratis-Guthaben und Spielzeug-Eingaben genügt. Warum das wichtig ist, klärt Modul 11 (Security).</p>
+    <div class="t">Zur Erinnerung</div>
+    <p>Wie schon bei Lab 1: auch für Lab 2 nur Wegwerf-Keys und Spielzeug-Daten – keine Firmen-/Kundendaten, keine produktiven API-Keys (Modul 11).</p>
   </div>
 
   <div class="goals reveal">
