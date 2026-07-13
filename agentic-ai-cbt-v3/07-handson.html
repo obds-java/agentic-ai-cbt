@@ -21,7 +21,7 @@
 
   <div class="box note reveal">
     <div class="t">Warum nur ein Pfad?</div>
-    <p>Statt mehrerer Wege, die nur Varianz und Frust erzeugen, gibt es <b>genau einen</b> getesteten Pfad: <b>genau ein</b> Tool (Flowise), <b>genau ein</b> Werkzeug (Calculator), <b>keine</b> Websuche (die bräuchte Zusatz-Keys). So bist du in ~20 Minuten durch und siehst den Agent-Loop live – und falls doch etwas klemmt (Firewall, Node-Version, PAT-Policy), hilft die Troubleshooting-Box unten. (UI-Beschriftungen und Limits: Stand Juli 2026 – Details können sich ändern.)</p>
+    <p>Statt mehrerer Wege, die nur Varianz und Frust erzeugen, gibt es <b>genau einen</b> getesteten Pfad: <b>genau ein</b> Tool (Flowise, fixiert auf <b>Version 3.1.3</b>), <b>genau ein</b> Werkzeug (Calculator), <b>keine</b> Websuche (die bräuchte Zusatz-Keys). Der Pfad wurde von einem Kollegen aus dem Team real durchgespielt. So bist du in ~20 Minuten durch und siehst den Agent-Loop live – und falls doch etwas klemmt, hilft die Troubleshooting-Box unten. (UI-Beschriftungen und Limits: Stand Juli 2026.)</p>
   </div>
 
   <!-- ===================== LAB 1 ===================== -->
@@ -29,12 +29,21 @@
   <p><b>Ziel:</b> Du baust einen Chat-Agenten, der selbstständig ein Rechen-Tool aufruft, und siehst im Log die Abfolge <i>denken → Tool rufen → Ergebnis → antworten</i>. Dauer ~20 Min, kostenlos.</p>
 
   <h3>Schritt 0 · Flowise starten</h3>
-  <p>Du hast zwei gleichwertige Optionen – nimm die, die auf deinem Gerät erlaubt ist:</p>
-  <ul>
-    <li><strong>Lokal (empfohlen mit Node 20 LTS oder neuer):</strong> Terminal öffnen, <code class="inline">npx flowise start</code> ausführen, dann <code class="inline">http://localhost:3000</code> im Browser öffnen. Node 18.15+ kann funktionieren – bei Problemen aber nicht lange knobeln, sondern den Cloud-Tier nehmen.</li>
-    <li><strong>Cloud:</strong> bei <a href="https://flowiseai.com/" target="_blank" rel="noopener">flowiseai.com</a> den kostenlosen Cloud-Tier nutzen (Login nötig).</li>
-  </ul>
-  <p class="reveal"><b>Erwartetes Ergebnis:</b> Du siehst die Flowise-Oberfläche mit einer leeren Liste von „Chatflows"/„Agentflows".</p>
+  <p><strong>Empfohlener Weg: Docker mit fixierter Version.</strong> Damit umgehst du sämtliche Node-Versionsprobleme und hast garantiert dieselbe Flowise-Version wie diese Anleitung:</p>
+  <div class="codeblock reveal">
+    <div class="codehead"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname">Terminal</span><span class="ver">Flowise 3.1.3</span></div>
+<pre><code>docker run -d \
+  --name flowise \
+  -p 3000:3000 \
+  -v "$HOME/.flowise:/root/.flowise" \
+  flowiseai/flowise:3.1.3</code></pre>
+  </div>
+  <p>Danach <code class="inline">http://localhost:3000</code> im Browser öffnen (der erste Start kann eine Minute dauern). Das Volume sorgt dafür, dass deine Flows einen Container-Neustart überleben. <b>Kein Docker auf dem Gerät?</b> Dann nimm den kostenlosen Cloud-Tier auf <a href="https://flowiseai.com/" target="_blank" rel="noopener">flowiseai.com</a> (Login nötig) – gleiche Übung, keine Installation.</p>
+  <div class="box warn reveal">
+    <div class="t">Bitte nicht: npx-Roulette</div>
+    <p>Von <code class="inline">npx flowise start</code> raten wir für dieses Lab ab: Flowise 3.1.x bringt eine native Abhängigkeit (better-sqlite3) mit, die je nach Node-Version (z. B. Node 24) den Start verweigert – das kostet genau die Tüftelzeit, die dieses Lab vermeiden will. Docker oder Cloud, fertig.</p>
+  </div>
+  <p class="reveal"><b>Erwartetes Ergebnis:</b> Du siehst die Flowise-Oberfläche; in der Seitenleiste gibt es u. a. „Agentflows" und „Chatflows" (beide Listen noch leer).</p>
 
   <h3>Schritt 1 · Modell-Zugang (Credential) hinterlegen</h3>
   <p>Du brauchst Zugang zu <em>einem</em> Chat-Modell. Am einfachsten und <b>kostenlos</b>: <strong>GitHub Models</strong> – ihr habt den GitHub-Account ja ohnehin, keine Kreditkarte nötig (Empfehlung unten). Alternativ ein API-Key mit Gratis-/Restguthaben bei OpenAI, Anthropic oder Google. <em>→ Das ist Schicht 1 aus Modul 3: das Gehirn.</em></p>
@@ -49,7 +58,7 @@
     <p>GitHub Models ist OpenAI-kompatibel – man hängt es in Flowise einfach an den <b>ChatOpenAI</b>-Knoten und überschreibt die Basis-URL. So geht's:</p>
     <p>
       <b>1. Token erzeugen:</b> GitHub → <i>Settings → Developer settings → Personal access tokens → Fine-grained tokens</i> → neuen Token mit Scope <code class="inline">models:read</code> erstellen.<br>
-      <b>2. In Flowise:</b> als Modell-Knoten <b>ChatOpenAI</b> wählen (nicht den Anthropic/Google-Knoten). In den Credentials den Token als „OpenAI API Key" eintragen.<br>
+      <b>2. In Flowise:</b> als Chat-Modell <b>ChatOpenAI</b> wählen (nicht Anthropic/Google) – in Flowise 3.x direkt im Agent-Knoten (Schritt 3). In den Credentials den Token als „OpenAI API Key" eintragen.<br>
       <b>3. Basis-URL überschreiben:</b> im Knoten das Feld <i>Base Path / BasePath</i> auf <code class="inline">https://models.github.ai/inference</code> setzen. Falls du das Feld nicht siehst: ChatOpenAI-Knoten öffnen, <i>Additional Parameters</i> aufklappen und dort nach <i>Base Path / Base URL</i> suchen (Name variiert je nach Flowise-Version).<br>
       <b>4. Modell wählen:</b> bevorzugt <code class="inline">openai/gpt-4o-mini</code> bzw. <code class="inline">gpt-4o-mini</code> (Schreibweise je nach Flowise-Version). Wichtig: Nimm ein Modell, das <b>Tool-/Function-Calling</b> unterstützt – nicht jedes Modell im Katalog kann das gleich zuverlässig, und ohne Tool-Support scheitert Schritt 5. Exakte Modell-IDs und Verfügbarkeit im aktuellen GitHub-Models-Katalog prüfen.
     </p>
@@ -65,15 +74,24 @@
   <p class="reveal"><b>Erwartetes Ergebnis:</b> Die Credential erscheint gespeichert in der Liste; sie lässt sich später im Knoten auswählen.</p>
 
   <h3>Schritt 2 · Einen Agentflow anlegen</h3>
-  <p>Neuen Flow erstellen und eine <strong>Agent</strong>-Vorlage wählen (nicht einen reinen „Conversation Chain"-Chatflow). Kern-Knoten ist ein <i>Tool Agent</i> / <i>AgentExecutor</i>, dem du dein Chatmodell aus Schritt 1 zuweist. <em>→ Das ist Schicht 2: der Loop.</em></p>
-  <p class="reveal"><b>Erwartetes Ergebnis:</b> Im Canvas liegt ein Agent-Knoten, der ein „Chat Model" als Eingang erwartet.</p>
+  <p>In der Seitenleiste <strong>Agentflows</strong> öffnen → <i>Add New</i>. Du bekommst einen Canvas mit einem <b>Start</b>-Knoten. Füge einen <strong>Agent</strong>-Knoten hinzu (über das +/Knoten-Menü) – er wird automatisch mit Start verbunden. <em>→ Das ist Schicht 2: der Loop.</em></p>
+  <p class="reveal"><b>Erwartetes Ergebnis:</b> Im Canvas stehen Start → Agent. Mehr Knoten brauchst du nicht.</p>
 
-  <h3>Schritt 3 · Das Calculator-Tool verbinden</h3>
-  <p>Zieh den Knoten <strong>Calculator</strong> in den Canvas und verbinde ihn mit dem Tool-Eingang des Agenten. Sonst nichts – keine Websuche, keine Vektor-DB. <em>→ Ein Tool aus dem Harness (Modul 4), bewusst minimal.</em></p>
-  <p class="reveal"><b>Erwartetes Ergebnis:</b> Der Agent listet „Calculator" als verfügbares Tool.</p>
+  <h3>Schritt 3 · Den Agent-Knoten konfigurieren: Modell + Calculator</h3>
+  <p>Wichtig zu wissen: In Flowise 3.x (Agentflow V2) wird <b>alles im Agent-Knoten selbst</b> konfiguriert – Modell, Tools und System-Prompt. Es gibt keine separaten Knoten zu verbinden. Klick also auf den Agent-Knoten und stelle ein:</p>
+  <ul>
+    <li><strong>Model:</strong> <i>ChatOpenAI</i> wählen, deine Credential aus Schritt 1 zuweisen; bei GitHub Models zusätzlich Base Path und Modell-ID setzen (siehe Kasten in Schritt 1).</li>
+    <li><strong>Tools:</strong> auf <i>Add Tool</i> (bzw. das Tools-Feld) klicken und <b>Calculator</b> hinzufügen. Sonst nichts – keine Websuche, keine Vektor-DB. <em>→ Ein Tool aus dem Harness (Modul 4), bewusst minimal.</em></li>
+  </ul>
+  <p class="reveal"><b>Erwartetes Ergebnis:</b> Im Agent-Knoten sind ein Modell (mit Credential) und das Tool „Calculator" eingetragen.</p>
+
+  <div class="box note reveal">
+    <div class="t">Deine Flowise-UI sieht anders aus?</div>
+    <p>Ältere Flowise-Versionen (bzw. der „Chatflows"-Bereich) arbeiten mit <b>separaten Knoten</b>, die man verbindet: ein <i>Tool Agent</i>-Knoten, daran ein <i>ChatOpenAI</i>-Knoten als Chat Model und ein <i>Calculator</i>-Knoten am Tool-Eingang. Das Ergebnis ist dasselbe. Wenn deine Oberfläche nicht zur Anleitung passt, prüfe zuerst die Version – mit dem Docker-Befehl aus Schritt 0 (3.1.3) stimmt sie garantiert überein.</p>
+  </div>
 
   <h3>Schritt 4 · System-Prompt setzen</h3>
-  <p>Gib dem Agenten ein kurzes Ziel, z. B.: <code class="inline">Du bist ein hilfreicher Assistent. Nutze das Calculator-Tool für jede Rechnung, statt selbst zu rechnen.</code> Flow speichern. <em>→ Die Instruktionsebene aus Modul 4 – du wirst gleich sehen, wie stark sie wirkt.</em></p>
+  <p>Ebenfalls im Agent-Knoten: Trage im Feld <i>Instructions</i> / <i>System Prompt</i> ein kurzes Ziel ein, z. B.: <code class="inline">Du bist ein hilfreicher Assistent. Nutze das Calculator-Tool für jede Rechnung, statt selbst zu rechnen.</code> Flow speichern. <em>→ Die Instruktionsebene aus Modul 4 – du wirst gleich sehen, wie stark sie wirkt.</em></p>
 
   <h3>Schritt 5 · Testen – das Tool erzwingen</h3>
   <p>Chat öffnen und fragen: <code class="inline">Was ist 1348 × 27 + 99?</code></p>
@@ -95,10 +113,12 @@
   <div class="box bug reveal">
     <div class="t">Troubleshooting</div>
     <p>
-      <b>„Invalid API key" / 401:</b> Credential aus Schritt 1 nochmals prüfen; richtigen Anbieter im Modell-Knoten gewählt? Key ohne Leerzeichen eingefügt?<br><br>
-      <b>Agent antwortet, ohne das Tool zu nutzen:</b> System-Prompt schärfen („nutze <i>immer</i> das Calculator-Tool für Rechnungen"); prüfen, ob das Tool wirklich mit dem Agenten verbunden ist (Linie im Canvas).<br><br>
-      <b><code class="inline">npx flowise start</code> hängt oder bricht ab:</b> Node-Version prüfen (<code class="inline">node -v</code> – empfohlen 20 LTS oder neuer, mindestens 18.15); Firmen-Firewall/Proxy kann npx blockieren → dann den Cloud-Tier nehmen.<br><br>
-      <b>Port 3000 belegt:</b> <code class="inline">npx flowise start --PORT=3100</code> und <code class="inline">http://localhost:3100</code> öffnen.<br><br>
+      <b>„Invalid API key" / 401:</b> Credential aus Schritt 1 nochmals prüfen; richtigen Modell-Typ (ChatOpenAI) gewählt? Key ohne Leerzeichen eingefügt?<br><br>
+      <b>Agent antwortet, ohne das Tool zu nutzen:</b> System-Prompt schärfen („nutze <i>immer</i> das Calculator-Tool für Rechnungen"); prüfen, ob Calculator im Agent-Knoten unter <i>Tools</i> wirklich eingetragen ist. Bei GitHub Models: unterstützt dein gewähltes Modell Tool-Calling? Im Zweifel <code class="inline">openai/gpt-4o-mini</code> nehmen.<br><br>
+      <b>Die UI passt nicht zur Anleitung:</b> Du hast vermutlich eine andere Flowise-Version (oder bist im „Chatflows"-Bereich statt „Agentflows"). Mit dem Docker-Befehl aus Schritt 0 bekommst du exakt Version 3.1.3 – oder nutze den Kasten „Deine Flowise-UI sieht anders aus?" in Schritt 3.<br><br>
+      <b>Docker startet nicht / kein Docker erlaubt:</b> Nicht tüfteln → Cloud-Tier auf flowiseai.com nehmen.<br><br>
+      <b><code class="inline">npx flowise start</code> bricht ab (z. B. Fehler um better-sqlite3):</b> Bekanntes Problem mit neueren Node-Versionen (z. B. Node 24). Nicht debuggen – Docker-Befehl aus Schritt 0 verwenden.<br><br>
+      <b>Port 3000 belegt:</b> im Docker-Befehl <code class="inline">-p 3100:3000</code> verwenden und <code class="inline">http://localhost:3100</code> öffnen.<br><br>
       <b>Kein API-Key verfügbar:</b> Viele Anbieter geben Gratis-Startguthaben; sonst Kollegen fragen oder den Cloud-Tier mit dortigem Free-Kontingent nutzen.
     </p>
   </div>
@@ -126,7 +146,7 @@
 
   <div class="box warn reveal">
     <div class="t">Voraussetzungen &amp; Version</div>
-    <p>JDK 17+, Maven, ein LLM-API-Key als Umgebungsvariable. Geschrieben für <b>Spring AI 2.0.0</b> und <b>Spring Boot 3.4.x</b>. Da sich die API bewegt: Bei Abweichungen die <a href="https://docs.spring.io/spring-ai/reference/" target="_blank" rel="noopener">Reference-Docs</a> deiner Version konsultieren.</p>
+    <p>JDK 17+, Maven, ein LLM-API-Key als Umgebungsvariable. Geschrieben für <b>Spring AI 2.0.0</b> auf <b>Spring Boot 4.0.x</b> – Spring AI 2.0.x setzt Boot 4.0/4.1 (Framework 7) voraus. <b>Läuft euer Projekt noch auf Boot 3.4/3.5?</b> Dann gehört ihr zur Spring-AI-<b>1.x</b>-Linie: <code class="inline">spring-ai-bom 1.1.x</code> verwenden – die hier gezeigten APIs (<code class="inline">@Tool</code>, ChatClient, Memory-Advisor) sind dort weitgehend identisch. Bei Abweichungen die <a href="https://docs.spring.io/spring-ai/reference/" target="_blank" rel="noopener">Reference-Docs</a> eurer Version konsultieren.</p>
   </div>
 
   <h3>1 · Abhängigkeiten (pom.xml, Auszug)</h3>
