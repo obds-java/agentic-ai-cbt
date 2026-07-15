@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>7 · Hands-On Labs — Agentic AI CBT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-mod="handson">
+
+<main class="wrap">
+
+  <div class="page-head">
+    <span class="eyebrow"><span class="num">7</span> Hands-On</span>
+    <h1 class="page-title">Hands-On Labs</h1>
+    <p class="lede">Genug Theorie – jetzt baust du selbst. In den letzten sechs Modulen hast du gelernt, was einen Agenten ausmacht: der Loop (Modul 2), die Schichten LLM · Agent · Harness (Modul 3) und die Tools als Hände des Agenten (Modul 4). All das siehst du jetzt live, an einem Agenten, den du in ~30–40 Minuten selbst zusammensteckst.</p>
+  </div>
+
+  <div class="box note reveal">
+    <div class="t">So läuft dieses Modul</div>
+    <p><strong>Lab 1</strong> ist Pflicht und geführt: ein einziger, klar beschriebener Pfad mit fixierter Flowise-Version, zwei kopierfertigen Tools und erwarteten Ergebnissen nach jedem Schritt – du musst nichts erfinden und nichts debuggen. <strong>Lab 2</strong> ist optional und überträgt dasselbe Konzept in unseren Java/Spring-Stack. Wenn etwas klemmt: Die Troubleshooting-Box am Ende von Lab 1 deckt die typischen Stolpersteine ab.</p>
+  </div>
+
+  <!-- ===================== LAB 1 ===================== -->
+  <h2><span class="sec">Lab 1</span> Flowise · Raumfinder-Agent mit zwei Tools <span class="tag good" style="font-size:12px;vertical-align:middle">Pflicht</span></h2>
+
+  <h3>Der Use Case</h3>
+  <p>Die Aufgabe ist bewusst alltäglich: Jemand sucht einen Meetingraum – bestimmtes Zeitfenster, Mindestanzahl Personen, gewünschte Ausstattung. Jeder kennt das Problem, niemand muss sich in eine fremde Fachdomäne eindenken.</p>
+  <p>Interessant wird es durch den Zuschnitt der Tools. Dein Agent bekommt <b>zwei</b> davon: <code class="inline">findAvailableRooms</code> liefert freie Räume mit Kapazität und Stockwerk – aber bewusst <em>ohne</em> Ausstattung. <code class="inline">getRoomEquipment</code> liefert die Ausstattung – aber immer nur für <em>einen</em> Raum. Kein einzelner Tool-Aufruf kann die Frage also beantworten. Der Agent muss selbst planen: erst Kandidaten suchen, dann deren Ausstattung einzeln prüfen, die Resultate vergleichen und eine begründete Empfehlung abgeben. Genau dieses Kombinieren mehrerer Tool-Aufrufe – der Loop aus Modul 2, mehrfach durchlaufen – ist der Kern von „agentisch". Und genau das wirst du nachher im Trace sehen.</p>
+  <p>Damit nichts dazwischenfunkt, läuft alles mit statischen, lokalen Daten: keine externen APIs, keine Datenbank, keine zusätzlichen Keys.</p>
+
+  <div class="goals">
+    <h4>Lernziele</h4>
+    <ul>
+      <li>sehen, wie ein Agent eine Anfrage in Zwischenschritte zerlegt und Tools selbst auswählt</li>
+      <li>beobachten, wie dasselbe Tool mehrfach mit anderen Parametern aufgerufen wird</li>
+      <li>im Trace prüfen, ob die Schlussfolgerung durch Tool-Resultate gedeckt ist</li>
+      <li>erleben, wie Tool-Beschreibungen das Verhalten steuern</li>
+    </ul>
+  </div>
+
+  <div class="box note reveal">
+    <div class="t">Warum genau dieser Zuschnitt?</div>
+    <p>Ein bewusster Design-Entscheid: <code class="inline">findAvailableRooms</code> filtert <b>nicht</b> nach Ausstattung. Würde es das tun, läge die Entscheidungslogik im Tool und der Agent hätte nichts mehr zu planen. So bleibt die Kombination der Resultate seine Aufgabe – und du siehst im Trace echtes agentisches Verhalten statt eines einzelnen Funktionsaufrufs. (UI-Beschriftungen: Stand Juli 2026, Flowise 3.1.3.)</p>
+  </div>
+
+  <h3>Schritt 0 · Flowise starten</h3>
+  <p>Flowise ist das No-Code-Werkzeug aus Modul 6: Agenten zusammenklicken statt programmieren – ideal, um den Loop sichtbar zu machen, bevor man ihn in Code giesst. <strong>Empfohlener Start: Docker mit fixierter Version.</strong> Das umgeht alle Node-Versionsprobleme und garantiert, dass deine Oberfläche exakt zu dieser Anleitung passt:</p>
+  <div class="codeblock reveal">
+    <div class="codehead"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname">Terminal</span><span class="ver">Flowise 3.1.3</span></div>
+<pre><code>docker run -d \
+  --name flowise \
+  -p 3000:3000 \
+  -v "$HOME/.flowise:/root/.flowise" \
+  flowiseai/flowise:3.1.3</code></pre>
+  </div>
+  <p>Danach <code class="inline">http://localhost:3000</code> öffnen (erster Start dauert ggf. eine Minute). Das Volume erhält deine Flows über Container-Neustarts. <b>Kein Docker erlaubt?</b> Kostenlosen Cloud-Tier auf <a href="https://flowiseai.com/" target="_blank" rel="noopener">flowiseai.com</a> nutzen (Login nötig).</p>
+  <div class="box warn reveal">
+    <div class="t">Warum nicht npx?</div>
+    <p><code class="inline">npx flowise start</code> scheitert je nach Node-Version an einer nativen Abhängigkeit (better-sqlite3, z. B. unter Node 24). Das kostet Zeit, die dieses Lab nicht kosten soll: Docker oder Cloud verwenden.</p>
+  </div>
+  <p class="reveal"><b>Erwartetes Ergebnis:</b> Die Flowise-Oberfläche ist erreichbar; in der Seitenleiste gibt es u. a. „Agentflows" und „Tools".</p>
+
+  <h3>Schritt 1 · Modell-Zugang (Credential) hinterlegen</h3>
+  <p>Du brauchst Zugang zu <em>einem</em> Chat-Modell mit Tool-Calling. Am einfachsten und kostenlos: <strong>GitHub Models</strong>. Alternativ ein eigener API-Key (OpenAI, Anthropic, Google). <em>→ Schicht 1 aus Modul 3: das Gehirn.</em></p>
+
+  <div class="box warn reveal">
+    <div class="t">Vorab: nur Lab-Daten &amp; Wegwerf-Token</div>
+    <p>Verwende ein persönliches Wegwerf-/Lab-Token und ausschliesslich Testdaten – keine Firmen- oder Kundendaten, keine produktiven API-Keys. (Hintergrund: Modul 11.)</p>
+  </div>
+
+  <div class="box tip reveal">
+    <div class="t">Empfohlen: kostenlos mit GitHub Models</div>
+    <p>
+      <b>1. Token erzeugen:</b> GitHub → <i>Settings → Developer settings → Personal access tokens → Fine-grained tokens</i> → Token mit Scope <code class="inline">models:read</code>.<br>
+      <b>2. Credential in Flowise:</b> Chat-Modell <b>ChatOpenAI</b> verwenden (in Flowise 3.x direkt im Agent-Knoten, Schritt 4); Token als „OpenAI API Key" eintragen.<br>
+      <b>3. Base Path setzen:</b> <code class="inline">https://models.github.ai/inference</code> (Feld ggf. unter <i>Additional Parameters</i>).<br>
+      <b>4. Modell:</b> <code class="inline">openai/gpt-4o-mini</code> bzw. <code class="inline">gpt-4o-mini</code>. Es muss ein Modell mit <b>Tool-/Function-Calling</b> sein, sonst scheitert das Lab; im Zweifel im GitHub-Models-Katalog prüfen.
+    </p>
+    <p style="margin-bottom:0"><b>Limits (Stand Juli 2026):</b> ~50 kostenfreie API-Calls pro Tag und Person (Richtwert, modell- und planabhängig). Ein Lab-Durchlauf braucht ~4–8 Calls – das reicht für mehrere Versuche. Token wie ein Passwort behandeln.</p>
+  </div>
+
+  <div class="box note reveal">
+    <div class="t">Alternative: eigener API-Key</div>
+    <p>Mit einem API-Key von OpenAI, Anthropic oder Google nutzt du den passenden Modell-Typ (ChatOpenAI, ChatAnthropic, ChatGoogleGenerativeAI) ohne Base-Path-Anpassung. Achtung: Ein Chat-<i>Abo</i> (ChatGPT Plus, Claude Pro, Gemini Advanced) enthält keinen API-Zugang – der Key kommt aus dem Entwickler-Portal des Anbieters. Google AI Studio bietet für die Gemini-API einen kostenlosen Tier mit grosszügigen Limits.</p>
+  </div>
+
+  <h3>Schritt 2 · Tool 1 erstellen: <code class="inline">findAvailableRooms</code></h3>
+  <p>Jetzt baust du die „Hände" deines Agenten (Modul 4). Ein Custom Tool in Flowise besteht aus genau den drei Teilen, die du aus dem Theorieteil kennst: <b>Name</b> und <b>Beschreibung</b> (daran erkennt das LLM, wann es das Tool braucht), das <b>Input-Schema</b> (die Parameter) – plus die JavaScript-Funktion, die das Tool ausführt. Alles Folgende kannst du 1:1 kopieren.</p>
+  <p>In der Seitenleiste <strong>Tools</strong> öffnen → <i>Create</i> / <i>New Tool</i>, dann die Felder wie folgt ausfüllen:</p>
+  <p><b>Tool Name:</b> <code class="inline">findAvailableRooms</code></p>
+  <p><b>Tool Description</b> (bestimmt, wann das LLM das Tool wählt – präzise formulieren):</p>
+  <div class="codeblock reveal">
+    <div class="codehead"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname">Description</span></div>
+<pre><code>Sucht alle Meetingräume, die im angegebenen Zeitfenster frei sind und
+mindestens die gewünschte Anzahl Personen fassen. Liefert pro Raum
+roomId, Name, Kapazität und Stockwerk – bewusst KEINE Ausstattung.
+Für Fragen zur Ausstattung getRoomEquipment verwenden.</code></pre>
+  </div>
+  <p><b>Input Schema</b> (vier Properties anlegen, alle required):</p>
+  <div class="tablewrap reveal">
+    <table class="matrix">
+      <thead><tr><th>Property</th><th>Typ</th><th>Beschreibung</th></tr></thead>
+      <tbody>
+        <tr><td>date</td><td>string</td><td>Datum im Format YYYY-MM-DD</td></tr>
+        <tr><td>startTime</td><td>string</td><td>Startzeit im Format HH:mm</td></tr>
+        <tr><td>endTime</td><td>string</td><td>Endzeit im Format HH:mm</td></tr>
+        <tr><td>numberOfPeople</td><td>number</td><td>Mindestanzahl Sitzplätze</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p><b>JavaScript Function</b> (1:1 kopieren; die <code class="inline">$</code>-Variablen entsprechen den Schema-Properties):</p>
+  <div class="codeblock reveal">
+    <div class="codehead"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname">findAvailableRooms.js</span></div>
+<pre><code><span class="tok-key">const</span> rooms = [
+  { roomId: <span class="tok-str">"aare"</span>,      name: <span class="tok-str">"Aare"</span>,      capacity: <span class="tok-num">8</span>,  floor: <span class="tok-num">2</span> },
+  { roomId: <span class="tok-str">"gurten"</span>,    name: <span class="tok-str">"Gurten"</span>,    capacity: <span class="tok-num">10</span>, floor: <span class="tok-num">3</span> },
+  { roomId: <span class="tok-str">"eiger"</span>,     name: <span class="tok-str">"Eiger"</span>,     capacity: <span class="tok-num">6</span>,  floor: <span class="tok-num">1</span> },
+  { roomId: <span class="tok-str">"jungfrau"</span>,  name: <span class="tok-str">"Jungfrau"</span>,  capacity: <span class="tok-num">12</span>, floor: <span class="tok-num">4</span> },
+  { roomId: <span class="tok-str">"stockhorn"</span>, name: <span class="tok-str">"Stockhorn"</span>, capacity: <span class="tok-num">4</span>,  floor: <span class="tok-num">2</span> },
+  { roomId: <span class="tok-str">"niesen"</span>,    name: <span class="tok-str">"Niesen"</span>,    capacity: <span class="tok-num">20</span>, floor: <span class="tok-num">1</span> }
+];
+
+<span class="tok-com">// Statische Buchungen: diese Slots sind besetzt</span>
+<span class="tok-key">const</span> bookings = [
+  { roomId: <span class="tok-str">"jungfrau"</span>, date: <span class="tok-str">"2026-09-15"</span>, start: <span class="tok-str">"09:00"</span>, end: <span class="tok-str">"12:00"</span> },
+  { roomId: <span class="tok-str">"niesen"</span>,   date: <span class="tok-str">"2026-09-15"</span>, start: <span class="tok-str">"10:00"</span>, end: <span class="tok-str">"11:30"</span> },
+  { roomId: <span class="tok-str">"gurten"</span>,   date: <span class="tok-str">"2026-09-16"</span>, start: <span class="tok-str">"08:00"</span>, end: <span class="tok-str">"18:00"</span> }
+];
+
+<span class="tok-com">// Zeitvergleich als String funktioniert für HH:mm</span>
+<span class="tok-key">const</span> overlaps = (b) =&gt;
+  b.date === $date &amp;&amp; b.start &lt; $endTime &amp;&amp; $startTime &lt; b.end;
+
+<span class="tok-key">const</span> result = rooms.filter(r =&gt;
+  r.capacity &gt;= Number($numberOfPeople) &amp;&amp;
+  !bookings.some(b =&gt; b.roomId === r.roomId &amp;&amp; overlaps(b))
+);
+
+<span class="tok-key">return</span> JSON.stringify(result);</code></pre>
+  </div>
+  <p class="reveal"><b>Erwartetes Ergebnis:</b> Das Tool erscheint in der Tools-Liste. Optional per <i>Test</i>-Funktion prüfen: <code class="inline">2026-09-15, 10:00–11:00, 6 Personen</code> liefert Aare, Gurten und Eiger (Jungfrau und Niesen sind belegt, Stockhorn ist zu klein).</p>
+
+  <h3>Schritt 3 · Tool 2 erstellen: <code class="inline">getRoomEquipment</code></h3>
+  <p>Das zweite Tool, gleicher Weg: <i>Create</i> / <i>New Tool</i>. Beachte beim Kopieren die Beschreibung – sie sagt dem Modell ausdrücklich, dass pro Aufruf nur <em>ein</em> Raum geprüft wird. Diese eine Formulierung sorgt später dafür, dass der Agent das Tool bei mehreren Kandidaten mehrfach aufruft, statt es einmal zu versuchen und aufzugeben.</p>
+  <p><b>Tool Name:</b> <code class="inline">getRoomEquipment</code></p>
+  <p><b>Tool Description:</b></p>
+  <div class="codeblock reveal">
+    <div class="codehead"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname">Description</span></div>
+<pre><code>Liefert die Ausstattung (large-screen, projector, whiteboard,
+video-conference) und die Rollstuhlgängigkeit GENAU EINES Meetingraums
+anhand seiner roomId. Prüft nur einen Raum pro Aufruf – für mehrere
+Kandidaten das Tool mehrfach aufrufen.</code></pre>
+  </div>
+  <p><b>Input Schema</b> (eine Property, required):</p>
+  <div class="tablewrap reveal">
+    <table class="matrix">
+      <thead><tr><th>Property</th><th>Typ</th><th>Beschreibung</th></tr></thead>
+      <tbody>
+        <tr><td>roomId</td><td>string</td><td>Eindeutige ID des Raums, z. B. "aare"</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p><b>JavaScript Function:</b></p>
+  <div class="codeblock reveal">
+    <div class="codehead"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname">getRoomEquipment.js</span></div>
+<pre><code><span class="tok-key">const</span> data = {
+  aare:      { name: <span class="tok-str">"Aare"</span>,      equipment: [<span class="tok-str">"large-screen"</span>, <span class="tok-str">"whiteboard"</span>, <span class="tok-str">"video-conference"</span>], wheelchairAccessible: <span class="tok-key">true</span> },
+  gurten:    { name: <span class="tok-str">"Gurten"</span>,    equipment: [<span class="tok-str">"projector"</span>, <span class="tok-str">"whiteboard"</span>], wheelchairAccessible: <span class="tok-key">true</span> },
+  eiger:     { name: <span class="tok-str">"Eiger"</span>,     equipment: [<span class="tok-str">"large-screen"</span>], wheelchairAccessible: <span class="tok-key">false</span> },
+  jungfrau:  { name: <span class="tok-str">"Jungfrau"</span>,  equipment: [<span class="tok-str">"large-screen"</span>, <span class="tok-str">"video-conference"</span>], wheelchairAccessible: <span class="tok-key">true</span> },
+  stockhorn: { name: <span class="tok-str">"Stockhorn"</span>, equipment: [<span class="tok-str">"whiteboard"</span>], wheelchairAccessible: <span class="tok-key">true</span> },
+  niesen:    { name: <span class="tok-str">"Niesen"</span>,    equipment: [<span class="tok-str">"projector"</span>, <span class="tok-str">"large-screen"</span>, <span class="tok-str">"video-conference"</span>, <span class="tok-str">"whiteboard"</span>], wheelchairAccessible: <span class="tok-key">true</span> }
+};
+
+<span class="tok-key">const</span> id = String($roomId).toLowerCase();
+<span class="tok-key">const</span> room = data[id];
+<span class="tok-key">if</span> (!room) {
+  <span class="tok-key">return</span> JSON.stringify({ error: <span class="tok-str">"Unbekannte roomId: "</span> + $roomId +
+    <span class="tok-str">". Gültige IDs: "</span> + Object.keys(data).join(<span class="tok-str">", "</span>) });
+}
+<span class="tok-key">return</span> JSON.stringify({ roomId: id, ...room });</code></pre>
+  </div>
+  <p class="reveal"><b>Erwartetes Ergebnis:</b> Beide Tools stehen in der Tools-Liste bereit. Test mit <code class="inline">roomId = aare</code> liefert Ausstattung inkl. <code class="inline">video-conference</code>.</p>
+
+  <h3>Schritt 4 · Agentflow anlegen und Agent konfigurieren</h3>
+  <p>Die Werkzeuge liegen bereit – jetzt kommt die Schicht 2 aus Modul 3: der Agent mit seinem Loop. In Flowise ist das ein einzelner Knoten, der Gehirn (Modell), Hände (Tools) und Instruktionen (System-Prompt) zusammenführt.</p>
+  <p><strong>Agentflows</strong> → <i>Add New</i>. Der Canvas enthält bereits einen <b>Start</b>-Knoten; füge einen <strong>Agent</strong>-Knoten hinzu. Wichtig zu wissen: In Flowise 3.x wird alles <b>im Agent-Knoten selbst</b> konfiguriert – du musst nichts verbinden. Klick den Knoten an und stelle ein:</p>
+  <ul>
+    <li><strong>Model:</strong> ChatOpenAI mit deiner Credential aus Schritt 1 (bei GitHub Models inkl. Base Path und Modell-ID).</li>
+    <li><strong>Tools:</strong> beide Custom Tools hinzufügen – <code class="inline">findAvailableRooms</code> und <code class="inline">getRoomEquipment</code>.</li>
+    <li><strong>Max Iterations</strong> (falls vorhanden): 8 – genug für mehrere Tool-Aufrufe, aber mit klarer Obergrenze (Stop-Bedingung, Modul 2).</li>
+    <li><strong>Instructions / System Prompt:</strong></li>
+  </ul>
+  <div class="codeblock reveal">
+    <div class="codehead"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname">System Prompt</span></div>
+<pre><code>Du hilfst, passende Meetingräume zu finden. Nutze findAvailableRooms
+für Verfügbarkeit und Kapazität, getRoomEquipment für die Ausstattung
+einzelner Räume. Empfiehl nur Räume, deren Eignung du mit
+Tool-Resultaten belegt hast – erfinde keine Räume und keine
+Ausstattung. Fehlen Datum oder Uhrzeit, frage nach. Antworte kurz:
+Empfehlung plus Begründung.</code></pre>
+  </div>
+  <p>Flow speichern.</p>
+  <div class="box note reveal">
+    <div class="t">Deine Flowise-UI sieht anders aus?</div>
+    <p>Ältere Versionen (bzw. der „Chatflows"-Bereich) arbeiten mit separaten, zu verbindenden Knoten: <i>Tool Agent</i> + ChatOpenAI als Chat Model + die beiden Custom Tools am Tool-Eingang. Das Ergebnis ist dasselbe. Mit dem Docker-Befehl aus Schritt 0 (3.1.3) stimmt die UI mit dieser Anleitung überein.</p>
+  </div>
+
+  <h3>Schritt 5 · Die zentrale Testabfrage</h3>
+  <p>Jetzt der Moment, auf den alles hinausläuft: Du stellst eine Frage, die sich nur durch das Kombinieren beider Tools beantworten lässt – und schaust dem Agenten beim Planen zu. Chat öffnen und eingeben:</p>
+  <div class="codeblock reveal">
+    <div class="codehead"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname">Testabfrage</span></div>
+<pre><code>Finde für den 15. September 2026 von 10:00 bis 11:00 Uhr einen freien
+Meetingraum für sechs Personen. Der Raum muss einen grossen Bildschirm
+und ein Videokonferenzsystem haben.</code></pre>
+  </div>
+  <p><b>Erwarteter Ablauf</b> – so sollte der Agent vorgehen:</p>
+  <ol>
+    <li><code class="inline">findAvailableRooms(2026-09-15, 10:00, 11:00, 6)</code> → drei Kandidaten: Aare, Gurten, Eiger</li>
+    <li><code class="inline">getRoomEquipment</code> für die Kandidaten – einzeln, ggf. mehrfach</li>
+    <li>Vergleich: Gurten hat weder grossen Bildschirm noch Videokonferenz, Eiger keine Videokonferenz – <b>Aare</b> erfüllt beides</li>
+    <li>Antwort: Empfehlung Aare (8 Plätze, Stockwerk 2) mit kurzer Begründung</li>
+  </ol>
+  <p class="reveal"><b>Erwartetes Ergebnis:</b> Die Empfehlung lautet <b>Aare</b>. Wichtiger als die Antwort: Im Verlauf sind <b>mehrere Tool-Aufrufe</b> sichtbar – einmal die Suche, dann die Ausstattungsabfragen. Reihenfolge und Anzahl können variieren (prüft der Agent alle drei Kandidaten oder stoppt er nach dem Treffer?) – das ist Nicht-Determinismus, kein Fehler.</p>
+
+  <h3>Schritt 6 · Den Trace lesen</h3>
+  <p>Die Antwort zu bekommen war der einfache Teil – der Lerneffekt steckt im Blick hinter die Kulissen. Öffne die Detailansicht des Laufs (Log-/Trace-Panel bzw. „View Messages"): Dort steht Schritt für Schritt, was der Agent gedacht, gerufen und beobachtet hat – der Reason-Act-Observe-Loop aus Modul 2, an deinem eigenen Agenten. Geh die Punkte bewusst durch:</p>
+  <div class="goals reveal">
+    <h4>Checkliste Trace-Analyse</h4>
+    <ul>
+      <li>Welche Parameter hat der Agent aus der Anfrage extrahiert (Datum, Zeit, Personenzahl)?</li>
+      <li>Welches Tool hat er zuerst gewählt – und passt das zur Aufgabe?</li>
+      <li>Für welche Räume hat er die Ausstattung abgefragt? Alle Kandidaten oder nur bis zum ersten Treffer?</li>
+      <li>Gab es unnötige Tool-Aufrufe?</li>
+      <li>Ist die Schlussfolgerung vollständig durch Tool-Resultate gedeckt – oder steht in der Antwort etwas, das kein Tool geliefert hat?</li>
+    </ul>
+  </div>
+  <p>Das ist im Kleinen genau das, was Observability in Produktion leistet (Modul 8): den Entscheidungsweg sichtbar und überprüfbar machen.</p>
+
+  <h3>Weitere Testabfragen</h3>
+  <p>Wenn die zentrale Abfrage funktioniert, lohnt sich das Weiterspielen – jede der folgenden Abfragen zeigt eine andere Facette agentischen Verhaltens: Sparsamkeit (keine unnötigen Tool-Aufrufe), Vollständigkeit (alle Kandidaten prüfen), Ehrlichkeit (kein Raum erfinden). Beobachte jeweils im Trace, wie sich der Agent verhält. Datum und Zeit bewusst absolut angeben – relative Angaben wie „morgen" sind unzuverlässig, weil das Modell das heutige Datum nicht sicher kennt (auch das eine Kontext-Lektion: Das Modell weiss nur, was im Request steht, Modul 2).</p>
+  <div class="tablewrap reveal">
+    <table class="matrix">
+      <thead><tr><th style="min-width:280px">Abfrage</th><th>Was sie zeigt</th></tr></thead>
+      <tbody>
+        <tr><td style="white-space:normal">„Freier Raum für 4 Personen am 20.09.2026, 14:00–15:00."</td><td>Ohne Ausstattungswunsch genügt Tool 1 – der Agent sollte Tool 2 <em>nicht</em> unnötig aufrufen.</td></tr>
+        <tr><td style="white-space:normal">„Welcher freie Raum für 8 Personen am 15.09.2026, 10:00–11:00, hat einen grossen Bildschirm?"</td><td>Suche + gezielte Ausstattungsprüfung (Kandidaten: Aare, Gurten → Antwort Aare).</td></tr>
+        <tr><td style="white-space:normal">„Freier Raum für 10 Personen am 20.09.2026, 14:00–16:00, mit Videokonferenz und Whiteboard."</td><td>Mehrere Kandidaten, mehrere Kriterien – nur Niesen erfüllt beide.</td></tr>
+        <tr><td style="white-space:normal">„Rollstuhlgängiger freier Raum für 6 Personen am 15.09.2026, 10:00–11:00, mit grossem Bildschirm."</td><td>Kriterium jenseits der Ausstattungsliste: Eiger hat den Bildschirm, scheitert aber an der Zugänglichkeit → Aare.</td></tr>
+        <tr><td style="white-space:normal">„Freier Raum für 25 Personen am 20.09.2026, 10:00–11:00, mit Videokonferenz."</td><td>Kein Raum passt (max. 20 Plätze). Der Agent muss das transparent sagen – nicht erfinden.</td></tr>
+        <tr><td style="white-space:normal">„Welche freien Räume für 6 Personen am 15.09.2026, 10:00–11:00 haben einen grossen Bildschirm? Nenne alle."</td><td>Vollständigkeit: Der Agent muss <em>alle</em> Kandidaten prüfen (→ Aare und Eiger), nicht beim ersten Treffer stoppen.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Abschlussaufgabe: die Tool-Beschreibung sabotieren</h3>
+  <p>Zum Schluss das aufschlussreichste Experiment des Labs. In Modul 4 stand: „Ein schlecht beschriebenes Tool wird falsch oder gar nicht genutzt." Das lässt sich jetzt in zwei Minuten selbst beweisen:</p>
+  <div class="box note reveal">
+    <div class="t">Experiment</div>
+    <p>Benenne <code class="inline">getRoomEquipment</code> in <code class="inline">tool_x</code> um und leere die Beschreibung. Stelle die zentrale Testabfrage erneut. Typische Beobachtung: Der Agent findet zwar Räume, prüft die Ausstattung aber nicht mehr – er antwortet ohne Beleg oder falsch. Danach zurückbenennen. Das ist die kompakteste Lektion des Labs: <b>Das Modell kennt Tools nur über Name und Beschreibung</b> (Module 2 &amp; 4) – Tool-Beschreibungen sind Engineering, nicht Doku.</p>
+  </div>
+
+  <div class="box bug reveal">
+    <div class="t">Troubleshooting</div>
+    <p>
+      <b>„Invalid API key" / 401:</b> Credential prüfen; richtiger Modell-Typ (ChatOpenAI)? Key ohne Leerzeichen?<br><br>
+      <b>Custom Tool wirft einen Fehler:</b> JS-Code 1:1 kopiert? Die <code class="inline">$</code>-Variablen müssen exakt den Property-Namen im Input-Schema entsprechen (<code class="inline">$date</code>, <code class="inline">$startTime</code>, <code class="inline">$endTime</code>, <code class="inline">$numberOfPeople</code>, <code class="inline">$roomId</code>).<br><br>
+      <b>Agent ruft die Tools nicht auf:</b> Tool-Beschreibungen wie oben übernehmen; sind beide Tools im Agent-Knoten eingetragen? Unterstützt das gewählte Modell Tool-Calling? Im Zweifel <code class="inline">openai/gpt-4o-mini</code>.<br><br>
+      <b>Agent nennt Räume oder Ausstattung, die es nicht gibt:</b> Halluzination – steht die System-Prompt-Zeile „nur mit Tool-Resultaten belegen" drin? Genau dieses Verhalten ist der Grund für die Regel.<br><br>
+      <b>Die UI passt nicht zur Anleitung:</b> vermutlich andere Flowise-Version oder „Chatflows" statt „Agentflows" – Docker-Befehl aus Schritt 0 nutzen oder den Kasten in Schritt 4 beachten.<br><br>
+      <b>Docker startet nicht / nicht erlaubt:</b> Cloud-Tier auf flowiseai.com.<br><br>
+      <b>Port 3000 belegt:</b> im Docker-Befehl <code class="inline">-p 3100:3000</code> und <code class="inline">http://localhost:3100</code>.
+    </p>
+  </div>
+
+  <div class="box deep reveal">
+    <div class="t">Abgrenzung: Warum hier keine Buchung?</div>
+    <p>Ein drittes Tool <code class="inline">bookRoom</code> wäre naheliegend – aber es hätte einen <b>Seiteneffekt</b>. Suchen und Empfehlen ist read-only; Buchen verändert die Welt und gehört hinter eine explizite Bestätigung (Human-in-the-Loop, Modul 10) und ein Permission-Konzept (Modul 11). Diese Trennung – Read frei, Write kontrolliert – ist eine der wichtigsten Regeln aus dem Security-Modul.</p>
+  </div>
+
+  <div class="goals reveal">
+    <h4>Lab 1 geschafft, wenn …</h4>
+    <ul>
+      <li>dein Agent für die zentrale Abfrage mehrere Tool-Aufrufe gemacht und Aare empfohlen hat</li>
+      <li>du im Trace nachvollzogen hast, welche Kandidaten er geprüft hat und ob die Antwort belegt ist</li>
+      <li>du im Experiment gesehen hast, wie die Tool-Beschreibung das Verhalten verändert</li>
+    </ul>
+  </div>
+
+  <hr class="soft">
+
+  <!-- ===================== LAB 2 ===================== -->
+  <h2><span class="sec">Lab 2</span> Spring-AI-Mini-Agent <span class="tag" style="font-size:12px;vertical-align:middle">optional · Java-Transfer</span></h2>
+  <p>In Flowise hast du den Agenten zusammengeklickt – hier siehst du, dass dahinter kein Zauber steckt, sondern Konzepte, die sich direkt in unseren Java/Spring-Stack übertragen lassen. Dieses Lab ist optional: Wenn dir Lab 1 reicht, spring ans Ende des Moduls und hak es ab. <b>Ziel:</b> ein winziger Spring-Boot-Agent mit <em>einem</em> Tool (<code class="inline">getOrderStatus</code>) und Kurzzeitgedächtnis – lokal startbar, eine Frage, ein sichtbarer Tool-Call im Log.</p>
+
+  <div class="box warn reveal">
+    <div class="t">Voraussetzungen &amp; Version</div>
+    <p>JDK 17+, Maven, ein LLM-API-Key als Umgebungsvariable. Geschrieben für <b>Spring AI 2.0.0</b> auf <b>Spring Boot 4.0.x</b> – Spring AI 2.0.x setzt Boot 4.0/4.1 (Framework 7) voraus. <b>Läuft euer Projekt noch auf Boot 3.4/3.5?</b> Dann gehört ihr zur Spring-AI-<b>1.x</b>-Linie: <code class="inline">spring-ai-bom 1.1.x</code> verwenden – die hier gezeigten APIs (<code class="inline">@Tool</code>, ChatClient, Memory-Advisor) sind dort weitgehend identisch. Bei Abweichungen die <a href="https://docs.spring.io/spring-ai/reference/" target="_blank" rel="noopener">Reference-Docs</a> eurer Version konsultieren.</p>
+  </div>
+
+  <h3>1 · Abhängigkeiten (pom.xml, Auszug)</h3>
+  <div class="codeblock reveal">
+    <div class="codehead"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname">pom.xml</span><span class="ver">Spring AI 2.0.0</span></div>
+<pre><code><span class="tok-an">&lt;dependency&gt;</span>
+    <span class="tok-an">&lt;groupId&gt;</span>org.springframework.ai<span class="tok-an">&lt;/groupId&gt;</span>
+    <span class="tok-an">&lt;artifactId&gt;</span>spring-ai-starter-model-openai<span class="tok-an">&lt;/artifactId&gt;</span>
+<span class="tok-an">&lt;/dependency&gt;</span>
+<span class="tok-com">&lt;!-- BOM verwaltet die Version: spring-ai-bom 2.0.0 --&gt;</span></code></pre>
+  </div>
+
+  <h3>2 · Konfiguration (application.properties)</h3>
+  <div class="codeblock reveal">
+    <div class="codehead"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname">application.properties</span></div>
+<pre><code><span class="tok-com"># Variante A: OpenAI direkt</span>
+spring.ai.openai.api-key=${OPENAI_API_KEY}
+spring.ai.openai.chat.options.model=gpt-4o-mini
+
+<span class="tok-com"># Variante B: kostenlos via GitHub Models (OpenAI-kompatibel)</span>
+<span class="tok-com"># spring.ai.openai.api-key=${GITHUB_TOKEN}          # PAT mit Scope models:read</span>
+<span class="tok-com"># spring.ai.openai.base-url=https://models.github.ai</span>
+<span class="tok-com"># spring.ai.openai.chat.completions-path=/inference/chat/completions</span>
+<span class="tok-com"># spring.ai.openai.chat.options.model=openai/gpt-4o-mini</span></code></pre>
+  </div>
+  <div class="box tip reveal">
+    <div class="t">GitHub Models auch hier nutzbar</div>
+    <p>Da GitHub Models OpenAI-kompatibel ist, genügt im Spring-AI-OpenAI-Starter ein Überschreiben von <code class="inline">base-url</code>, <code class="inline">completions-path</code> und Modell-ID (Variante B oben) – als „Key" der GitHub-PAT mit <code class="inline">models:read</code>. Exakte URL/Path/Modell-ID bitte gegen die aktuelle <a href="https://docs.github.com/github-models/prototyping-with-ai-models" target="_blank" rel="noopener">GitHub-Models-Doku</a> und deine Spring-AI-Version prüfen.</p>
+  </div>
+
+  <h3>3 · Tool + Agent + eine Frage</h3>
+  <div class="codeblock reveal">
+    <div class="codehead"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname">MiniAgent.java</span><span class="ver">Spring AI 2.0.0</span></div>
+<pre><code><span class="tok-an">@SpringBootApplication</span>
+<span class="tok-key">public class</span> <span class="tok-cls">MiniAgent</span> {
+  <span class="tok-key">public static void</span> <span class="tok-fn">main</span>(<span class="tok-cls">String</span>[] a){ <span class="tok-cls">SpringApplication</span>.<span class="tok-fn">run</span>(<span class="tok-cls">MiniAgent</span>.<span class="tok-key">class</span>, a); }
+
+  <span class="tok-com">// --- das eine Tool ---</span>
+  <span class="tok-key">static class</span> <span class="tok-cls">OrderTools</span> {
+    <span class="tok-an">@Tool</span>(description = <span class="tok-str">"Liefert den Versandstatus einer Bestellung per ID."</span>)
+    <span class="tok-cls">String</span> <span class="tok-fn">getOrderStatus</span>(<span class="tok-cls">String</span> orderId) {
+      <span class="tok-key">return</span> <span class="tok-str">"4711"</span>.<span class="tok-fn">equals</span>(orderId) ? <span class="tok-str">"versandt am 24.06."</span> : <span class="tok-str">"unbekannt"</span>;
+    }
+  }
+
+  <span class="tok-com">// --- Agent: ChatClient mit Memory; Tools werden in 2.0 automatisch geloopt ---</span>
+  <span class="tok-an">@Bean</span>
+  <span class="tok-cls">CommandLineRunner</span> <span class="tok-fn">run</span>(<span class="tok-cls">ChatClient.Builder</span> builder) {
+    <span class="tok-cls">ChatClient</span> agent = builder
+        .<span class="tok-fn">defaultAdvisors</span>(<span class="tok-cls">MessageChatMemoryAdvisor</span>
+            .<span class="tok-fn">builder</span>(<span class="tok-cls">MessageWindowChatMemory</span>.<span class="tok-fn">builder</span>().<span class="tok-fn">build</span>()).<span class="tok-fn">build</span>())
+        .<span class="tok-fn">defaultTools</span>(<span class="tok-key">new</span> <span class="tok-cls">OrderTools</span>())
+        .<span class="tok-fn">build</span>();
+
+    <span class="tok-key">return</span> args -> {
+      <span class="tok-cls">String</span> answer = agent.<span class="tok-fn">prompt</span>()
+          .<span class="tok-fn">user</span>(<span class="tok-str">"Wie ist der Status von Bestellung 4711?"</span>)
+          .<span class="tok-fn">call</span>().<span class="tok-fn">content</span>();
+      <span class="tok-cls">System</span>.<span class="tok-fn">out</span>.<span class="tok-fn">println</span>(answer);
+    };
+  }
+}</code></pre>
+  </div>
+
+  <h3>4 · Starten &amp; den Tool-Call im Log sehen</h3>
+  <div class="codeblock reveal">
+    <div class="codehead"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname">Terminal</span></div>
+<pre><code>$ export OPENAI_API_KEY=sk-...
+$ ./mvnw spring-boot:run
+...
+DEBUG o.s.a.tool  : calling tool 'getOrderStatus' args={orderId=4711}
+DEBUG o.s.a.tool  : tool result: versandt am 24.06.
+&gt; Die Bestellung 4711 wurde am 24.06. versandt.</code></pre>
+  </div>
+  <p>Tipp: <code class="inline">logging.level.org.springframework.ai=DEBUG</code> setzen, um Tool-Calls im Log zu sehen – euer erster, einfachster „Trace" (mehr in Modul 8).</p>
+
+  <div class="box note reveal">
+    <div class="t">Transferaufgabe</div>
+    <p>Bau das Raumfinder-Beispiel aus Lab 1 nach: zweite Tool-Methode <code class="inline">getRoomEquipment(String roomId)</code> mit einer statischen Map, und als Frage die zentrale Testabfrage. Beobachte im DEBUG-Log, ob Spring AI dieselbe Tool-Sequenz fährt wie Flowise – gleiche Konzepte, anderer Stack.</p>
+  </div>
+
+  <div class="merke reveal">
+    <div class="lbl">Merksatz</div>
+    <div class="q">Der Moment, in dem der Agent <b>selbst</b> entscheidet, ein Tool ein zweites Mal mit anderen Parametern zu rufen, ist der Moment, in dem aus „Function Calling" ein Agent wird – ob im No-Code-Canvas oder in Spring.</div>
+  </div>
+
+  <div class="box warn reveal">
+    <div class="t">Zur Erinnerung</div>
+    <p>Wie bei Lab 1: nur Wegwerf-Keys und Testdaten – keine Firmen-/Kundendaten, keine produktiven API-Keys (Modul 11).</p>
+  </div>
+
+  <div class="goals reveal">
+    <h4>Modul abschliessen</h4>
+    <p style="margin:0 0 14px;color:var(--text-soft);font-size:15px">Dieses Modul hat kein Quiz – es zählt, was du gebaut hast. Wenn dein Agent die zentrale Testabfrage mit mehreren Tool-Aufrufen gelöst hat (Checkliste oben), hak das Modul hier ab:</p>
+    <button class="btn" data-mark-done>Lab geschafft – Modul abhaken ✓</button>
+  </div>
+
+  <div id="pager" class="pager"></div>
+
+</main>
+
+<footer class="foot">Agentic AI · Modul 7 von 12 · Orange Business <span class="vtag">· v4</span></footer>
+<script src="assets/cbt.js"></script>
+</body>
+</html>
