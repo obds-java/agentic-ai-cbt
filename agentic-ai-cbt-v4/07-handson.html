@@ -76,21 +76,25 @@
     <div class="t">Empfohlen: kostenlos mit GitHub Models</div>
     <p>
       <b>1. Token erzeugen:</b> GitHub → <i>Settings → Developer settings → Personal access tokens → Fine-grained tokens</i> → Token mit Scope <code class="inline">models:read</code>.<br>
-      <b>2. Credential in Flowise:</b> Chat-Modell <b>ChatOpenAI</b> verwenden (in Flowise 3.x direkt im Agent-Knoten, Schritt 4); Token als „OpenAI API Key" eintragen.<br>
-      <b>3. Base Path setzen:</b> <code class="inline">https://models.github.ai/inference</code> (Feld ggf. unter <i>Additional Parameters</i>).<br>
-      <b>4. Modell:</b> <code class="inline">openai/gpt-4o-mini</code> bzw. <code class="inline">gpt-4o-mini</code>. Es muss ein Modell mit <b>Tool-/Function-Calling</b> sein, sonst scheitert das Lab; im Zweifel im GitHub-Models-Katalog prüfen.
+      <b>2. Das war's fürs Erste:</b> Die Credential legst du erst in Schritt 4 an – direkt im Agent-Knoten über <i>Connect Credential → Create New</i>, wo du dieses Token einträgst. Auch der Base Path für GitHub Models kommt dort hin.<br>
+      <b>3. Modellwahl merken:</b> Im Agent-Knoten wählst du später <code class="inline">gpt-4o-mini</code> aus dem Dropdown – ein Modell mit <b>Tool-/Function-Calling</b>, genau das braucht dieses Lab.
     </p>
     <p style="margin-bottom:0"><b>Limits (Stand Juli 2026):</b> ~50 kostenfreie API-Calls pro Tag und Person (Richtwert, modell- und planabhängig). Ein Lab-Durchlauf braucht ~4–8 Calls – das reicht für mehrere Versuche. Token wie ein Passwort behandeln.</p>
   </div>
 
   <div class="box note reveal">
     <div class="t">Alternative: eigener API-Key</div>
-    <p>Mit einem API-Key von OpenAI, Anthropic oder Google nutzt du den passenden Modell-Typ (ChatOpenAI, ChatAnthropic, ChatGoogleGenerativeAI) ohne Base-Path-Anpassung. Achtung: Ein Chat-<i>Abo</i> (ChatGPT Plus, Claude Pro, Gemini Advanced) enthält keinen API-Zugang – der Key kommt aus dem Entwickler-Portal des Anbieters. Google AI Studio bietet für die Gemini-API einen kostenlosen Tier mit grosszügigen Limits.</p>
+    <p>Mit einem API-Key von OpenAI, Anthropic oder Google wählst du in Schritt 4c einfach den entsprechenden Anbieter (OpenAI, Anthropic, Google Gemini) und lässt die BasePath-Anpassung weg. Achtung: Ein Chat-<i>Abo</i> (ChatGPT Plus, Claude Pro, Gemini Advanced) enthält keinen API-Zugang – der Key kommt aus dem Entwickler-Portal des Anbieters. Google AI Studio bietet für die Gemini-API einen kostenlosen Tier mit grosszügigen Limits.</p>
   </div>
 
   <h3>Schritt 2 · Tool 1 erstellen: <code class="inline">findAvailableRooms</code></h3>
   <p>Jetzt baust du die „Hände" deines Agenten (Modul 4). Ein Custom Tool in Flowise besteht aus genau den drei Teilen, die du aus dem Theorieteil kennst: <b>Name</b> und <b>Beschreibung</b> (daran erkennt das LLM, wann es das Tool braucht), das <b>Input-Schema</b> (die Parameter) – plus die JavaScript-Funktion, die das Tool ausführt. Alles Folgende kannst du 1:1 kopieren.</p>
-  <p>In der Seitenleiste <strong>Tools</strong> öffnen → <i>Create</i> / <i>New Tool</i>, dann die Felder wie folgt ausfüllen:</p>
+  <p>Im Menü <strong>Tools</strong> auf <i>Create</i> klicken. Der Tool-Dialog hat vier Bereiche: Name, Beschreibung, Input-Schema (jede Property über <i>+ Add Item</i> anlegen) und ganz unten die JavaScript-Funktion. Am Ende mit <i>Add</i> speichern.</p>
+  <figure class="diagram reveal">
+    <img src="assets/img/lab1-tool-dialog.png" alt="Flowise: Tool-Dialog mit Name, Beschreibung und Input-Schema" style="max-width:100%;border-radius:10px" onerror="this.closest('figure').style.display='none'">
+    <figcaption>Der Tool-Dialog in Flowise 3.1.3: oben Name und Beschreibung, darunter das Input-Schema – die JavaScript-Funktion folgt weiter unten im Dialog.</figcaption>
+  </figure>
+  <p>Die Felder im Einzelnen:</p>
   <p><b>Tool Name:</b> <code class="inline">findAvailableRooms</code></p>
   <p><b>Tool Description</b> (bestimmt, wann das LLM das Tool wählt – präzise formulieren):</p>
   <div class="codeblock reveal">
@@ -142,10 +146,10 @@ Für Fragen zur Ausstattung getRoomEquipment verwenden.</code></pre>
 
 <span class="tok-key">return</span> JSON.stringify(result);</code></pre>
   </div>
-  <p class="reveal"><b>Erwartetes Ergebnis:</b> Das Tool erscheint in der Tools-Liste. Optional per <i>Test</i>-Funktion prüfen: <code class="inline">2026-09-15, 10:00–11:00, 6 Personen</code> liefert Aare, Gurten und Eiger (Jungfrau und Niesen sind belegt, Stockhorn ist zu klein).</p>
+  <p class="reveal"><b>Erwartetes Ergebnis:</b> Das Tool erscheint in der Tools-Liste. Einen Test-Button für Tools gibt es in Flowise nicht – getestet wird in Schritt 5 über den Chat. Merk dir dafür diesen Test-Prompt: <i>„Rufe findAvailableRooms mit date=2026-09-15, startTime=10:00, endTime=11:00, numberOfPeople=6 auf und zeig mir das rohe Resultat."</i> Er muss Aare, Gurten und Eiger liefern (Jungfrau und Niesen sind belegt, Stockhorn ist zu klein).</p>
 
   <h3>Schritt 3 · Tool 2 erstellen: <code class="inline">getRoomEquipment</code></h3>
-  <p>Das zweite Tool, gleicher Weg: <i>Create</i> / <i>New Tool</i>. Beachte beim Kopieren die Beschreibung – sie sagt dem Modell ausdrücklich, dass pro Aufruf nur <em>ein</em> Raum geprüft wird. Diese eine Formulierung sorgt später dafür, dass der Agent das Tool bei mehreren Kandidaten mehrfach aufruft, statt es einmal zu versuchen und aufzugeben.</p>
+  <p>Das zweite Tool, gleicher Weg: <i>Tools → Create</i>, am Ende mit <i>Add</i> speichern. Beachte beim Kopieren die Beschreibung – sie sagt dem Modell ausdrücklich, dass pro Aufruf nur <em>ein</em> Raum geprüft wird. Diese eine Formulierung sorgt später dafür, dass der Agent das Tool bei mehreren Kandidaten mehrfach aufruft, statt es einmal zu versuchen und aufzugeben.</p>
   <p><b>Tool Name:</b> <code class="inline">getRoomEquipment</code></p>
   <p><b>Tool Description:</b></p>
   <div class="codeblock reveal">
@@ -184,17 +188,19 @@ Kandidaten das Tool mehrfach aufrufen.</code></pre>
 }
 <span class="tok-key">return</span> JSON.stringify({ roomId: id, ...room });</code></pre>
   </div>
-  <p class="reveal"><b>Erwartetes Ergebnis:</b> Beide Tools stehen in der Tools-Liste bereit. Test mit <code class="inline">roomId = aare</code> liefert Ausstattung inkl. <code class="inline">video-conference</code>.</p>
+  <p class="reveal"><b>Erwartetes Ergebnis:</b> Beide Tools stehen in der Tools-Liste bereit. Test-Prompt für Schritt 5: <i>„Rufe getRoomEquipment mit roomId=aare auf und zeig mir das rohe Resultat."</i> Erwartete Antwort: die Ausstattung von Aare inkl. <code class="inline">video-conference</code>.</p>
 
   <h3>Schritt 4 · Agentflow anlegen und Agent konfigurieren</h3>
-  <p>Die Werkzeuge liegen bereit – jetzt kommt die Schicht 2 aus Modul 3: der Agent mit seinem Loop. In Flowise ist das ein einzelner Knoten, der Gehirn (Modell), Hände (Tools) und Instruktionen (System-Prompt) zusammenführt.</p>
-  <p><strong>Agentflows</strong> → <i>Add New</i>. Der Canvas enthält bereits einen <b>Start</b>-Knoten; füge einen <strong>Agent</strong>-Knoten hinzu. Wichtig zu wissen: In Flowise 3.x wird alles <b>im Agent-Knoten selbst</b> konfiguriert – du musst nichts verbinden. Klick den Knoten an und stelle ein:</p>
-  <ul>
-    <li><strong>Model:</strong> ChatOpenAI mit deiner Credential aus Schritt 1 (bei GitHub Models inkl. Base Path und Modell-ID).</li>
-    <li><strong>Tools:</strong> beide Custom Tools hinzufügen – <code class="inline">findAvailableRooms</code> und <code class="inline">getRoomEquipment</code>.</li>
-    <li><strong>Max Iterations</strong> (falls vorhanden): 8 – genug für mehrere Tool-Aufrufe, aber mit klarer Obergrenze (Stop-Bedingung, Modul 2).</li>
-    <li><strong>Instructions / System Prompt:</strong></li>
-  </ul>
+  <p>Die Werkzeuge liegen bereit – jetzt kommt die Schicht 2 aus Modul 3: der Agent mit seinem Loop. In Flowise ist das ein einzelner Knoten, der Gehirn (Modell), Hände (Tools) und Instruktionen (System-Prompt) zusammenführt. Der Reihe nach:</p>
+
+  <p><b>4a · Flow anlegen:</b> Im Menü <strong>Agentflows</strong> auf <i>Add New</i> klicken. Du bekommst einen Canvas, auf dem bereits ein <b>Start</b>-Knoten liegt.</p>
+  <p><b>4b · Agent hinzufügen:</b> Oben links auf das <b>+</b> klicken, in der Auswahlliste <b>Agent</b> selektieren und auf den Canvas ziehen. Dann den ausgehenden Pfeil des Start-Knotens auf den neuen Agent-Knoten ziehen. Ein <b>Doppelklick auf den Agenten</b> öffnet seine Einstellungen.</p>
+  <p><b>4c · Modell &amp; Credential:</b> Bei <i>Model</i> den Anbieter <b>OpenAI</b> wählen (so heisst der Eintrag hier – nicht „ChatOpenAI", das ist die Bezeichnung aus der älteren Chatflow-UI). In den <i>OpenAI Parameters</i>: <i>Connect Credential → Create New</i> und dein GitHub-Token aus Schritt 1 als API Key eintragen. Bei <i>Model Name</i> im Dropdown <code class="inline">gpt-4o-mini</code> wählen. Für GitHub Models zusätzlich weiter unten in den OpenAI Parameters das Feld <i>BasePath</i> auf <code class="inline">https://models.github.ai/inference</code> setzen. Optional: die <i>Temperature</i> (Default 0.9) auf ~0.2 senken – der Agent verhält sich dann reproduzierbarer (Temperatur: siehe Glossar, Modul 1).</p>
+  <figure class="diagram reveal">
+    <img src="assets/img/lab1-agent-model.png" alt="Flowise Agent-Knoten: Model OpenAI, Credential, Model Name gpt-4o-mini" style="max-width:100%;border-radius:10px" onerror="this.closest('figure').style.display='none'">
+    <figcaption>Agent-Einstellungen: Anbieter „OpenAI", verbundene Credential, Modell gpt-4o-mini.</figcaption>
+  </figure>
+  <p><b>4d · System-Prompt:</b> Im Abschnitt <i>Messages</i> auf <i>+ Add Messages</i> klicken, als <i>Role</i> <b>System</b> wählen und in <i>Content</i> den folgenden Prompt einsetzen:</p>
   <div class="codeblock reveal">
     <div class="codehead"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname">System Prompt</span></div>
 <pre><code>Du hilfst, passende Meetingräume zu finden. Nutze findAvailableRooms
@@ -204,14 +210,28 @@ Tool-Resultaten belegt hast – erfinde keine Räume und keine
 Ausstattung. Fehlen Datum oder Uhrzeit, frage nach. Antworte kurz:
 Empfehlung plus Begründung.</code></pre>
   </div>
-  <p>Flow speichern.</p>
+  <figure class="diagram reveal">
+    <img src="assets/img/lab1-system-prompt.png" alt="Flowise: Message mit Rolle System und dem System-Prompt" style="max-width:100%;border-radius:10px" onerror="this.closest('figure').style.display='none'">
+    <figcaption>Der System-Prompt als Message mit Rolle „System" – die Instruktionsebene aus Modul 4.</figcaption>
+  </figure>
+  <p><b>4e · Tools anbinden:</b> Im Abschnitt <i>Tools</i> einen Eintrag hinzufügen, als Typ <b>Custom Tool</b> wählen und unter <i>Custom Tool Parameters → Select Tool</i> dein <code class="inline">findAvailableRooms</code> auswählen. Das Ganze für <code class="inline">getRoomEquipment</code> wiederholen. Der Schalter <i>Return Direct</i> bleibt aus (sonst würde das rohe Tool-Resultat direkt zurückgegeben, ohne dass der Agent weiterdenkt).</p>
+  <figure class="diagram reveal">
+    <img src="assets/img/lab1-tool-select.png" alt="Flowise: Custom Tool auswählen im Agent-Knoten" style="max-width:100%;border-radius:10px" onerror="this.closest('figure').style.display='none'">
+    <figcaption>Tools im Agent-Knoten: Typ „Custom Tool", dann das eigene Tool auswählen – zweimal, für beide Tools.</figcaption>
+  </figure>
+  <p><b>4f · Speichern:</b> Oben rechts das <b>Disketten-Symbol</b> klicken und dem Flow einen Namen geben (z. B. „Roomfinder"). Auf dem Canvas siehst du jetzt Start → Agent, und im Agent-Knoten sind Modell und die beiden Tools (Schraubenschlüssel-Symbole) sichtbar.</p>
+  <figure class="diagram reveal">
+    <img src="assets/img/lab1-canvas.png" alt="Flowise Canvas: Start-Knoten verbunden mit Agent-Knoten inkl. Modell und zwei Tools" style="max-width:100%;border-radius:10px" onerror="this.closest('figure').style.display='none'">
+    <figcaption>Fertig konfiguriert: Start → Agent mit gpt-4o-mini und den beiden Custom Tools. Mehr braucht dieses Lab nicht.</figcaption>
+  </figure>
   <div class="box note reveal">
     <div class="t">Deine Flowise-UI sieht anders aus?</div>
     <p>Ältere Versionen (bzw. der „Chatflows"-Bereich) arbeiten mit separaten, zu verbindenden Knoten: <i>Tool Agent</i> + ChatOpenAI als Chat Model + die beiden Custom Tools am Tool-Eingang. Das Ergebnis ist dasselbe. Mit dem Docker-Befehl aus Schritt 0 (3.1.3) stimmt die UI mit dieser Anleitung überein.</p>
   </div>
 
-  <h3>Schritt 5 · Die zentrale Testabfrage</h3>
-  <p>Jetzt der Moment, auf den alles hinausläuft: Du stellst eine Frage, die sich nur durch das Kombinieren beider Tools beantworten lässt – und schaust dem Agenten beim Planen zu. Chat öffnen und eingeben:</p>
+  <h3>Schritt 5 · Erst die Tools testen, dann die zentrale Abfrage</h3>
+  <p>Öffne rechts oben das <b>Chat-Symbol</b> – das ist das Chatfenster deines Agenten. Schick zuerst die beiden Test-Prompts aus Schritt 2 und 3 ab („Rufe findAvailableRooms mit … auf und zeig mir das rohe Resultat" bzw. „Rufe getRoomEquipment mit roomId=aare auf …"). Liefern beide die erwarteten Daten, weisst du: Tools, Credential und Modell funktionieren – ab hier kann es nur noch am Denken des Agenten liegen, nicht an der Technik.</p>
+  <p>Jetzt der Moment, auf den alles hinausläuft: eine Frage, die sich nur durch das Kombinieren beider Tools beantworten lässt.</p>
   <div class="codeblock reveal">
     <div class="codehead"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname">Testabfrage</span></div>
 <pre><code>Finde für den 15. September 2026 von 10:00 bis 11:00 Uhr einen freien
@@ -226,9 +246,13 @@ und ein Videokonferenzsystem haben.</code></pre>
     <li>Antwort: Empfehlung Aare (8 Plätze, Stockwerk 2) mit kurzer Begründung</li>
   </ol>
   <p class="reveal"><b>Erwartetes Ergebnis:</b> Die Empfehlung lautet <b>Aare</b>. Wichtiger als die Antwort: Im Verlauf sind <b>mehrere Tool-Aufrufe</b> sichtbar – einmal die Suche, dann die Ausstattungsabfragen. Reihenfolge und Anzahl können variieren (prüft der Agent alle drei Kandidaten oder stoppt er nach dem Treffer?) – das ist Nicht-Determinismus, kein Fehler.</p>
+  <figure class="diagram reveal">
+    <img src="assets/img/lab1-chat-result.png" alt="Flowise-Chat: zentrale Testabfrage mit Process Flow – ein findAvailableRooms-Aufruf, drei getRoomEquipment-Aufrufe, dann die Antwort" style="max-width:100%;border-radius:10px" onerror="this.closest('figure').style.display='none'">
+    <figcaption>So sieht ein echter Lauf aus: Nach der Anfrage ruft der Agent einmal <code class="inline">findAvailableRooms</code> und dreimal <code class="inline">getRoomEquipment</code> auf – jeder Kandidat wird einzeln geprüft, dann kommt die begründete Antwort. Ein Klick auf „Process Flow" oder einen Tool-Eintrag zeigt die Details.</figcaption>
+  </figure>
 
   <h3>Schritt 6 · Den Trace lesen</h3>
-  <p>Die Antwort zu bekommen war der einfache Teil – der Lerneffekt steckt im Blick hinter die Kulissen. Öffne die Detailansicht des Laufs (Log-/Trace-Panel bzw. „View Messages"): Dort steht Schritt für Schritt, was der Agent gedacht, gerufen und beobachtet hat – der Reason-Act-Observe-Loop aus Modul 2, an deinem eigenen Agenten. Geh die Punkte bewusst durch:</p>
+  <p>Die Antwort zu bekommen war der einfache Teil – der Lerneffekt steckt im Blick hinter die Kulissen. Direkt im Chat erscheint jeder Tool-Call als eigener Eintrag; <b>ein Klick darauf</b> zeigt die übergebenen Parameter und das Resultat. Ganze Läufe kannst du zusätzlich im Bereich <b>Executions</b> (Seitenleiste) im Detail untersuchen. Was du dort siehst, ist der Reason-Act-Observe-Loop aus Modul 2 – an deinem eigenen Agenten. Geh die Punkte bewusst durch:</p>
   <div class="goals reveal">
     <h4>Checkliste Trace-Analyse</h4>
     <ul>
@@ -267,9 +291,9 @@ und ein Videokonferenzsystem haben.</code></pre>
   <div class="box bug reveal">
     <div class="t">Troubleshooting</div>
     <p>
-      <b>„Invalid API key" / 401:</b> Credential prüfen; richtiger Modell-Typ (ChatOpenAI)? Key ohne Leerzeichen?<br><br>
-      <b>Custom Tool wirft einen Fehler:</b> JS-Code 1:1 kopiert? Die <code class="inline">$</code>-Variablen müssen exakt den Property-Namen im Input-Schema entsprechen (<code class="inline">$date</code>, <code class="inline">$startTime</code>, <code class="inline">$endTime</code>, <code class="inline">$numberOfPeople</code>, <code class="inline">$roomId</code>).<br><br>
-      <b>Agent ruft die Tools nicht auf:</b> Tool-Beschreibungen wie oben übernehmen; sind beide Tools im Agent-Knoten eingetragen? Unterstützt das gewählte Modell Tool-Calling? Im Zweifel <code class="inline">openai/gpt-4o-mini</code>.<br><br>
+      <b>„Invalid API key" / 401:</b> Credential prüfen (in Schritt 4c korrekt verbunden?); bei GitHub Models: BasePath gesetzt? Key ohne Leerzeichen eingefügt?<br><br>
+      <b>Custom Tool wirft einen Fehler:</b> JS-Code 1:1 kopiert? Die <code class="inline">$</code>-Variablen müssen exakt den Property-Namen im Input-Schema entsprechen (<code class="inline">$date</code>, <code class="inline">$startTime</code>, <code class="inline">$endTime</code>, <code class="inline">$numberOfPeople</code>, <code class="inline">$roomId</code>). Zur Fehlersuche: <code class="inline">console.log(...)</code> im Tool-Code landet im Server-Log (<code class="inline">docker logs -f flowise</code>).<br><br>
+      <b>Agent ruft die Tools nicht auf:</b> Tool-Beschreibungen wie oben übernehmen; sind beide Tools im Agent-Knoten eingetragen? Unterstützt das gewählte Modell Tool-Calling? Im Zweifel <code class="inline">gpt-4o-mini</code>.<br><br>
       <b>Agent nennt Räume oder Ausstattung, die es nicht gibt:</b> Halluzination – steht die System-Prompt-Zeile „nur mit Tool-Resultaten belegen" drin? Genau dieses Verhalten ist der Grund für die Regel.<br><br>
       <b>Die UI passt nicht zur Anleitung:</b> vermutlich andere Flowise-Version oder „Chatflows" statt „Agentflows" – Docker-Befehl aus Schritt 0 nutzen oder den Kasten in Schritt 4 beachten.<br><br>
       <b>Docker startet nicht / nicht erlaubt:</b> Cloud-Tier auf flowiseai.com.<br><br>
