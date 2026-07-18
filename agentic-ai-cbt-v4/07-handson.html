@@ -53,7 +53,7 @@
     <p><b>Flowise</b> ist eine Open-Source-Plattform, mit der man LLM-Anwendungen visuell zusammenbaut statt programmiert: Chatbots, RAG-Anwendungen über eigene Dokumente, Tool-Anbindungen und eben vollwertige <b>Agenten</b> – per Drag-and-drop im Browser, mit Anschluss an praktisch alle Modell-Anbieter. Wir verwenden es hier aus drei Gründen: Es ist <b>einfach</b> (kein Code, keine Projekt-Einrichtung – jeder im Team kommt sofort rein), es macht den Agent-Loop <b>sichtbar</b> (jeder Tool-Aufruf erscheint im Chat-Verlauf), und es ist <b>frei verfügbar</b> – lokal per Docker oder als Cloud-Dienst. Kurz: das schnellste Werkzeug, um Agenten zu begreifen, bevor man sie in Code giesst (Modul 6).</p>
   </div>
   <p><strong>Empfohlener Start: Docker mit fixierter Version.</strong> Das umgeht alle Node-Versionsprobleme und garantiert, dass deine Oberfläche exakt zu dieser Anleitung passt:</p>
-  <div class="codeblock reveal">
+  <div class="codeblock reveal" data-copy='docker run -d --name flowise -p 3000:3000 -v "$HOME/.flowise:/root/.flowise" flowiseai/flowise:3.1.3'>
     <div class="codehead"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname">Terminal</span><span class="ver">Flowise 3.1.3</span></div>
 <pre><code>docker run -d \
   --name flowise \
@@ -61,6 +61,7 @@
   -v "$HOME/.flowise:/root/.flowise" \
   flowiseai/flowise:3.1.3</code></pre>
   </div>
+  <p style="font-size:14px;color:var(--text-faint);margin-top:-14px">Der Copy-Button kopiert den Befehl als <b>Einzeiler</b> – so läuft er direkt in PowerShell, macOS- und Linux-Terminals. Nur die klassische Windows-Eingabeaufforderung (cmd) kennt <code class="inline">$HOME</code> nicht: dort stattdessen <code class="inline">%USERPROFILE%</code> einsetzen.</p>
   <p>Danach <code class="inline">http://localhost:3000</code> öffnen (erster Start dauert ggf. eine Minute). Beim ersten Öffnen verlangt Flowise auch lokal ein Login bzw. eine Registrierung – die Angaben werden nicht geprüft, eine beliebige (auch erfundene) E-Mail-Adresse und ein Passwort genügen. Das Volume erhält deine Flows über Container-Neustarts. <b>Kein Docker erlaubt?</b> Kostenlosen Cloud-Tier auf <a href="https://flowiseai.com/" target="_blank" rel="noopener">flowiseai.com</a> nutzen (Login nötig).</p>
   <div class="box warn reveal">
     <div class="t">Warum nicht npx?</div>

@@ -223,7 +223,7 @@
       btn.textContent = "Copy";
       btn.setAttribute("aria-label", "Code kopieren");
       btn.addEventListener("click", function () {
-        var txt = pre.textContent;
+        var txt = cb.getAttribute("data-copy") || pre.textContent;
         function done(ok) {
           btn.textContent = ok ? "Kopiert \u2713" : "Fehler";
           setTimeout(function () { btn.textContent = "Copy"; }, 1600);
