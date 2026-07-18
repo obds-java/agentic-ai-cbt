@@ -21,11 +21,11 @@
 
   <div class="box note reveal">
     <div class="t">So läuft dieses Modul</div>
-    <p><strong>Lab 1</strong> ist Pflicht und geführt: ein einziger, klar beschriebener Pfad mit fixierter Flowise-Version, zwei kopierfertigen Tools und erwarteten Ergebnissen nach jedem Schritt – du musst nichts erfinden und nichts debuggen. <strong>Lab 2</strong> ist optional und überträgt dasselbe Konzept in unseren Java/Spring-Stack. Wenn etwas klemmt: Die Troubleshooting-Box am Ende von Lab 1 deckt die typischen Stolpersteine ab.</p>
+    <p>Die Labs sind freiwillig – aber sie sind der Teil dieser CBT, der am meisten hängen bleibt. <strong>Lab 1</strong> (empfohlen) ist geführt: ein einziger, klar beschriebener Pfad mit fixierter Flowise-Version, zwei fertigen Tools und erwarteten Ergebnissen nach jedem Schritt – du musst nichts erfinden und nichts debuggen. <strong>Lab 2</strong> ist optional, für alle, die danach noch nicht genug haben und denselben Agenten-Ansatz gleich in Spring Boot ausprobieren wollen. Wenn etwas klemmt: Die Troubleshooting-Box am Ende von Lab 1 deckt die typischen Stolpersteine ab.</p>
   </div>
 
   <!-- ===================== LAB 1 ===================== -->
-  <h2><span class="sec">Lab 1</span> Flowise · Raumfinder-Agent mit zwei Tools <span class="tag good" style="font-size:12px;vertical-align:middle">Pflicht</span></h2>
+  <h2><span class="sec">Lab 1</span> Flowise · Raumfinder-Agent mit zwei Tools <span class="tag good" style="font-size:12px;vertical-align:middle">empfohlen</span></h2>
 
   <h3>Der Use Case</h3>
   <p>Die Aufgabe ist bewusst alltäglich: Jemand sucht einen Meetingraum – bestimmtes Zeitfenster, Mindestanzahl Personen, gewünschte Ausstattung. Jeder kennt das Problem, niemand muss sich in eine fremde Fachdomäne eindenken.</p>
@@ -48,7 +48,11 @@
   </div>
 
   <h3>Schritt 0 · Flowise starten</h3>
-  <p>Flowise ist das No-Code-Werkzeug aus Modul 6: Agenten zusammenklicken statt programmieren – ideal, um den Loop sichtbar zu machen, bevor man ihn in Code giesst. <strong>Empfohlener Start: Docker mit fixierter Version.</strong> Das umgeht alle Node-Versionsprobleme und garantiert, dass deine Oberfläche exakt zu dieser Anleitung passt:</p>
+  <div class="box note reveal">
+    <div class="t">Was ist Flowise – und warum nehmen wir es?</div>
+    <p><b>Flowise</b> ist eine Open-Source-Plattform, mit der man LLM-Anwendungen visuell zusammenbaut statt programmiert: Chatbots, RAG-Anwendungen über eigene Dokumente, Tool-Anbindungen und eben vollwertige <b>Agenten</b> – per Drag-and-drop im Browser, mit Anschluss an praktisch alle Modell-Anbieter. Wir verwenden es hier aus drei Gründen: Es ist <b>einfach</b> (kein Code, keine Projekt-Einrichtung – jeder im Team kommt sofort rein), es macht den Agent-Loop <b>sichtbar</b> (jeder Tool-Aufruf erscheint im Chat-Verlauf), und es ist <b>frei verfügbar</b> – lokal per Docker oder als Cloud-Dienst. Kurz: das schnellste Werkzeug, um Agenten zu begreifen, bevor man sie in Code giesst (Modul 6).</p>
+  </div>
+  <p><strong>Empfohlener Start: Docker mit fixierter Version.</strong> Das umgeht alle Node-Versionsprobleme und garantiert, dass deine Oberfläche exakt zu dieser Anleitung passt:</p>
   <div class="codeblock reveal">
     <div class="codehead"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname">Terminal</span><span class="ver">Flowise 3.1.3</span></div>
 <pre><code>docker run -d \
@@ -57,7 +61,7 @@
   -v "$HOME/.flowise:/root/.flowise" \
   flowiseai/flowise:3.1.3</code></pre>
   </div>
-  <p>Danach <code class="inline">http://localhost:3000</code> öffnen (erster Start dauert ggf. eine Minute). Das Volume erhält deine Flows über Container-Neustarts. <b>Kein Docker erlaubt?</b> Kostenlosen Cloud-Tier auf <a href="https://flowiseai.com/" target="_blank" rel="noopener">flowiseai.com</a> nutzen (Login nötig).</p>
+  <p>Danach <code class="inline">http://localhost:3000</code> öffnen (erster Start dauert ggf. eine Minute). Beim ersten Öffnen verlangt Flowise auch lokal ein Login bzw. eine Registrierung – die Angaben werden nicht geprüft, eine beliebige (auch erfundene) E-Mail-Adresse und ein Passwort genügen. Das Volume erhält deine Flows über Container-Neustarts. <b>Kein Docker erlaubt?</b> Kostenlosen Cloud-Tier auf <a href="https://flowiseai.com/" target="_blank" rel="noopener">flowiseai.com</a> nutzen (Login nötig).</p>
   <div class="box warn reveal">
     <div class="t">Warum nicht npx?</div>
     <p><code class="inline">npx flowise start</code> scheitert je nach Node-Version an einer nativen Abhängigkeit (better-sqlite3, z. B. unter Node 24). Das kostet Zeit, die dieses Lab nicht kosten soll: Docker oder Cloud verwenden.</p>
@@ -75,7 +79,7 @@
   <div class="box tip reveal">
     <div class="t">Empfohlen: kostenlos mit GitHub Models</div>
     <p>
-      <b>1. Token erzeugen:</b> GitHub → <i>Settings → Developer settings → Personal access tokens → Fine-grained tokens</i> → Token mit Scope <code class="inline">models:read</code>.<br>
+      <b>1. Token erzeugen:</b> GitHub → <i>Settings → Developer settings → Personal access tokens → Fine-grained tokens</i> → Token mit Scope <code class="inline">models:read</code>. Bei <i>Repository access</i> genügt <b>„Public repositories"</b> (der Default) – Zugriff auf eure Repos braucht dieses Token nicht.<br>
       <b>2. Das war's fürs Erste:</b> Die Credential legst du erst in Schritt 4 an – direkt im Agent-Knoten über <i>Connect Credential → Create New</i>, wo du dieses Token einträgst. Auch der Base Path für GitHub Models kommt dort hin.<br>
       <b>3. Modellwahl merken:</b> Im Agent-Knoten wählst du später <code class="inline">gpt-4o-mini</code> aus dem Dropdown – ein Modell mit <b>Tool-/Function-Calling</b>, genau das braucht dieses Lab.
     </p>
@@ -89,6 +93,11 @@
 
   <h3>Schritt 2 · Tool 1 erstellen: <code class="inline">findAvailableRooms</code></h3>
   <p>Jetzt baust du die „Hände" deines Agenten (Modul 4). Ein Custom Tool in Flowise besteht aus genau den drei Teilen, die du aus dem Theorieteil kennst: <b>Name</b> und <b>Beschreibung</b> (daran erkennt das LLM, wann es das Tool braucht), das <b>Input-Schema</b> (die Parameter) – plus die JavaScript-Funktion, die das Tool ausführt. Alles Folgende kannst du 1:1 kopieren.</p>
+
+  <div class="box tip reveal">
+    <div class="t">Abkürzung: fertige Tool-Definitionen importieren</div>
+    <p>Beide Tools liegen als fertige JSON-Exporte bereit: <a href="assets/inputs/findAvailableRooms-CustomTool.json" download>findAvailableRooms-CustomTool.json</a> und <a href="assets/inputs/getRoomEquipment-CustomTool.json" download>getRoomEquipment-CustomTool.json</a>. Herunterladen und im Tools-Bereich über die Import-/Load-Funktion einlesen – dann kannst du die Schritte 2 und 3 überfliegen und direkt zu Schritt 4. Der manuelle Weg lohnt sich trotzdem: Beim Selbst-Erfassen versteht man am besten, wie Name, Beschreibung und Schema zusammenspielen.</p>
+  </div>
   <p>Im Menü <strong>Tools</strong> auf <i>Create</i> klicken. Der Tool-Dialog hat vier Bereiche: Name, Beschreibung, Input-Schema (jede Property über <i>+ Add Item</i> anlegen) und ganz unten die JavaScript-Funktion. Am Ende mit <i>Add</i> speichern.</p>
   <figure class="diagram reveal">
     <img src="assets/img/lab1-tool-dialog.png" alt="Flowise: Tool-Dialog mit Name, Beschreibung und Input-Schema" style="max-width:100%;border-radius:10px" onerror="this.closest('figure').style.display='none'">
@@ -115,6 +124,11 @@ Für Fragen zur Ausstattung getRoomEquipment verwenden.</code></pre>
         <tr><td>numberOfPeople</td><td>number</td><td>Mindestanzahl Sitzplätze</td></tr>
       </tbody>
     </table>
+  </div>
+
+  <div class="box deep reveal">
+    <div class="t">Warum Datum und Zeit als String – und nicht als Date-Typ?</div>
+    <p>Tool-Schnittstellen werden als JSON-Schema beschrieben, und JSON kennt keinen Datums-Typ – nur string, number, boolean, object und array. Auch das LLM erzeugt die Parameter schlicht als Text. Klar dokumentierte String-Formate (<code class="inline">YYYY-MM-DD</code>, <code class="inline">HH:mm</code>) sind deshalb der übliche Weg – mit einem angenehmen Nebeneffekt: Bei genau diesen Formaten funktioniert der einfache String-Vergleich für „liegt zeitlich davor/danach", was unser Code für die Überlappungsprüfung nutzt. Kein Date-Parsing, keine Zeitzonen – bewusst einfach gehalten.</p>
   </div>
   <p><b>JavaScript Function</b> (1:1 kopieren; die <code class="inline">$</code>-Variablen entsprechen den Schema-Properties):</p>
   <div class="codeblock reveal">
@@ -319,14 +333,15 @@ und ein Videokonferenzsystem haben.</code></pre>
 
   <!-- ===================== LAB 2 ===================== -->
   <h2><span class="sec">Lab 2</span> Spring-AI-Mini-Agent <span class="tag" style="font-size:12px;vertical-align:middle">optional · Java-Transfer</span></h2>
-  <p>In Flowise hast du den Agenten zusammengeklickt – hier siehst du, dass dahinter kein Zauber steckt, sondern Konzepte, die sich direkt in unseren Java/Spring-Stack übertragen lassen. Dieses Lab ist optional: Wenn dir Lab 1 reicht, spring ans Ende des Moduls und hak es ab. <b>Ziel:</b> ein winziger Spring-Boot-Agent mit <em>einem</em> Tool (<code class="inline">getOrderStatus</code>) und Kurzzeitgedächtnis – lokal startbar, eine Frage, ein sichtbarer Tool-Call im Log.</p>
+  <p>In Flowise hast du den Agenten zusammengeklickt – hier siehst du, dass dahinter kein Zauber steckt, sondern Konzepte, die sich direkt in unseren Java/Spring-Stack übertragen lassen. Dieses Lab ist optional: für alle, die noch nicht genug haben und selbst einen einfachen Agenten mit Spring Boot bauen wollen. Wenn dir Lab 1 reicht, spring ans Ende des Moduls und hak es ab. <b>Ziel:</b> ein winziger Spring-Boot-Agent mit <em>einem</em> Tool (<code class="inline">getOrderStatus</code>) und Kurzzeitgedächtnis – lokal startbar, eine Frage, ein sichtbarer Tool-Call im Log.</p>
 
   <div class="box warn reveal">
     <div class="t">Voraussetzungen &amp; Version</div>
-    <p>JDK 17+, Maven, ein LLM-API-Key als Umgebungsvariable. Geschrieben für <b>Spring AI 2.0.0</b> auf <b>Spring Boot 4.0.x</b> – Spring AI 2.0.x setzt Boot 4.0/4.1 (Framework 7) voraus. <b>Läuft euer Projekt noch auf Boot 3.4/3.5?</b> Dann gehört ihr zur Spring-AI-<b>1.x</b>-Linie: <code class="inline">spring-ai-bom 1.1.x</code> verwenden – die hier gezeigten APIs (<code class="inline">@Tool</code>, ChatClient, Memory-Advisor) sind dort weitgehend identisch. Bei Abweichungen die <a href="https://docs.spring.io/spring-ai/reference/" target="_blank" rel="noopener">Reference-Docs</a> eurer Version konsultieren.</p>
+    <p>JDK 17+, Maven, ein LLM-API-Key als Umgebungsvariable. Geschrieben für <b>Spring AI 2.0.0</b> auf <b>Spring Boot 4.x</b> – Spring AI 2.0.x setzt Boot 4.0/4.1 (Framework 7) voraus; das bereitgestellte pom.xml nutzt Boot 4.1. <b>Läuft euer Projekt noch auf Boot 3.4/3.5?</b> Dann gehört ihr zur Spring-AI-<b>1.x</b>-Linie: <code class="inline">spring-ai-bom 1.1.x</code> verwenden – die hier gezeigten APIs (<code class="inline">@Tool</code>, ChatClient, Memory-Advisor) sind dort weitgehend identisch. Bei Abweichungen die <a href="https://docs.spring.io/spring-ai/reference/" target="_blank" rel="noopener">Reference-Docs</a> eurer Version konsultieren.</p>
   </div>
 
-  <h3>1 · Abhängigkeiten (pom.xml, Auszug)</h3>
+  <h3>1 · Abhängigkeiten (pom.xml)</h3>
+  <p>Für den schnellen Start liegt ein getestetes Minimal-POM bereit: <a href="assets/inputs/pom.xml" download>pom.xml herunterladen</a> (Spring Boot 4.1, Spring AI 2.0) – ins Projektverzeichnis legen, fertig. Der relevante Auszug daraus:</p>
   <div class="codeblock reveal">
     <div class="codehead"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname">pom.xml</span><span class="ver">Spring AI 2.0.0</span></div>
 <pre><code><span class="tok-an">&lt;dependency&gt;</span>
@@ -339,19 +354,19 @@ und ein Videokonferenzsystem haben.</code></pre>
   <h3>2 · Konfiguration (application.properties)</h3>
   <div class="codeblock reveal">
     <div class="codehead"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="fname">application.properties</span></div>
-<pre><code><span class="tok-com"># Variante A: OpenAI direkt</span>
+<pre><code><span class="tok-com"># Variante A (getestet): kostenlos via GitHub Models (OpenAI-kompatibel)</span>
+<span class="tok-com"># Den GitHub-PAT (Scope models:read) als OPENAI_API_KEY exportieren</span>
 spring.ai.openai.api-key=${OPENAI_API_KEY}
-spring.ai.openai.chat.options.model=gpt-4o-mini
+spring.ai.openai.base-url=https://models.github.ai/inference
+spring.ai.openai.chat.model=openai/gpt-4o-mini
 
-<span class="tok-com"># Variante B: kostenlos via GitHub Models (OpenAI-kompatibel)</span>
-<span class="tok-com"># spring.ai.openai.api-key=${GITHUB_TOKEN}          # PAT mit Scope models:read</span>
-<span class="tok-com"># spring.ai.openai.base-url=https://models.github.ai</span>
-<span class="tok-com"># spring.ai.openai.chat.completions-path=/inference/chat/completions</span>
-<span class="tok-com"># spring.ai.openai.chat.options.model=openai/gpt-4o-mini</span></code></pre>
+<span class="tok-com"># Variante B: OpenAI direkt – base-url weglassen, Modell ohne Prefix</span>
+<span class="tok-com"># spring.ai.openai.api-key=${OPENAI_API_KEY}</span>
+<span class="tok-com"># spring.ai.openai.chat.model=gpt-4o-mini</span></code></pre>
   </div>
   <div class="box tip reveal">
-    <div class="t">GitHub Models auch hier nutzbar</div>
-    <p>Da GitHub Models OpenAI-kompatibel ist, genügt im Spring-AI-OpenAI-Starter ein Überschreiben von <code class="inline">base-url</code>, <code class="inline">completions-path</code> und Modell-ID (Variante B oben) – als „Key" der GitHub-PAT mit <code class="inline">models:read</code>. Exakte URL/Path/Modell-ID bitte gegen die aktuelle <a href="https://docs.github.com/github-models/prototyping-with-ai-models" target="_blank" rel="noopener">GitHub-Models-Doku</a> und deine Spring-AI-Version prüfen.</p>
+    <div class="t">GitHub Models: die getestete Konfiguration</div>
+    <p>Variante A oben ist real durchgespielt (Juli 2026): Es genügt, <code class="inline">base-url</code> auf <code class="inline">https://models.github.ai/inference</code> zu setzen und als Modell <code class="inline">openai/gpt-4o-mini</code> anzugeben – ein separater completions-path-Override ist <b>nicht</b> nötig. Als „API Key" dient der GitHub-PAT mit <code class="inline">models:read</code>. Bei Abweichungen die aktuelle <a href="https://docs.github.com/github-models/prototyping-with-ai-models" target="_blank" rel="noopener">GitHub-Models-Doku</a> konsultieren.</p>
   </div>
 
   <h3>3 · Tool + Agent + eine Frage</h3>

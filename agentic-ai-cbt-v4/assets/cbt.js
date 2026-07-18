@@ -210,6 +210,38 @@
     });
   }
 
+
+  /* Copy-Button an jedem Codeblock */
+  function initCopyButtons() {
+    Array.prototype.slice.call(document.querySelectorAll(".codeblock")).forEach(function (cb) {
+      var head = cb.querySelector(".codehead");
+      var pre = cb.querySelector("pre");
+      if (!head || !pre) return;
+      var btn = document.createElement("button");
+      btn.className = "copybtn";
+      btn.type = "button";
+      btn.textContent = "Copy";
+      btn.setAttribute("aria-label", "Code kopieren");
+      btn.addEventListener("click", function () {
+        var txt = pre.textContent;
+        function done(ok) {
+          btn.textContent = ok ? "Kopiert \u2713" : "Fehler";
+          setTimeout(function () { btn.textContent = "Copy"; }, 1600);
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(txt).then(function(){done(true);}, function(){done(false);});
+        } else {
+          var ta = document.createElement("textarea");
+          ta.value = txt; ta.style.position = "fixed"; ta.style.opacity = "0";
+          document.body.appendChild(ta); ta.select();
+          try { done(document.execCommand("copy")); } catch (e) { done(false); }
+          document.body.removeChild(ta);
+        }
+      });
+      head.appendChild(btn);
+    });
+  }
+
   /* Einblend-Animation als reine Zugabe: Inhalte sind per CSS immer sichtbar.
      Erst wenn JS + IntersectionObserver sicher laufen, wird html.js-anim
      gesetzt und animiert. (Lehre aus V2: nie Sichtbarkeit von JS abhaengen.) */
@@ -232,6 +264,7 @@
     refreshProgress();
     Array.prototype.slice.call(document.querySelectorAll(".quiz")).forEach(initQuiz);
     initMarkDone();
+    initCopyButtons();
     initReveal();
 
     Array.prototype.slice.call(document.querySelectorAll("[data-reset-progress]")).forEach(function (b) {

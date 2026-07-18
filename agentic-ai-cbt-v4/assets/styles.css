@@ -455,3 +455,12 @@ details.glossar dd { margin: 0; font-size: 14px; color: var(--text-soft); }
 .reveal { opacity: 1; transform: none; }
 html.js-anim .reveal { opacity: 0; transform: translateY(14px); transition: opacity .5s ease, transform .5s ease; }
 html.js-anim .reveal.in { opacity: 1; transform: none; }
+
+/* ---------- Copy-Button in Codeblöcken ---------- */
+.codeblock .codehead .copybtn {
+  margin-left: auto; font: 11px var(--mono); color: #9a9aa6;
+  background: #1e1e22; border: 1px solid #33333a; border-radius: 7px;
+  padding: 3px 10px; cursor: pointer; transition: .15s; flex: none;
+}
+.codeblock .codehead .copybtn:hover { color: #fff; border-color: #4a4a52; }
+.codeblock .codehead .ver ~ .copybtn { margin-left: 8px; }

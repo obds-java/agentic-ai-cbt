@@ -1,0 +1,9 @@
+{
+  "name": "getRoomEquipment",
+  "description": "Liefert die Ausstattung (large-screen, projector, whiteboard,\nvideo-conference) und die Rollstuhlgängigkeit GENAU EINES Meetingraums\nanhand seiner roomId. Prüft nur einen Raum pro Aufruf – für mehrere\nKandidaten das Tool mehrfach aufrufen.",
+  "color": "linear-gradient(rgb(53,142,45), rgb(105,20,43))",
+  "iconSrc": "",
+  "schema": "[{\"id\":0,\"property\":\"roomId\",\"description\":\"Eindeutige ID des Raums, z. B. \\\"aare\\\"\",\"type\":\"string\",\"required\":false}]",
+  "func": "const data = {\n  aare:      { name: \"Aare\",      equipment: [\"large-screen\", \"whiteboard\", \"video-conference\"], wheelchairAccessible: true },\n  gurten:    { name: \"Gurten\",    equipment: [\"projector\", \"whiteboard\"], wheelchairAccessible: true },\n  eiger:     { name: \"Eiger\",     equipment: [\"large-screen\"], wheelchairAccessible: false },\n  jungfrau:  { name: \"Jungfrau\",  equipment: [\"large-screen\", \"video-conference\"], wheelchairAccessible: true },\n  stockhorn: { name: \"Stockhorn\", equipment: [\"whiteboard\"], wheelchairAccessible: true },\n  niesen:    { name: \"Niesen\",    equipment: [\"projector\", \"large-screen\", \"video-conference\", \"whiteboard\"], wheelchairAccessible: true }\n};\n\nconst id = String($roomId).toLowerCase();\nconst room = data[id];\nif (!room) {\n  return JSON.stringify({ error: \"Unbekannte roomId: \" + $roomId +\n    \". Gültige IDs: \" + Object.keys(data).join(\", \") });\n}\nreturn JSON.stringify({ roomId: id, ...room });",
+  "workspaceId": "eea71369-7bd4-4a26-bc6e-64acec9d37ad"
+}
